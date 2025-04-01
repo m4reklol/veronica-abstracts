@@ -633,42 +633,46 @@ a {
 
 @media (max-width: 768px) {
     .instagram-container {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
-
+  
     .instagram-left {
-        order: 1;
-        align-items: center;
-        margin-top: 20px;
+      order: 1;
+      align-items: center;
+      margin-top: 20px;
     }
-
+  
     .instagram-title {
-        font-size: 1.5rem;
+      font-size: 1.5rem;
     }
-
+  
     .instagram-icon {
-        font-size: 3rem;
+      font-size: 3rem;
     }
-
+  
     .instagram-text-image {
-        max-width: 250px;
+      max-width: 250px;
     }
-
+  
     .instagram-right {
-        order: 2;
-        width: 100%;
-        display: flex;
-        justify-content: center;
+      order: 2;
+      width: 100%;
+      display: flex;
+      justify-content: center;
     }
-
+  
     .instagram-embed {
-        width: 90%;
-        max-width: 350px;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+      text-align: center;
+      display: block;
+    }
+  
+    .instagram-embed blockquote.instagram-media {
+      margin: 0 auto !important;
     }
 }
 

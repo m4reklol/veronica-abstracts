@@ -43,6 +43,15 @@ const Header = () => {
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
+  const normalizeImagePath = (path) => {
+    if (!path) return "";
+    return path.startsWith("http")
+      ? path
+      : path.startsWith("/")
+      ? path
+      : `/uploads/${path}`;
+  };
+
   return (
     <header className="header">
       <div className="header-container">
@@ -103,11 +112,7 @@ const Header = () => {
                         className="cart-dropdown-link"
                       >
                         <img
-                          src={
-                            item.image.startsWith("http")
-                              ? item.image
-                              : `/${item.image}`
-                          }
+                          src={normalizeImagePath(item.image)}
                           alt={item.name}
                           className="cart-dropdown-img"
                         />
@@ -174,11 +179,7 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <img
-                  src={
-                    item.image.startsWith("http")
-                      ? item.image
-                      : `/${item.image}`
-                  }
+                  src={normalizeImagePath(item.image)}
                   alt={item.name}
                   className="mobile-cart-img"
                 />
