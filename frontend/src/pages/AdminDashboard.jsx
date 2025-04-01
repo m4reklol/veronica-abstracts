@@ -35,7 +35,7 @@ const AdminDashboard = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/admin/products`,
+          `/api/admin/products`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this product?"))
       return;
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/products/${id}`, {
+      await axios.delete(`/api/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -131,7 +131,7 @@ const AdminDashboard = () => {
                       className="admin-product-link"
                     >
                       <img
-                        src={`${import.meta.env.VITE_API_URL}${prod.image}`}
+                        src={`${prod.image}`}
                         alt={prod.name}
                         className="admin-product-thumb"
                       />

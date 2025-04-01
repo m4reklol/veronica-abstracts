@@ -32,7 +32,7 @@ const Cart = () => {
 
   const normalizeImagePath = (path) =>
     path?.startsWith("/uploads")
-      ? `${import.meta.env.VITE_API_URL}${path}`
+      ? `${path}`
       : path;
 
   const totalItems = cart.length;

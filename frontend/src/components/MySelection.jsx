@@ -10,7 +10,7 @@ const MySelection = () => {
     const fetchNewestProducts = async () => {
       try {
         const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/products`
+          `/api/products`
         );
         const sorted = data
           .filter((p) => !p.sold)
@@ -19,7 +19,7 @@ const MySelection = () => {
           .map((product) => ({
             ...product,
             image: product.image.startsWith("/uploads")
-              ? `${import.meta.env.VITE_API_URL}${product.image}`
+              ? `${product.image}`
               : product.image,
           }));
         setNewestProducts(sorted);

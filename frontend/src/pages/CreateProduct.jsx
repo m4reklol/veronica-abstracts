@@ -66,7 +66,7 @@ const CreateProduct = () => {
     images.forEach((img) => data.append("images", img));
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/products`, data, {
+      await axios.post(`/api/products`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

@@ -18,13 +18,13 @@ const RelatedProducts = ({ currentProductId }) => {
 
   const normalizeImagePath = (path) =>
     path.startsWith("/uploads")
-      ? `${import.meta.env.VITE_API_URL}${path}`
+      ? `${path}`
       : path;
 
   useEffect(() => {
     const fetchProducts = async () => {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/products`
+        `/api/products`
       );
       const filtered = data
         .filter((p) => p._id !== currentProductId && !p.sold)

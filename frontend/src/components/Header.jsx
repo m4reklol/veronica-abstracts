@@ -106,7 +106,7 @@ const Header = () => {
                           src={
                             item.image.startsWith("http")
                               ? item.image
-                              : `${import.meta.env.VITE_API_URL}/${item.image}`
+                              : `/${item.image}`
                           }
                           alt={item.name}
                           className="cart-dropdown-img"
@@ -177,7 +177,7 @@ const Header = () => {
                   src={
                     item.image.startsWith("http")
                       ? item.image
-                      : `${import.meta.env.VITE_API_URL}/${item.image}`
+                      : `/${item.image}`
                   }
                   alt={item.name}
                   className="mobile-cart-img"

@@ -27,12 +27,12 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/products/${id}`
+          `/api/products/${id}`
         );
 
         const normalize = (imgPath) =>
           imgPath.startsWith("/uploads")
-            ? `${import.meta.env.VITE_API_URL}${imgPath}`
+            ? `${imgPath}`
             : imgPath;
 
         if (data.image) data.image = normalize(data.image);

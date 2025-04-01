@@ -24,7 +24,7 @@ const Gallery = () => {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
+      const { data } = await axios.get(`/api/products`);
       setProducts(data.filter((product) => !product.sold));
       setSoldProducts(data.filter((product) => product.sold));
     } catch (error) {
@@ -153,13 +153,13 @@ const Gallery = () => {
                 <div className="image-container">
                   <Link to={`/product/${product._id}`}>
                     <img
-                      src={`${import.meta.env.VITE_API_URL}${product.image}`}
+                      src={`${product.image}`}
                       alt={product.name}
                       className="gallery-img"
                     />
                     {product.additionalImages.length > 0 && (
                       <img
-                        src={`${import.meta.env.VITE_API_URL}${
+                        src={`${
                           product.additionalImages[0]
                         }`}
                         alt="alt-preview"
@@ -199,13 +199,13 @@ const Gallery = () => {
                   <Link to={`/product/${product._id}`}>
                     <div className="image-container">
                       <img
-                        src={`${import.meta.env.VITE_API_URL}${product.image}`}
+                        src={`${product.image}`}
                         alt={product.name}
                         className="gallery-img"
                       />
                       {product.additionalImages.length > 0 && (
                         <img
-                          src={`${import.meta.env.VITE_API_URL}${
+                          src={`${
                             product.additionalImages[0]
                           }`}
                           alt="alt-preview"

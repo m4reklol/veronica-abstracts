@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 
-const BASE_URL = `${import.meta.env.VITE_API_URL}`;
+const BASE_URL = ``;
 
 const normalizeImagePath = (path) => {
   return path?.startsWith("/uploads") ? `${BASE_URL}${path}` : path;

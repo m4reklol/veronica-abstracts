@@ -54,7 +54,7 @@ const EditProduct = () => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/products/${id}`
+          `/api/products/${id}`
         );
         setFormData({
           name: data.name,
@@ -66,7 +66,7 @@ const EditProduct = () => {
 
         const normalize = (img) =>
           img.startsWith("/uploads")
-            ? `${import.meta.env.VITE_API_URL}${img}`
+            ? `${img}`
             : img;
 
         const allImages = [data.image, ...(data.additionalImages || [])].map(
@@ -139,16 +139,15 @@ const EditProduct = () => {
         if (img.file) {
           formDataToSend.append("images", img.file);
         } else {
-          existingImages.push(
-            img.url.replace(`${import.meta.env.VITE_API_URL}`, "")
-          );
+          const relative = new URL(img.url, window.location.origin).pathname;
+          existingImages.push(relative);
         }
       });
 
       formDataToSend.append("existingImages", JSON.stringify(existingImages));
 
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/products/${id}`,
+        `/api/products/${id}`,
         formDataToSend,
         {
           headers: {
