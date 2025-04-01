@@ -240,7 +240,7 @@ const ProductDetail = () => {
                 prevImage();
               }}
             >
-              ◀
+              <i class="ri-arrow-left-s-line"></i>
             </button>
             <div
               ref={imageWrapperRef}
@@ -265,7 +265,7 @@ const ProductDetail = () => {
                 nextImage();
               }}
             >
-              ▶
+              <i class="ri-arrow-right-s-line"></i>
             </button>
           </div>
         )}

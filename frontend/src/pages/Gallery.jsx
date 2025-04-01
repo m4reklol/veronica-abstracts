@@ -79,7 +79,6 @@ const Gallery = () => {
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://veronicaabstracts.com/gallery" />
-
         <meta property="og:title" content="Galerie | Veronica Abstracts" />
         <meta
           property="og:description"
@@ -89,12 +88,8 @@ const Gallery = () => {
           property="og:image"
           content="https://veronicaabstracts.com/images/Vlogofinal.png"
         />
-        <meta
-          property="og:url"
-          content="https://veronicaabstracts.com/gallery"
-        />
+        <meta property="og:url" content="https://veronicaabstracts.com/gallery" />
         <meta property="og:type" content="website" />
-
         <meta name="twitter:title" content="Galerie | Veronica Abstracts" />
         <meta
           name="twitter:description"
@@ -106,6 +101,7 @@ const Gallery = () => {
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+
       <div className="gallery-container">
         {notification && (
           <Notification
@@ -124,10 +120,9 @@ const Gallery = () => {
           <h2 className="gallery-title">ABSTRAKTNÍ OBRAZY</h2>
           <p className="gallery-description">
             Abstraktní umění je vizuální forma, která přináší emoce a nálady bez
-            nutnosti konkrétního vyjádření. Každý tah štětce je součástí
-            příběhu, který čeká na svého objevitele. Nechte se inspirovat
-            unikátními díly, která přinášejí barvu a energii do každého
-            prostoru.
+            nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu,
+            který čeká na svého objevitele. Nechte se inspirovat unikátními díly,
+            která přinášejí barvu a energii do každého prostoru.
           </p>
         </div>
 
@@ -149,41 +144,42 @@ const Gallery = () => {
         <div className="gallery-grid">
           {products.length > 0 ? (
             products.map((product) => (
-              <div key={product._id} className="gallery-item">
-                <div className="image-container">
-                  <Link to={`/product/${product._id}`}>
+              <Link to={`/product/${product._id}`} key={product._id} className="gallery-item-link">
+                <div className="gallery-item">
+                  <div className="image-container">
                     <img
-                      src={`${product.image}`}
+                      src={product.image}
                       alt={product.name}
                       className="gallery-img"
                     />
                     {product.additionalImages.length > 0 && (
                       <img
-                        src={`${
-                          product.additionalImages[0]
-                        }`}
+                        src={product.additionalImages[0]}
                         alt="alt-preview"
                         className="hover-img"
                       />
                     )}
-                  </Link>
+                  </div>
+                  <h3>{product.name}</h3>
+                  <p id="product-dimensions">{product.dimensions}</p>
+                  <p id="product-price">
+                    {new Intl.NumberFormat("cs-CZ", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(product.price)}{" "}
+                    Kč
+                  </p>
+                  <button
+                    className="add-to-cart"
+                    onClick={(e) => {
+                      e.preventDefault(); // ⛔️ zabrání přesměrování
+                      handleAddToCart(product);
+                    }}
+                  >
+                    Přidat do košíku
+                  </button>
                 </div>
-                <h3>{product.name}</h3>
-                <p id="product-dimensions">{product.dimensions}</p>
-                <p id="product-price">
-                  {new Intl.NumberFormat("cs-CZ", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(product.price)}{" "}
-                  Kč
-                </p>
-                <button
-                  className="add-to-cart"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  Přidat do košíku
-                </button>
-              </div>
+              </Link>
             ))
           ) : (
             <p className="no-products">Žádné produkty k dispozici.</p>
@@ -199,15 +195,13 @@ const Gallery = () => {
                   <Link to={`/product/${product._id}`}>
                     <div className="image-container">
                       <img
-                        src={`${product.image}`}
+                        src={product.image}
                         alt={product.name}
                         className="gallery-img"
                       />
                       {product.additionalImages.length > 0 && (
                         <img
-                          src={`${
-                            product.additionalImages[0]
-                          }`}
+                          src={product.additionalImages[0]}
                           alt="alt-preview"
                           className="hover-img"
                         />
