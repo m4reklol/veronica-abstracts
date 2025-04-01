@@ -122,8 +122,8 @@ const ContactSection = () => {
           </div>
           <div className="faq-link">
             <a href="/contact#faq">
-              <i className="ri-question-line"></i> Podívejte se na{" "}
-              <strong>nejčastější dotazy</strong>
+              <i className="ri-question-line"></i>
+              Podívejte se&nbsp;na <strong>nejčastější dotazy</strong>
             </a>
           </div>
         </div>

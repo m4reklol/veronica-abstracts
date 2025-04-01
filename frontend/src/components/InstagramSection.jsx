@@ -16,7 +16,6 @@ const InstagramSection = () => {
       };
       document.body.appendChild(script);
     } else {
-      // Skript už existuje – jen znovu spusť zpracování embedů
       if (window.instgrm) {
         window.instgrm.Embeds.process();
       }

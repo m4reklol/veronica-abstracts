@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:build": "npm run build && cd .. && git add . && git commit -m \"deploy: auto-build\" && git push origin main"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
