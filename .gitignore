@@ -15,7 +15,6 @@ frontend/.env.production
 
 # === Backend ===
 backend/node_modules/
-backend/uploads/
 backend/public/
 backend/.env
 backend/.env.production
