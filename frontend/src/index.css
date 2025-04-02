@@ -1425,7 +1425,7 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
     touch-action: none;
 }
 
@@ -1454,7 +1454,7 @@ a {
 
 .close-slider {
     position: absolute;
-    top: 80px;
+    top: 30px;
     right: 30px;
     font-size: 2rem;
     color: rgb(255, 255, 255);
@@ -1529,8 +1529,8 @@ a {
     }
 
     .slider-image {
-        max-width: 90%;
-        max-height: 60vh;
+        max-width: 95%;
+        max-height: 95vh;
     }
 
     .prev-slide,
