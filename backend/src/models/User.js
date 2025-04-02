@@ -4,6 +4,11 @@ import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: true, unique: true },
+    email: {
+      type: String,
+      unique: true,
+      sparse: true, // ✅ umožňuje více null hodnot, ale zachová unikátnost pokud email je zadán
+    },
     password: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
   },
