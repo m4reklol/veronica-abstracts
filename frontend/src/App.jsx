@@ -27,7 +27,7 @@ function App() {
     AOS.init({
       duration: 800,
       once: true,
-      offset: isMobile ? 100 : 69,
+      offset: isMobile ? 100 : 68,
     });
   }, []);
 

@@ -220,11 +220,13 @@ a {
       height: 100vh;
       background: #fff;
       box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-      padding: 1.5rem;
+      padding: 1.5rem 1rem;
       z-index: 9999;
       display: flex;
       flex-direction: column;
       transition: right 0.3s ease;
+      overflow-y: auto;
+      justify-content: space-between;
     }
   
     .mobile-menu.open {
@@ -305,7 +307,6 @@ a {
     }
   
     .mobile-nav {
-      margin-top: 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -316,6 +317,20 @@ a {
       font-size: 1.2rem;
       color: #333;
       text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+    
+    .shopping-cart i {
+        color: #333;
+    }
+
+    .mobile-nav a i {
+      font-size: 1.1rem;
+      color: #ff6600;
     }
   
     .mobile-nav a:hover {
@@ -324,6 +339,33 @@ a {
   
     .brand-name {
       font-size: 1.3rem;
+    }
+  
+    .mobile-extra-links {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid #d1d0d0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.4rem;
+    }
+  
+    .mobile-extra-links a {
+      font-size: 1.1rem;
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+  
+    .mobile-extra-links a i {
+      color: #ff6600;
+    }
+  
+    .mobile-extra-links a:hover {
+      color: #ff6600;
     }
 }
   
@@ -1536,6 +1578,11 @@ a {
     .prev-slide,
     .next-slide {
         font-size: 1.5rem;
+    }
+
+    .close-slider{
+        top: 20px;
+        right: 20px;
     }
 }
 

@@ -19,7 +19,7 @@ const Contact = () => {
       const timeout = setTimeout(() => {
         const el = document.querySelector(hash);
         if (el) {
-          const offset = 69;
+          const offset = 68;
           const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
           window.scrollTo({ top, behavior: "smooth" });
         }

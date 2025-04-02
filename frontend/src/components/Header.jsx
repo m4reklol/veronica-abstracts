@@ -65,26 +65,10 @@ const Header = () => {
         <div className="header-right desktop-only">
           <nav className="nav-bar">
             <ul className="nav-list">
-              <li>
-                <Link to="/" className="nav-link">
-                  Domů
-                </Link>
-              </li>
-              <li>
-                <Link to="/gallery" className="nav-link">
-                  Galerie
-                </Link>
-              </li>
-              <li>
-                <Link to="/process" className="nav-link">
-                  Proces
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="nav-link">
-                  Kontakt
-                </Link>
-              </li>
+              <li><Link to="/" className="nav-link">Domů</Link></li>
+              <li><Link to="/gallery" className="nav-link">Galerie</Link></li>
+              <li><Link to="/process" className="nav-link">Proces</Link></li>
+              <li><Link to="/contact" className="nav-link">Kontakt</Link></li>
             </ul>
           </nav>
 
@@ -107,10 +91,7 @@ const Header = () => {
                 <ul className="cart-items-list">
                   {cart.map((item) => (
                     <li key={item._id} className="cart-dropdown-item">
-                      <Link
-                        to={`/product/${item._id}`}
-                        className="cart-dropdown-link"
-                      >
+                      <Link to={`/product/${item._id}`} className="cart-dropdown-link">
                         <img
                           src={normalizeImagePath(item.image)}
                           alt={item.name}
@@ -200,19 +181,23 @@ const Header = () => {
           </div>
 
           <nav className="mobile-nav">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)}>
-              Domů
-            </Link>
-            <Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>
-              Galerie
-            </Link>
-            <Link to="/process" onClick={() => setMobileMenuOpen(false)}>
-              Proces
-            </Link>
-            <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>
-              Kontakt
-            </Link>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)}>Domů</Link>
+            <Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>Galerie</Link>
+            <Link to="/process" onClick={() => setMobileMenuOpen(false)}>Proces</Link>
+            <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Kontakt</Link>
           </nav>
+
+          <div className="mobile-extra-links">
+            <Link to="/contact#faq" onClick={() => setMobileMenuOpen(false)}>
+              <i className="ri-question-line"></i> Nejčastější dotazy
+            </Link>
+            <Link to="/contact#payment-shipping" onClick={() => setMobileMenuOpen(false)}>
+              <i className="ri-truck-line"></i> Doprava & Platba
+            </Link>
+            <Link to="/obchodni-podminky.pdf" target="_blank" rel="noopener noreferrer">
+              <i className="ri-article-line"></i> Obchodní podmínky
+            </Link>
+          </div>
         </div>
       )}
     </header>
