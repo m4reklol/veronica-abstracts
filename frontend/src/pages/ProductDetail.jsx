@@ -21,35 +21,41 @@ const ProductDetail = () => {
 
   const sliderTouchStartX = useRef(0);
   const sliderTranslateX = useRef(0);
-  const isPinching = useRef(false);
-  const lastTouchDistance = useRef(null);
-  const zoomScale = useRef(1);
-  const panOffset = useRef({ x: 0, y: 0 });
-  const lastPanPosition = useRef({ x: 0, y: 0 });
-
   const imageWrapperRef = useRef(null);
   const imageRef = useRef(null);
+
+  const isZooming = useRef(false);
+  const startDistance = useRef(0);
+  const startScale = useRef(1);
+  const currentScale = useRef(1);
+  const panOffset = useRef({ x: 0, y: 0 });
+  const startCenter = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(`/api/products/${id}`);
+
         const normalize = (imgPath) =>
           imgPath.startsWith("/uploads") ? `${imgPath}` : imgPath;
+
         if (data.image) data.image = normalize(data.image);
         if (data.additionalImages && Array.isArray(data.additionalImages)) {
           data.additionalImages = data.additionalImages.map(normalize);
         }
+
         setProduct(data);
         setMainImage(data.image);
       } catch (error) {
         console.error("Error fetching product details:", error);
       }
     };
+
     fetchProduct();
   }, [id]);
 
   if (!product) return <p>Načítání...</p>;
+
   const allImages = [product.image, ...(product.additionalImages || [])];
 
   const openSlider = (index) => {
@@ -60,74 +66,82 @@ const ProductDetail = () => {
   const closeSlider = (e) => {
     if (e.target.classList.contains("image-slider")) {
       setShowSlider(false);
-      resetZoom();
     }
   };
 
   const nextImage = () => {
     setSliderIndex((prev) => (prev + 1) % allImages.length);
-    resetZoom();
   };
 
   const prevImage = () => {
     setSliderIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-    resetZoom();
-  };
-
-  const resetZoom = () => {
-    zoomScale.current = 1;
-    panOffset.current = { x: 0, y: 0 };
-    lastPanPosition.current = { x: 0, y: 0 };
-    if (imageRef.current) {
-      imageRef.current.style.transform = `scale(1)`;
-    }
   };
 
   const handleAddToCart = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
     if (!cart.some((item) => item._id === product._id)) {
       dispatch({ type: "ADD_TO_CART", payload: product });
-      setNotification({ message: "Položka byla přidána do košíku!", type: "success" });
+      setNotification({
+        message: "Položka byla přidána do košíku!",
+        type: "success",
+      });
     } else {
-      setNotification({ message: "Tato položka je již v košíku.", type: "error" });
+      setNotification({
+        message: "Tato položka je již v košíku.",
+        type: "error",
+      });
     }
-    timeoutRef.current = setTimeout(() => setNotification(null), 1500);
+
+    timeoutRef.current = setTimeout(() => {
+      setNotification(null);
+    }, 1500);
   };
 
   const getDistance = (touches) => {
-    const [a, b] = touches;
-    return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getCenter = (touches) => {
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2,
+    };
   };
 
   const handleSliderTouchStart = (e) => {
     if (e.touches.length === 2) {
-      isPinching.current = true;
-      lastTouchDistance.current = getDistance(e.touches);
-    } else {
-      isPinching.current = false;
+      isZooming.current = true;
+      startDistance.current = getDistance(e.touches);
+      startCenter.current = getCenter(e.touches);
+      panOffset.current = { x: 0, y: 0 };
+      if (imageRef.current) {
+        const rect = imageRef.current.getBoundingClientRect();
+        imageRef.current.style.transformOrigin = `${startCenter.current.x - rect.left}px ${startCenter.current.y - rect.top}px`;
+      }
+    } else if (e.touches.length === 1 && !isZooming.current) {
       sliderTouchStartX.current = e.touches[0].clientX;
     }
   };
 
   const handleSliderTouchMove = (e) => {
-    if (e.touches.length === 2) {
-      isPinching.current = true;
+    if (e.touches.length === 2 && isZooming.current) {
       const newDistance = getDistance(e.touches);
-      const scaleChange = newDistance / lastTouchDistance.current;
-      zoomScale.current = Math.max(1, Math.min(3, zoomScale.current * scaleChange));
-      lastTouchDistance.current = newDistance;
+      const scale = Math.min(Math.max(newDistance / startDistance.current, 1), 3);
+      currentScale.current = scale;
 
-      const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      panOffset.current = {
-        x: centerX - window.innerWidth / 2,
-        y: centerY - window.innerHeight / 2,
-      };
+      const center = getCenter(e.touches);
+      const dx = center.x - startCenter.current.x;
+      const dy = center.y - startCenter.current.y;
+
+      panOffset.current = { x: dx, y: dy };
 
       if (imageRef.current) {
-        imageRef.current.style.transform = `scale(${zoomScale.current}) translate(${panOffset.current.x / zoomScale.current}px, ${panOffset.current.y / zoomScale.current}px)`;
+        imageRef.current.style.transform = `scale(${scale}) translate(${dx / scale}px, ${dy / scale}px)`;
       }
-    } else if (!isPinching.current && e.touches.length === 1) {
+    } else if (e.touches.length === 1 && !isZooming.current) {
       const deltaX = e.touches[0].clientX - sliderTouchStartX.current;
       sliderTranslateX.current = deltaX;
       if (imageWrapperRef.current) {
@@ -138,28 +152,51 @@ const ProductDetail = () => {
   };
 
   const handleSliderTouchEnd = (e) => {
-    if (!isPinching.current && e.changedTouches.length === 1) {
-      const threshold = 50;
-      if (sliderTranslateX.current < -threshold) nextImage();
-      else if (sliderTranslateX.current > threshold) prevImage();
-      if (imageWrapperRef.current) {
-        imageWrapperRef.current.style.transition = "transform 0.3s ease";
-        imageWrapperRef.current.style.transform = "translateX(0)";
+    if (isZooming.current) {
+      isZooming.current = false;
+      currentScale.current = 1;
+      if (imageRef.current) {
+        imageRef.current.style.transition = "transform 0.3s ease";
+        imageRef.current.style.transform = "scale(1) translate(0, 0)";
       }
+      return;
     }
+
+    const threshold = 50;
+    if (sliderTranslateX.current < -threshold) {
+      nextImage();
+    } else if (sliderTranslateX.current > threshold) {
+      prevImage();
+    }
+
+    if (imageWrapperRef.current) {
+      imageWrapperRef.current.style.transition = "transform 0.3s ease";
+      imageWrapperRef.current.style.transform = "translateX(0)";
+    }
+
     sliderTranslateX.current = 0;
-    isPinching.current = false;
   };
 
   return (
     <>
       <Helmet>
         <title>{`${product.name} | Veronica Abstracts`}</title>
-        <meta name="description" content={`Obraz \"${product.name}\" od Veroniky – originál k zakoupení.`} />
+        <meta name="description" content={`Obraz "${product.name}" od Veroniky – originál k zakoupení.`} />
+        <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`https://veronicaabstracts.com/product/${product._id}`} />
+
+        <meta property="og:title" content={`${product.name} | Veronica Abstracts`} />
+        <meta property="og:description" content="Originální abstraktní obraz od Veroniky." />
         <meta property="og:image" content={product.image} />
         <meta property="og:url" content={`https://veronicaabstracts.com/product/${product._id}`} />
+        <meta property="og:type" content="product" />
+
+        <meta name="twitter:title" content={`${product.name} | Veronica Abstracts`} />
+        <meta name="twitter:description" content="Originální abstraktní obraz od Veroniky." />
+        <meta name="twitter:image" content={product.image} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+
       <div className="product-detail-container">
         {notification && (
           <Notification {...notification} onClose={() => setNotification(null)} />
@@ -194,9 +231,15 @@ const ProductDetail = () => {
           <h2>{product.name}</h2>
           <p className="product-description">{product.description}</p>
           <p className="product-dimensions">{product.dimensions}</p>
+
           {!product.sold ? (
             <>
-              <p className="product-price">{product.price.toLocaleString("cs-CZ", { minimumFractionDigits: 2 })} Kč</p>
+              <p className="product-price">
+                {new Intl.NumberFormat("cs-CZ", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(product.price)} Kč
+              </p>
               <button className="add-to-cart-button" onClick={handleAddToCart}>
                 <i className="ri-shopping-cart-line"></i> PŘIDAT DO KOŠÍKU
               </button>
@@ -217,23 +260,39 @@ const ProductDetail = () => {
             <button className="close-slider" onClick={() => setShowSlider(false)}>
               <i className="ri-close-line"></i>
             </button>
-            <button className="prev-slide" onClick={(e) => { e.stopPropagation(); prevImage(); }}>
+            <button
+              className="prev-slide"
+              onClick={(e) => {
+                e.stopPropagation();
+                prevImage();
+              }}
+            >
               <i className="ri-arrow-left-s-line"></i>
             </button>
             <div
               ref={imageWrapperRef}
               className="slider-image-wrapper"
-              style={{ display: "flex", justifyContent: "center", alignItems: "center", willChange: "transform" }}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                willChange: "transform",
+              }}
             >
               <img
                 ref={imageRef}
                 src={allImages[sliderIndex]}
                 alt="Fullscreen"
                 className="slider-image"
-                style={{ touchAction: "none" }}
               />
             </div>
-            <button className="next-slide" onClick={(e) => { e.stopPropagation(); nextImage(); }}>
+            <button
+              className="next-slide"
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
+            >
               <i className="ri-arrow-right-s-line"></i>
             </button>
           </div>
