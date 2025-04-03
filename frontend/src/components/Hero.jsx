@@ -8,15 +8,33 @@ const Hero = () => {
     "/images/hero2.webp",
     "/images/hero3.webp",
   ];
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   useEffect(() => {
+    let loadedCount = 0;
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === images.length) {
+          setImagesLoaded(true);
+        }
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!imagesLoaded) return;
+
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [imagesLoaded]);
 
   return (
     <section
@@ -31,7 +49,8 @@ const Hero = () => {
         <small className="hero-subtext">Kde se abstrakce stává realitou</small>
         <h1 className="hero-title">VERONICA ABSTRACT ART</h1>
         <p className="hero-description">
-            Objevte krásu emocí, kreativity a nekonečné inspirace prostřednictvím jedinečného a fascinujícího abstraktního umění.
+          Objevte krásu emocí, kreativity a nekonečné inspirace prostřednictvím
+          jedinečného a fascinujícího abstraktního umění.
         </p>
 
         <div className="hero-buttons">
@@ -41,7 +60,7 @@ const Hero = () => {
           <button
             onClick={() => {
               const aboutSection = document.getElementById("about-section");
-              if (aboutSection){
+              if (aboutSection) {
                 aboutSection.scrollIntoView({ behavior: "smooth" });
               }
             }}

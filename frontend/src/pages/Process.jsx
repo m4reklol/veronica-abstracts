@@ -103,7 +103,7 @@ const Process = () => {
                 nabídlo hlubší ponor do lidské psychiky, spirituální roviny i neviditelných 
                 struktur reality.
                 </p>
-                <a href="https://kuunagency.com/blogs/news/kuun-art-whispered-realms-hidden-spaces-and-beings-a-mystical-art-experience-in-venice" target="_blank" className="exhibition-link">Více informací ↗</a>
+                <a href="https://kuunagency.com/blogs/news/kuun-art-whispered-realms-hidden-spaces-and-beings-a-mystical-art-experience-in-venice" target="_blank" className="exhibition-link">Více informací <i class="ri-arrow-right-up-fill"></i></a>
               </div>
             </div>
 
@@ -122,7 +122,7 @@ const Process = () => {
                   vystavit moje obrazy ve svém prostoru, neváhejte mě kontaktovat. Ráda
                   vytvořím jedinečný zážitek pro Vaše návštěvníky.
                 </p>
-                <a href="/contact" className="exhibition-link">Kontaktujte mě ↗</a>
+                <a href="/contact" className="exhibition-link">Kontaktujte mě <i class="ri-arrow-right-up-fill"></i></a>
               </div>
             </div>
           </div>
