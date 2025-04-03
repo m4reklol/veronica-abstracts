@@ -217,7 +217,7 @@ a {
       right: -60vw;
       width: 60vw;
       max-width: 400px;
-      height: 100vh;
+      height: 100dvh;
       background: #fff;
       box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
       padding: 1.5rem 1rem;
@@ -227,6 +227,7 @@ a {
       transition: right 0.3s ease;
       overflow-y: auto;
       justify-content: space-between;
+      padding-bottom: 6rem;
     }
   
     .mobile-menu.open {
