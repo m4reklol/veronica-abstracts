@@ -38,13 +38,13 @@ const Contact = () => {
 
       <meta property="og:title" content="Kontakt | Veronica Abstracts" />
       <meta property="og:description" content="Máte dotaz nebo zájem o spolupráci? Kontaktujte Veroniku." />
-      <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+      <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
       <meta property="og:url" content="https://veronicaabstracts.com/contact" />
       <meta property="og:type" content="website" />
 
       <meta name="twitter:title" content="Kontakt | Veronica Abstracts" />
       <meta name="twitter:description" content="Kontaktujte Veroniku pro více informací nebo objednávky." />
-      <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+      <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
       <meta name="twitter:card" content="summary_large_image" />
     </Helmet>
       <section className="contact-hero">

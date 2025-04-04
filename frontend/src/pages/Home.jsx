@@ -38,13 +38,13 @@ const Home = () => {
 
         <meta property="og:title" content="Domů | Veronica Abstracts" />
         <meta property="og:description" content="Vítejte ve světě abstraktního umění Veroniky. Objevte originální obrazy." />
-        <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+        <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta property="og:url" content="https://veronicaabstracts.com/" />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:title" content="Domů | Veronica Abstracts" />
         <meta name="twitter:description" content="Vítejte ve světě abstraktního umění Veroniky." />
-        <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+        <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Hero />

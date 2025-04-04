@@ -21,13 +21,13 @@ const Process = () => {
 
         <meta property="og:title" content="Proces | Veronica Abstracts" />
         <meta property="og:description" content="Poznejte proces tvorby abstraktních obrazů." />
-        <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+        <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta property="og:url" content="https://veronicaabstracts.com/process" />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:title" content="Proces | Veronica Abstracts" />
         <meta name="twitter:description" content="Zajímá vás, jak vzniká abstraktní umění?" />
-        <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+        <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <div className="process-page">

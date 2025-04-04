@@ -53,7 +53,7 @@ const Cart = () => {
         <meta property="og:description" content="Vaše položky k objednání." />
         <meta
           property="og:image"
-          content="https://veronicaabstracts.com/images/Vlogofinal.png"
+          content="https://veronicaabstracts.com/images/Vlogofinal2.png"
         />
         <meta property="og:url" content="https://veronicaabstracts.com/cart" />
         <meta property="og:type" content="website" />
@@ -65,7 +65,7 @@ const Cart = () => {
         />
         <meta
           name="twitter:image"
-          content="https://veronicaabstracts.com/images/Vlogofinal.png"
+          content="https://veronicaabstracts.com/images/Vlogofinal2.png"
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

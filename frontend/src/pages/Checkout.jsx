@@ -17,13 +17,13 @@ const Checkout = ({ cartItems }) => {
 
       <meta property="og:title" content="Pokladna | Veronica Abstracts" />
       <meta property="og:description" content="Zadejte své údaje a dokončete objednávku." />
-      <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+      <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
       <meta property="og:url" content="https://veronicaabstracts.com/checkout" />
       <meta property="og:type" content="website" />
 
       <meta name="twitter:title" content="Pokladna | Veronica Abstracts" />
       <meta name="twitter:description" content="Zadejte údaje a odešlete objednávku." />
-      <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal.png" />
+      <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
       <meta name="twitter:card" content="summary_large_image" />
     </Helmet>
     <CheckoutForm cartItems={cartItems} />
