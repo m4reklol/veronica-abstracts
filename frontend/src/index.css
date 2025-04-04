@@ -307,10 +307,11 @@ a {
     }
   
     .mobile-nav {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
     }
   
     .mobile-nav a {
