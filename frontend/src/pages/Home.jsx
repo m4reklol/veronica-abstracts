@@ -9,6 +9,7 @@ import ContactSection from "../components/ContactSection.jsx";
 import FinalMessageSection from "../components/FinalMessageSection.jsx";
 import { Helmet } from "react-helmet-async";
 import GalleryCTA from "../components/GalleryCTA.jsx";
+import ExhibitionsSection from "../components/ExhibitionsSection.jsx";
 
 const Home = () => {
   const location = useLocation();
@@ -50,6 +51,7 @@ const Home = () => {
       <section id="about-section">
         <AboutSection />
       </section>
+      <ExhibitionsSection />
       <GalleryCTA />
       <InstagramSection />
       <MySelection />

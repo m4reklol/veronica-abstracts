@@ -115,13 +115,21 @@ const Header = () => {
         </div>
 
         {isMobile && (
-          <button
-            className="mobile-menu-icon mobile-only"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Otevřít menu"
-          >
-            <i className="ri-menu-line"></i>
-          </button>
+          <div className="mobile-only mobile-icons-row">
+            <Link to="/cart" className="shopping-cart" aria-label="Košík">
+              <i className="ri-shopping-cart-line"></i>
+              {cart.length > 0 && (
+                <span className="cart-count">{cart.length}</span>
+              )}
+            </Link>
+            <button
+              className="mobile-menu-icon"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Otevřít menu"
+            >
+              <i className="ri-menu-line"></i>
+            </button>
+          </div>
         )}
       </div>
 

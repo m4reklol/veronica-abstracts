@@ -3,24 +3,39 @@ import "../index.css";
 
 const faqs = [
   {
-    question: "Jak vzniká každý obraz?",
+    question: "Jak dlouho trvá vytvořit jeden obraz?",
     answer:
-      "Každý obraz vzniká intuitivně, bez předem stanoveného plánu. Reaguji na své emoce, náladu i hudbu – tak vzniká každý tah štětce autenticky.",
+      "Záleží na velikosti a náročnosti díla. Někdy vznikne obraz během jednoho dne, jindy mi trvá i týden – hlavně pokud pracuji s více vrstvami, které musí postupně schnout. Každý obraz má svůj vlastní proces.",
   },
   {
-    question: "Lze obraz přizpůsobit na míru?",
+    question: "Můžu si obraz osobně vyzvednout?",
     answer:
-      "Ano, ráda vytvořím dílo na základě vašich preferencí. Stačí mě kontaktovat a probereme barvy, velikost i pocit, který má dílo vyvolávat.",
+      "Ano, osobní vyzvednutí je možné po domluvě v Českých Budějovicích. Pokud preferujete tuto možnost, napište mi prosím při objednávce zprávu a domluvíme se na čase a místě.",
   },
   {
-    question: "Používáte ráda konkrétní barvy?",
+    question: "Poskytujete certifikát pravosti?",
     answer:
-      "Preferuji kontrasty – černou a bílou, ale také syté barvy jako tyrkysová, růžová či zlatá, které dodávají energii.",
+      "Ano, ke každému obrazu obdržíte certifikát pravosti. Obsahuje datum zhotovení, název díla, rozměry a podpis autora. Je tak potvrzeno, že se jedná o originální dílo.",
   },
   {
-    question: "Jak se o díla starat?",
+    question: "Dodáváte obraz i s rámem?",
     answer:
-      "Obrazy jsou chráněny finálním lakem. Doporučuji nevystavovat je přímému slunečnímu světlu a otírat pouze suchým hadříkem.",
+      "Ne, obrazy jsou malované na kvalitní plátno a dodávám je bez rámu. Většina mých obrazů je napnutá na dřevěném blindrámu a připravená k okamžitému zavěšení – rámování je tedy volitelné a můžete si ho doladit podle svého interiéru.",
+  },
+  {
+    question: "Jak zjistím, jak bude obraz vypadat u mě doma?",
+    answer:
+      "Ráda Vám pomohu s představou. Pokud mi pošlete fotografii Vašeho interiéru a rozměry stěny, mohu Vám vytvořit jednoduchou vizualizaci s vybraným obrazem. Tak lépe uvidíte, jak se dílo hodí do Vašeho prostoru.",
+  },
+  {
+    question: "Mohu obraz vrátit, pokud nesplní má očekávání?",
+    answer:
+      "Jelikož se jedná o originální umělecká díla vytvářená na zakázku, není možné je vrátit. Proto doporučuji pečlivě zvážit svůj výběr. Ráda Vám poskytnu další fotografie či informace, abyste měli jistotu, že obraz splní Vaše očekávání.",
+  },
+  {
+    question: "Posíláte obrazy i do zahraničí?",
+    answer:
+      "Ano, obrazy zasílám i do zahraničí. Při objednávce prosím uveďte svou adresu a já Vám sdělím konkrétní informace o ceně dopravy a odhadovaném době doručení. Upozorňuji, že při mezinárodních zásilkách mohou být účtována cla nebo daně dle předpisů Vaší země.",
   },
 ];
 

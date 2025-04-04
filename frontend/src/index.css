@@ -227,7 +227,6 @@ a {
       transition: right 0.3s ease;
       overflow-y: auto;
       justify-content: space-between;
-      padding-bottom: 6rem;
     }
   
     .mobile-menu.open {
@@ -339,7 +338,7 @@ a {
     }
   
     .brand-name {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
     }
   
     .mobile-extra-links {
@@ -367,6 +366,30 @@ a {
   
     .mobile-extra-links a:hover {
       color: #ff6600;
+    }
+
+    .mobile-icons-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .brand-name {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .brand-name {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .brand-name {
+      display: none;
     }
 }
   
@@ -2566,7 +2589,7 @@ a {
     font-size: 1.25rem;
     font-style: italic;
     color: hsla(0, 0%, 15%, 0.796);
-    font-family: "Nunuto Sans", sans-serif;;
+    font-family: "Montserrat", sans-serif;
 }
   
 @media (max-width: 768px) {
