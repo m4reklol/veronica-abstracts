@@ -390,6 +390,12 @@ a {
 
 @media (max-width: 380px) {
     .brand-name {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 364px) {
+    .brand-name {
       display: none;
     }
 }
@@ -2926,14 +2932,19 @@ a {
     position: relative;
     margin-bottom: 3rem;
     height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
   
 .exhibitions-line {
     position: absolute;
     top: 50%;
+    left: 0;
     width: 100%;
+    height: 2px;
+    background-color: #ddd;
     border: none;
-    border-top: 2px solid #ddd;
     z-index: 1;
 }
   
@@ -2943,6 +2954,9 @@ a {
     height: 100%;
     max-height: 100%;
     object-fit: contain;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
   
 .exhibitions-heading {
