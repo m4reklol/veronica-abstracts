@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <footer className="footer">
       <h2 className="footer-title">„Každý obraz má svůj příběh, objevte ten svůj.“</h2>
-      <p className="footer-subtitle">Vyberte si umění, které vás inspiruje.</p>
+      <p className="footer-subtitle">Vyberte si umění, které Vás inspiruje.</p>
 
       <p className="footer-text">
         Máte dotazy? Neváhejte mě<a href="/contact"> kontaktovat!</a>

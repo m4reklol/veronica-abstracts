@@ -89,8 +89,8 @@ const ContactSection = () => {
         <div className="contact-info">
           <h2>Máte otázku? Napište mi</h2>
           <p>
-            Ať už vás zaujalo konkrétní dílo nebo máte otázku ohledně mé tvorby,
-            napište mi. Ráda uslyším váš názor nebo zpětnou vazbu.
+            Ať už Vás zaujalo konkrétní dílo nebo máte otázku ohledně mé tvorby,
+            napište mi. Ráda uslyším Váš názor nebo zpětnou vazbu.
           </p>
 
           <div className="contact-detail">

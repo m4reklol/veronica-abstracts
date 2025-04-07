@@ -27,7 +27,7 @@ const AboutSection = () => {
 
           <p>
             Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
-            intuitivní a nese kus mého příběhu. Pokud vás moje tvorba osloví, budu ráda, když se stane součástí i toho vašeho.
+            intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.
           </p>
         </div>
 
