@@ -12,7 +12,7 @@ import nodemailer from "nodemailer";
 const router = express.Router();
 
 // ✅ CREATE PAYMENT — Přesměrování na bránu
-router.post("/gpwebpay/create-payment", async (req, res) => {
+router.post("/create-payment", async (req, res) => {
   try {
     const { order, cartItems, shippingCost } = req.body;
 
@@ -57,7 +57,7 @@ router.post("/gpwebpay/create-payment", async (req, res) => {
 });
 
 // ✅ RESPONSE HANDLER — Callback z GP Webpay
-router.post("/gpwebpay/response", express.urlencoded({ extended: true }), async (req, res) => {
+router.post("/response", express.urlencoded({ extended: true }), async (req, res) => {
   try {
     const {
       OPERATION,
