@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import productRoutes from "./routes/products.js";
 import adminRoutes from "./routes/admin.js";
 import contactRoute from "./routes/contact.js";
+import gpwebpayRoutes from "./routes/gpwebpay.js"; // ✅ správně přidáno
 
 dotenv.config();
 const app = express();
@@ -35,6 +36,7 @@ app.use("/uploads", express.static(uploadDir));
 app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/contact", contactRoute);
+app.use("/api/gpwebpay", gpwebpayRoutes); // ✅ opravená cesta
 
 // ✅ Serve frontend build (React)
 const publicDir = path.join(__dirname, "..", "public");

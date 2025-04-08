@@ -41,10 +41,31 @@ const CheckoutForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Order submitted:", formData);
-    // TODO: submit to backend and redirect to Comgate
+    if (!formData.termsAccepted || isOutsideEU) return;
+  
+    try {
+      const res = await fetch("/api/gpwebpay/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order: formData,
+          cartItems,
+          shippingCost,
+        }),
+      });
+  
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Nastala chyba při přesměrování na platební bránu.");
+      }
+    } catch (error) {
+      console.error("Chyba při odesílání objednávky:", error);
+      alert("Nastala chyba při odesílání objednávky.");
+    }
   };
 
   const totalPrice =

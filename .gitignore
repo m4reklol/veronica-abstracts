@@ -29,3 +29,6 @@ pnpm-debug.log*
 # === Systémové soubory ===
 Thumbs.db
 *.swp
+
+# === Klíče a certifikáty ===
+backend/keys/
