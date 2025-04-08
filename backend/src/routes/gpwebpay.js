@@ -20,11 +20,9 @@ router.post("/create-payment", async (req, res) => {
       return res.status(400).json({ error: "Neplatná data objednávky." });
     }
 
-    // ⏱️ Jedinečné číslo objednávky
     const ORDERNUMBER = Date.now().toString();
     const AMOUNT = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
 
-    // ✅ Uložíme objednávku do DB
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
       ...order,
@@ -33,25 +31,27 @@ router.post("/create-payment", async (req, res) => {
       totalAmount: AMOUNT,
       status: "pending",
     });
+
     await newOrder.save();
 
-    // ⚠️ GP Webpay parametry (přesně dle dokumentace)
     const params = {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
       ORDERNUMBER,
       MERORDERNUM: ORDERNUMBER,
       AMOUNT: AMOUNT.toString(),
-      CURRENCY: "203", // CZK
+      CURRENCY: "203",
       DEPOSITFLAG: "1",
       URL: `${process.env.FRONTEND_URL}/thankyou`,
       DESCRIPTION: `Objednávka ${ORDERNUMBER}`,
+      LANG: "CZ", // volitelné, ale doporučené
     };
 
     const payload = await createPaymentPayload(params);
     const query = new URLSearchParams(payload).toString();
     const redirectUrl = `${process.env.GP_GATEWAY_URL}?${query}`;
 
+    console.log("📦 Redirect URL:", redirectUrl); // ✅ pro debug
     return res.json({ url: redirectUrl });
   } catch (err) {
     console.error("❌ Chyba při vytváření platby:", err);
@@ -65,7 +65,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
     const {
       OPERATION,
       ORDERNUMBER,
-      MERORDERNUM = "", // může být prázdné
+      MERORDERNUM = "",
       MD = "",
       PRCODE,
       SRCODE,
@@ -73,7 +73,8 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       DIGEST,
     } = req.body;
 
-    // 🔐 Správně vytvořený vstup pro ověření DIGEST
+    console.log("📩 GP Webpay callback:", req.body); // ✅ debug
+
     const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
     const isValid = await verifyDigest(digestInput, DIGEST);
 
@@ -105,39 +106,41 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
         },
       });
 
-      // Zákazník
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: order.email,
-        subject: `Potvrzení objednávky #${order.orderNumber}`,
-        html: `
-          <p>Děkujeme za Vaši objednávku!</p>
-          <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
-          <p>Celková částka: <strong>${order.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
-          <p>Brzy Vás budeme kontaktovat s podrobnostmi o dopravě.</p>
-        `,
-      });
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM,
+          to: order.email,
+          subject: `Potvrzení objednávky #${order.orderNumber}`,
+          html: `
+            <p>Děkujeme za Vaši objednávku!</p>
+            <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
+            <p>Celková částka: <strong>${order.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
+            <p>Brzy Vás budeme kontaktovat s podrobnostmi o dopravě.</p>
+          `,
+        });
 
-      // Admin
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: process.env.SMTP_ADMIN,
-        subject: `✅ Nová objednávka #${order.orderNumber}`,
-        html: `
-          <h3>Nová objednávka</h3>
-          <p><strong>Jméno:</strong> ${order.fullName}</p>
-          <p><strong>Email:</strong> ${order.email}</p>
-          <p><strong>Telefon:</strong> ${order.phone}</p>
-          <p><strong>Adresa:</strong> ${order.address}, ${order.city}, ${order.zip}, ${order.country}</p>
-          <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
-          <p><strong>Položky:</strong></p>
-          <ul>
-            ${order.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
-          </ul>
-          <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
-          <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
-        `,
-      });
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM,
+          to: process.env.SMTP_ADMIN,
+          subject: `✅ Nová objednávka #${order.orderNumber}`,
+          html: `
+            <h3>Nová objednávka</h3>
+            <p><strong>Jméno:</strong> ${order.fullName}</p>
+            <p><strong>Email:</strong> ${order.email}</p>
+            <p><strong>Telefon:</strong> ${order.phone}</p>
+            <p><strong>Adresa:</strong> ${order.address}, ${order.city}, ${order.zip}, ${order.country}</p>
+            <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
+            <p><strong>Položky:</strong></p>
+            <ul>
+              ${order.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
+            </ul>
+            <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+            <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
+          `,
+        });
+      } catch (emailErr) {
+        console.error("❗ Chyba při odesílání e-mailu:", emailErr);
+      }
     }
 
     return res.send("OK");

@@ -8,7 +8,7 @@ import crypto from 'crypto';
 const privateKeyPath = path.resolve(process.env.GP_PRIVATE_KEY_PATH);
 const publicKeyPath = path.resolve(process.env.GP_PUBLIC_KEY_PATH);
 
-// Parametry, které se musí použít pro výpočet DIGEST podle pořadí
+// Parametry pro výpočet DIGEST (přesně podle pořadí GP Webpay)
 const digestParamOrder = [
   'MERCHANTNUMBER',
   'OPERATION',
@@ -21,7 +21,7 @@ const digestParamOrder = [
 ];
 
 /**
- * Vytvoří tzv. digestInput podle přesného pořadí parametrů
+ * Vytvoří tzv. digestInput podle pořadí parametru pro podpis
  * @param {Object} params 
  * @returns {string}
  */
@@ -30,7 +30,7 @@ function createDigestInput(params) {
 }
 
 /**
- * Vytvoří base64 podpis (DIGEST) z digestInputu pomocí privátního klíče
+ * Podepíše digestInput privátním klíčem a vrátí podpis (base64)
  * @param {string} digestInput 
  * @returns {Promise<string>}
  */
@@ -43,7 +43,7 @@ async function signDigestInput(digestInput) {
 }
 
 /**
- * Ověří odpověď od GP Webpay pomocí veřejného klíče
+ * Ověří odpověď od GP Webpay pomocí veřejného certifikátu
  * @param {string} digestInput 
  * @param {string} digest 
  * @returns {Promise<boolean>}
@@ -57,13 +57,18 @@ export async function verifyDigest(digestInput, digest) {
 }
 
 /**
- * Vytvoří objekt s podpisem a připraveným payloadem pro redirect/post
+ * Vytvoří payload pro přesměrování na GP Webpay včetně DIGEST
  * @param {Object} params 
  * @returns {Promise<Object>}
  */
 export async function createPaymentPayload(params) {
   const digestInput = createDigestInput(params);
   const digest = await signDigestInput(digestInput);
+
+  // Debug logy pro ladění (volitelně zakomentuj v produkci)
+  console.log("🔐 digestInput:", digestInput);
+  console.log("📄 digest:", digest);
+
   return {
     ...params,
     DIGEST: digest
@@ -71,7 +76,7 @@ export async function createPaymentPayload(params) {
 }
 
 /**
- * Vrací řetězec param=hodnota oddělený ampersandy, řazený podle abecedy klíčů
+ * Vrací URL encoded řetězec klíč=hodnota, řazený abecedně
  * @param {Object} params 
  * @returns {string}
  */
@@ -82,5 +87,5 @@ export function createQueryString(params) {
     .join('&');
 }
 
-// Pro interní použití, pokud potřebuješ mimo export:
+// Export digest input pro ruční ověření
 export { createDigestInput };

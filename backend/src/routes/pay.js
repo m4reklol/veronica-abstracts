@@ -7,37 +7,45 @@ const router = express.Router();
 
 router.post('/pay', async (req, res) => {
   try {
-    // 1️⃣ Extract basic info from body (this would typically come from Checkout)
+    // 1️⃣ Extract data from body (used in test tools or custom clients)
     const {
-      orderNumber,   // unique order identifier (string, max 10 chars)
-      amount,        // in cents, e.g. 50000 = 500.00 CZK
-      currency = '203', // default CZK
-      returnUrl      // full frontend URL after payment
+      orderNumber,
+      amount,
+      currency = '203', // CZK default
+      returnUrl
     } = req.body;
 
-    // 2️⃣ Prepare parameters required by GP Webpay
+    if (!orderNumber || !amount || !returnUrl) {
+      return res.status(400).json({ success: false, error: 'Missing required parameters' });
+    }
+
+    const ORDERNUMBER = orderNumber.slice(0, 10); // GP Webpay allows max 10 chars
+    const AMOUNT = String(amount);
+
+    // 2️⃣ Required parameters
     const params = {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: 'CREATE_ORDER',
-      ORDERNUMBER: orderNumber,
-      AMOUNT: String(amount),
+      ORDERNUMBER: ORDERNUMBER,
+      MERORDERNUM: ORDERNUMBER,
+      AMOUNT: AMOUNT,
       CURRENCY: currency,
       DEPOSITFLAG: '1',
-      MERORDERNUM: orderNumber,
       URL: returnUrl,
+      LANG: 'CZ',
     };
 
-    // 3️⃣ Generate payload with DIGEST
+    // 3️⃣ Generate DIGEST + payload
     const payload = await createPaymentPayload(params);
 
-    // 4️⃣ Build query string for GET redirect (optional)
+    // 4️⃣ Convert payload to GET query format
     const query = createQueryString(payload);
-    const redirectUrl = `${process.env.GP_WEBPAY_URL}?${query}`;
+    const redirectUrl = `${process.env.GP_GATEWAY_URL}?${query}`;
 
     res.json({ success: true, redirectUrl });
   } catch (err) {
-    console.error('Payment init error:', err);
-    res.status(500).json({ success: false, error: 'Payment initialization failed' });
+    console.error('❌ Chyba při vytváření platby (pay.js):', err);
+    res.status(500).json({ success: false, error: 'Chyba při inicializaci platby' });
   }
 });
 
