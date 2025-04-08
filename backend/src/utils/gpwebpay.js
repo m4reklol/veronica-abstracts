@@ -1,9 +1,12 @@
+// backend/src/utils/gpwebpay.js
+
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 
 // Cesty ke klíčům
 const privateKeyPath = path.resolve(process.env.GP_PRIVATE_KEY_PATH);
+const publicKeyPath = path.resolve(process.env.GP_PUBLIC_KEY_PATH);
 
 // Parametry, které se musí použít pro výpočet DIGEST podle pořadí
 const digestParamOrder = [
@@ -20,7 +23,7 @@ const digestParamOrder = [
 /**
  * Vytvoří tzv. digestInput podle přesného pořadí parametrů
  * @param {Object} params 
- * @returns {string} – např. "123456|CREATE_ORDER|0001|50000|978|1|..."
+ * @returns {string}
  */
 function createDigestInput(params) {
   return digestParamOrder.map((key) => params[key] ?? '').join('|');
@@ -40,8 +43,22 @@ async function signDigestInput(digestInput) {
 }
 
 /**
+ * Ověří odpověď od GP Webpay pomocí veřejného klíče
+ * @param {string} digestInput 
+ * @param {string} digest 
+ * @returns {Promise<boolean>}
+ */
+export async function verifyDigest(digestInput, digest) {
+  const publicKeyPem = await fs.readFile(publicKeyPath, 'utf-8');
+  const verifier = crypto.createVerify('SHA1');
+  verifier.update(digestInput, 'utf-8');
+  verifier.end();
+  return verifier.verify(publicKeyPem, digest, 'base64');
+}
+
+/**
  * Vytvoří objekt s podpisem a připraveným payloadem pro redirect/post
- * @param {Object} params - všechny požadované parametry podle GP Webpay
+ * @param {Object} params 
  * @returns {Promise<Object>}
  */
 export async function createPaymentPayload(params) {
@@ -55,7 +72,6 @@ export async function createPaymentPayload(params) {
 
 /**
  * Vrací řetězec param=hodnota oddělený ampersandy, řazený podle abecedy klíčů
- * Např. pro redirect GET URL
  * @param {Object} params 
  * @returns {string}
  */
@@ -65,3 +81,6 @@ export function createQueryString(params) {
     .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
     .join('&');
 }
+
+// Pro interní použití, pokud potřebuješ mimo export:
+export { createDigestInput };

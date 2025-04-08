@@ -1,15 +1,17 @@
 // backend/src/routes/gpwebpay.js
 
 import express from "express";
-import { createPaymentPayload } from "../utils/gpwebpay.js";
-import crypto from "crypto";
-import fs from "fs/promises";
+import {
+  createPaymentPayload,
+  createDigestInput,
+  verifyDigest,
+} from "../utils/gpwebpay.js";
 import Order from "../models/Order.js";
 import nodemailer from "nodemailer";
 
 const router = express.Router();
 
-// ✅ CREATE PAYMENT – Přesměrování na bránu
+// ✅ CREATE PAYMENT — Přesměrování na bránu
 router.post("/gpwebpay/create-payment", async (req, res) => {
   try {
     const { order, cartItems, shippingCost } = req.body;
@@ -54,7 +56,7 @@ router.post("/gpwebpay/create-payment", async (req, res) => {
   }
 });
 
-// ✅ RESPONSE HANDLER – Callback z GP Webpay
+// ✅ RESPONSE HANDLER — Callback z GP Webpay
 router.post("/gpwebpay/response", express.urlencoded({ extended: true }), async (req, res) => {
   try {
     const {
@@ -68,19 +70,22 @@ router.post("/gpwebpay/response", express.urlencoded({ extended: true }), async 
       DIGEST,
     } = req.body;
 
-    const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
+    const digestInput = createDigestInput({
+      OPERATION,
+      ORDERNUMBER,
+      MERORDERNUM,
+      MD,
+      PRCODE,
+      SRCODE,
+      RESULTTEXT,
+    });
 
-    const pubKeyPem = await fs.readFile(process.env.GP_PUBLIC_KEY_PATH, "utf-8");
-    const verifier = crypto.createVerify("SHA1");
-    verifier.update(digestInput, "utf-8");
-
-    const isValid = verifier.verify(pubKeyPem, DIGEST, "base64");
+    const isValid = await verifyDigest(digestInput, DIGEST);
     if (!isValid) {
       console.warn("❌ Neplatný podpis od GP Webpay");
       return res.status(400).send("INVALID SIGNATURE");
     }
 
-    // ✅ Update objednávky v DB
     const paymentStatus = PRCODE === "0" ? "paid" : "failed";
     const order = await Order.findOneAndUpdate(
       { orderNumber: ORDERNUMBER },
@@ -93,19 +98,17 @@ router.post("/gpwebpay/response", express.urlencoded({ extended: true }), async 
       return res.send("OK");
     }
 
-    // ✅ Pokud platba prošla, pošli e-maily
     if (paymentStatus === "paid") {
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
-        port: 587,
-        secure: false,
+        port: parseInt(process.env.SMTP_PORT),
+        secure: process.env.SMTP_SECURE === "true",
         auth: {
           user: process.env.GMAIL_USER,
           pass: process.env.GMAIL_PASS,
         },
       });
 
-      // E-mail zákazníkovi
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: order.email,
@@ -118,7 +121,6 @@ router.post("/gpwebpay/response", express.urlencoded({ extended: true }), async 
         `,
       });
 
-      // E-mail adminovi
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: process.env.SMTP_ADMIN,
