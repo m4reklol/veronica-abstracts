@@ -40,12 +40,12 @@ router.post("/create-payment", async (req, res) => {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
       ORDERNUMBER,
+      MERORDERNUM: ORDERNUMBER,
       AMOUNT: AMOUNT.toString(),
       CURRENCY: "203", // CZK
       DEPOSITFLAG: "1",
       URL: `${process.env.FRONTEND_URL}/thankyou`,
-      // MERORDERNUM je nepovinný – jen pokud tvůj systém má vlastní čísla
-      // Pozor: pokud ho sem nepřidáš, NEZAPOMEŇ ho pak nezahrnout do DIGEST ověření
+      DESCRIPTION: `Objednávka ${ORDERNUMBER}`,
     };
 
     const payload = await createPaymentPayload(params);
@@ -82,7 +82,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       return res.status(400).send("INVALID SIGNATURE");
     }
 
-    const paymentStatus = PRCODE === "0" ? "paid" : "failed";
+    const paymentStatus = String(PRCODE) === "0" ? "paid" : "failed";
     const order = await Order.findOneAndUpdate(
       { orderNumber: ORDERNUMBER },
       { status: paymentStatus },
