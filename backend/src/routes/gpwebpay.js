@@ -11,7 +11,7 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
-// ✅ CREATE PAYMENT — Přesměrování na bránu
+// ✅ CREATE PAYMENT — Přesměrování na platební bránu
 router.post("/create-payment", async (req, res) => {
   try {
     const { order, cartItems, shippingCost } = req.body;
@@ -20,9 +20,11 @@ router.post("/create-payment", async (req, res) => {
       return res.status(400).json({ error: "Neplatná data objednávky." });
     }
 
+    // ⏱️ Jedinečné číslo objednávky
     const ORDERNUMBER = Date.now().toString();
     const AMOUNT = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
 
+    // ✅ Uložíme objednávku do DB
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
       ...order,
@@ -31,56 +33,50 @@ router.post("/create-payment", async (req, res) => {
       totalAmount: AMOUNT,
       status: "pending",
     });
-
     await newOrder.save();
 
+    // ⚠️ GP Webpay parametry (přesně dle dokumentace)
     const params = {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
       ORDERNUMBER,
       AMOUNT: AMOUNT.toString(),
-      CURRENCY: "203",
+      CURRENCY: "203", // CZK
       DEPOSITFLAG: "1",
       URL: `${process.env.FRONTEND_URL}/thankyou`,
-      DESCRIPTION: `Objednávka ${ORDERNUMBER}`,
+      // MERORDERNUM je nepovinný – jen pokud tvůj systém má vlastní čísla
+      // Pozor: pokud ho sem nepřidáš, NEZAPOMEŇ ho pak nezahrnout do DIGEST ověření
     };
 
     const payload = await createPaymentPayload(params);
     const query = new URLSearchParams(payload).toString();
     const redirectUrl = `${process.env.GP_GATEWAY_URL}?${query}`;
 
-    res.json({ url: redirectUrl });
+    return res.json({ url: redirectUrl });
   } catch (err) {
     console.error("❌ Chyba při vytváření platby:", err);
-    res.status(500).json({ error: "Chyba při vytváření platební brány." });
+    return res.status(500).json({ error: "Chyba při vytváření platební brány." });
   }
 });
 
-// ✅ RESPONSE HANDLER — Callback z GP Webpay
+// ✅ RESPONSE HANDLER — GP Webpay callback
 router.post("/response", express.urlencoded({ extended: true }), async (req, res) => {
   try {
     const {
       OPERATION,
       ORDERNUMBER,
-      MERORDERNUM,
-      MD,
+      MERORDERNUM = "", // může být prázdné
+      MD = "",
       PRCODE,
       SRCODE,
       RESULTTEXT,
       DIGEST,
     } = req.body;
 
-    const digestInput = createDigestInput({
-      OPERATION,
-      ORDERNUMBER,
-      MERORDERNUM,
-      MD,
-      PRCODE,
-      SRCODE,
-      RESULTTEXT,
-    });
-
+    // 🔐 Správně vytvořený vstup pro ověření DIGEST
+    const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
     const isValid = await verifyDigest(digestInput, DIGEST);
+
     if (!isValid) {
       console.warn("❌ Neplatný podpis od GP Webpay");
       return res.status(400).send("INVALID SIGNATURE");
@@ -94,7 +90,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
     );
 
     if (!order) {
-      console.warn("⚠️ Objednávka nebyla nalezena:", ORDERNUMBER);
+      console.warn("⚠️ Objednávka nenalezena:", ORDERNUMBER);
       return res.send("OK");
     }
 
@@ -109,6 +105,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
         },
       });
 
+      // Zákazník
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: order.email,
@@ -121,6 +118,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
         `,
       });
 
+      // Admin
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: process.env.SMTP_ADMIN,
@@ -145,7 +143,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
     return res.send("OK");
   } catch (err) {
     console.error("❌ Chyba v /gpwebpay/response:", err);
-    res.status(500).send("INTERNAL SERVER ERROR");
+    return res.status(500).send("INTERNAL SERVER ERROR");
   }
 });
 
