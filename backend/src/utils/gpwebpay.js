@@ -17,7 +17,9 @@ const digestParamOrder = [
   'CURRENCY',
   'DEPOSITFLAG',
   'MERORDERNUM',
-  'URL'
+  'URL',
+  'DESCRIPTION',
+  'LANG',
 ];
 
 /**

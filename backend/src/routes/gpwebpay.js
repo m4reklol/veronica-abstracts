@@ -44,7 +44,7 @@ router.post("/create-payment", async (req, res) => {
       DEPOSITFLAG: "1",
       URL: `${process.env.FRONTEND_URL}/thankyou`,
       DESCRIPTION: `Objednávka ${ORDERNUMBER}`,
-      LANG: "CZ", // volitelné, ale doporučené
+      LANG: "CZ",
     };
 
     const payload = await createPaymentPayload(params);
