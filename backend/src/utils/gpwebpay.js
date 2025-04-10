@@ -18,6 +18,7 @@ const digestParamOrder = [
   'DEPOSITFLAG',
   'MERORDERNUM',
   'URL',
+  'RESPONSEURL',
   'DESCRIPTION',
 ];
 
