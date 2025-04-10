@@ -38,12 +38,12 @@ router.post("/create-payment", async (req, res) => {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
       ORDERNUMBER,
-      MERORDERNUM: ORDERNUMBER,
       AMOUNT: AMOUNT.toString(),
       CURRENCY: "203",
       DEPOSITFLAG: "1",
+      MERORDERNUM: ORDERNUMBER,
       URL: `${process.env.FRONTEND_URL}/thankyou`,
-      DESCRIPTION: `Objednavka ${ORDERNUMBER}`,
+      DESCRIPTION: `Objednavka_${ORDERNUMBER}`,
       LANG: "CZ",
     };
 
