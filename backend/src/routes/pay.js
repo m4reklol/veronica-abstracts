@@ -20,7 +20,9 @@ router.post('/pay', async (req, res) => {
     }
 
     const ORDERNUMBER = orderNumber.slice(0, 10); // GP Webpay allows max 10 chars
-    const AMOUNT = String(amount);
+
+    // 💰 Převod z Kč na haléře (multiply by 100)
+    const AMOUNT = String(Math.round(amount * 100));
 
     // 2️⃣ Required parameters
     const params = {

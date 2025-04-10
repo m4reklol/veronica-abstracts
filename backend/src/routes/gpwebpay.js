@@ -21,14 +21,17 @@ router.post("/create-payment", async (req, res) => {
     }
 
     const ORDERNUMBER = Date.now().toString();
-    const AMOUNT = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
+
+    // 💰 Přepočet na haléře (multiply by 100 and round)
+    const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
+    const AMOUNT = Math.round(totalAmountCZK * 100);
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
       ...order,
       cartItems,
       shippingCost,
-      totalAmount: AMOUNT,
+      totalAmount: totalAmountCZK, // v Kč
       status: "pending",
     });
 
@@ -38,7 +41,7 @@ router.post("/create-payment", async (req, res) => {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
       ORDERNUMBER,
-      AMOUNT: AMOUNT.toString(),
+      AMOUNT: AMOUNT.toString(), // v haléřích jako string
       CURRENCY: "203",
       DEPOSITFLAG: "1",
       MERORDERNUM: ORDERNUMBER,
