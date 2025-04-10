@@ -43,12 +43,12 @@ app.use("/api/gpwebpay", gpwebpayRoutes);
 const publicDir = path.join(__dirname, "..", "public");
 app.use(express.static(publicDir));
 
-// ✅ Only fallback GET requests to React (neodchytá POST /api/gpwebpay/response!)
+// ✅ Only fallback GET requests to React
 app.get("*", (req, res, next) => {
   if (req.method === "GET") {
     res.sendFile(path.join(publicDir, "index.html"));
   } else {
-    next(); // allow API POST requests to reach proper handlers
+    next();
   }
 });
 
