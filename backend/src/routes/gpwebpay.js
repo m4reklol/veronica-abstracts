@@ -62,6 +62,11 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
+router.get("/response", (req, res) => {
+  console.log("📩 GP Webpay CALLBACK GET", req.query);
+  res.send("OK");
+});
+
 // ✅ RESPONSE HANDLER — GP Webpay callback
 router.post("/response", express.urlencoded({ extended: true }), async (req, res) => {
   console.log("📩 CALLBACK TRIGGERED");
