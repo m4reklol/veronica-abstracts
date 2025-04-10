@@ -19,7 +19,6 @@ const digestParamOrder = [
   'MERORDERNUM',
   'URL',
   'DESCRIPTION',
-  'LANG',
 ];
 
 /**
