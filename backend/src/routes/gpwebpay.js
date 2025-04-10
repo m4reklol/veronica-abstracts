@@ -31,7 +31,7 @@ router.post("/create-payment", async (req, res) => {
       ...order,
       cartItems,
       shippingCost,
-      totalAmount: totalAmountCZK, // v Kč
+      totalAmount: totalAmountCZK,
       status: "pending",
     });
 
@@ -41,11 +41,12 @@ router.post("/create-payment", async (req, res) => {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
       ORDERNUMBER,
-      AMOUNT: AMOUNT.toString(), // v haléřích jako string
+      AMOUNT: AMOUNT.toString(),
       CURRENCY: "203",
       DEPOSITFLAG: "1",
       MERORDERNUM: ORDERNUMBER,
       URL: `${process.env.FRONTEND_URL}/thankyou`,
+      RESPONSEURL: `${process.env.FRONTEND_URL}/gpwebpay/response`,
       DESCRIPTION: `Objednavka_${ORDERNUMBER}`,
       LANG: "CZ",
     };
