@@ -22,8 +22,6 @@ router.post("/create-payment", async (req, res) => {
     }
 
     const ORDERNUMBER = Date.now().toString();
-
-    // 💰 Přepočet na haléře (multiply by 100 and round)
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK * 100);
 
@@ -66,6 +64,9 @@ router.post("/create-payment", async (req, res) => {
 
 // ✅ RESPONSE HANDLER — GP Webpay callback
 router.post("/response", express.urlencoded({ extended: true }), async (req, res) => {
+  console.log("📩 CALLBACK TRIGGERED");
+  console.log("📩 Raw body received:", req.body);
+
   try {
     const {
       OPERATION,
@@ -78,10 +79,19 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       DIGEST,
     } = req.body;
 
-    console.log("📩 GP Webpay callback:", req.body);
-
     const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
-    const isValid = await verifyDigest(digestInput, DIGEST);
+    console.log("🔐 Digest Input:", digestInput);
+    console.log("🔐 DIGEST (from GP Webpay):", DIGEST);
+
+    let isValid = false;
+
+    try {
+      isValid = await verifyDigest(digestInput, DIGEST);
+      console.log("✅ Digest valid?", isValid);
+    } catch (verifyErr) {
+      console.error("❌ Chyba při ověření digestu:", verifyErr);
+      return res.status(500).send("Digest Verification Failed");
+    }
 
     if (!isValid) {
       console.warn("❌ Neplatný podpis od GP Webpay");
@@ -100,13 +110,19 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       return res.send("OK");
     }
 
-    // ✅ Označit produkty jako prodané
     if (paymentStatus === "paid") {
       const productIds = order.cartItems.map((item) => item._id);
-      await Product.updateMany(
-        { _id: { $in: productIds } },
-        { $set: { sold: true } }
-      );
+      console.log("🖼️ Produkty k označení jako prodané:", productIds);
+
+      try {
+        await Product.updateMany(
+          { _id: { $in: productIds } },
+          { $set: { sold: true } }
+        );
+        console.log("✅ Produkty označeny jako sold");
+      } catch (productErr) {
+        console.error("❌ Chyba při označování produktů jako sold:", productErr);
+      }
 
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -150,6 +166,8 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
             <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
           `,
         });
+
+        console.log("📧 E-maily odeslány");
       } catch (emailErr) {
         console.error("❗ Chyba při odesílání e-mailu:", emailErr);
       }
@@ -157,7 +175,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
 
     return res.send("OK");
   } catch (err) {
-    console.error("❌ Chyba v api/gpwebpay/response:", err);
+    console.error("❌ Chyba v /api/gpwebpay/response:", err);
     return res.status(500).send("INTERNAL SERVER ERROR");
   }
 });
