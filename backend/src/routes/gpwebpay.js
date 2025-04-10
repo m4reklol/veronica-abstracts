@@ -43,7 +43,7 @@ router.post("/create-payment", async (req, res) => {
       CURRENCY: "203",
       DEPOSITFLAG: "1",
       URL: `${process.env.FRONTEND_URL}/thankyou`,
-      DESCRIPTION: `Objednávka ${ORDERNUMBER}`,
+      DESCRIPTION: `Objednavka ${ORDERNUMBER}`,
       LANG: "CZ",
     };
 
