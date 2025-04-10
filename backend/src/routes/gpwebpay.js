@@ -7,6 +7,7 @@ import {
   verifyDigest,
 } from "../utils/gpwebpay.js";
 import Order from "../models/Order.js";
+import Product from "../models/Product.js"; // ✅ import Product model
 import nodemailer from "nodemailer";
 
 const router = express.Router();
@@ -46,7 +47,7 @@ router.post("/create-payment", async (req, res) => {
       DEPOSITFLAG: "1",
       MERORDERNUM: ORDERNUMBER,
       URL: `${process.env.FRONTEND_URL}/thankyou`,
-      RESPONSEURL: `${process.env.FRONTEND_URL}/gpwebpay/response`,
+      RESPONSEURL: `${process.env.FRONTEND_URL}/api/gpwebpay/response`,
       DESCRIPTION: `Objednavka_${ORDERNUMBER}`,
       LANG: "CZ",
     };
@@ -55,7 +56,7 @@ router.post("/create-payment", async (req, res) => {
     const query = new URLSearchParams(payload).toString();
     const redirectUrl = `${process.env.GP_GATEWAY_URL}?${query}`;
 
-    console.log("📦 Redirect URL:", redirectUrl); // ✅ pro debug
+    console.log("📦 Redirect URL:", redirectUrl);
     return res.json({ url: redirectUrl });
   } catch (err) {
     console.error("❌ Chyba při vytváření platby:", err);
@@ -77,7 +78,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       DIGEST,
     } = req.body;
 
-    console.log("📩 GP Webpay callback:", req.body); // ✅ debug
+    console.log("📩 GP Webpay callback:", req.body);
 
     const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
     const isValid = await verifyDigest(digestInput, DIGEST);
@@ -99,7 +100,14 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       return res.send("OK");
     }
 
+    // ✅ Označit produkty jako prodané
     if (paymentStatus === "paid") {
+      const productIds = order.cartItems.map((item) => item._id);
+      await Product.updateMany(
+        { _id: { $in: productIds } },
+        { $set: { sold: true } }
+      );
+
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT),
@@ -149,7 +157,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
 
     return res.send("OK");
   } catch (err) {
-    console.error("❌ Chyba v /gpwebpay/response:", err);
+    console.error("❌ Chyba v api/gpwebpay/response:", err);
     return res.status(500).send("INTERNAL SERVER ERROR");
   }
 });
