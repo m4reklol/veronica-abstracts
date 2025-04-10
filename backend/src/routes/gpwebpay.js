@@ -54,19 +54,17 @@ router.post("/create-payment", async (req, res) => {
     const query = new URLSearchParams(payload).toString();
     const redirectUrl = `${process.env.GP_GATEWAY_URL}?${query}`;
 
-    console.log("📦 Redirect URL:", redirectUrl);
+    console.log("\ud83d\udce6 Redirect URL:", redirectUrl);
     return res.json({ url: redirectUrl });
   } catch (err) {
-    console.error("❌ Chyba při vytváření platby:", err);
+    console.error("\u274c Chyba při vytváření platby:", err);
     return res.status(500).json({ error: "Chyba při vytváření platební brány." });
   }
 });
 
-// ✅ RESPONSE HANDLER — GP Webpay callback
-router.post("/response", express.urlencoded({ extended: true }), async (req, res) => {
-  console.log("📩 CALLBACK TRIGGERED");
-  console.log("📩 Raw body received:", req.body);
-
+// ✅ RESPONSE HANDLER — GP Webpay callback (GET i POST)
+const handleCallback = async (data, res) => {
+  console.log("\ud83d\udce9 CALLBACK TRIGGERED:", data);
   try {
     const {
       OPERATION,
@@ -77,26 +75,15 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
       SRCODE,
       RESULTTEXT,
       DIGEST,
-    } = req.body;
+    } = data;
 
     const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
-    console.log("🔐 Digest Input:", digestInput);
-    console.log("🔐 DIGEST (from GP Webpay):", DIGEST);
+    console.log("\ud83d\udd10 Digest Input:", digestInput);
+    console.log("\ud83d\udd10 DIGEST (from GP Webpay):", DIGEST);
 
-    let isValid = false;
-
-    try {
-      isValid = await verifyDigest(digestInput, DIGEST);
-      console.log("✅ Digest valid?", isValid);
-    } catch (verifyErr) {
-      console.error("❌ Chyba při ověření digestu:", verifyErr);
-      return res.status(500).send("Digest Verification Failed");
-    }
-
-    if (!isValid) {
-      console.warn("❌ Neplatný podpis od GP Webpay");
-      return res.status(400).send("INVALID SIGNATURE");
-    }
+    const isValid = await verifyDigest(digestInput, DIGEST);
+    console.log("✅ Digest valid?", isValid);
+    if (!isValid) return res.status(400).send("INVALID SIGNATURE");
 
     const paymentStatus = String(PRCODE) === "0" ? "paid" : "failed";
     const order = await Order.findOneAndUpdate(
@@ -112,17 +99,7 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
 
     if (paymentStatus === "paid") {
       const productIds = order.cartItems.map((item) => item._id);
-      console.log("🖼️ Produkty k označení jako prodané:", productIds);
-
-      try {
-        await Product.updateMany(
-          { _id: { $in: productIds } },
-          { $set: { sold: true } }
-        );
-        console.log("✅ Produkty označeny jako sold");
-      } catch (productErr) {
-        console.error("❌ Chyba při označování produktů jako sold:", productErr);
-      }
+      await Product.updateMany({ _id: { $in: productIds } }, { $set: { sold: true } });
 
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -134,50 +111,36 @@ router.post("/response", express.urlencoded({ extended: true }), async (req, res
         },
       });
 
-      try {
-        await transporter.sendMail({
-          from: process.env.SMTP_FROM,
-          to: order.email,
-          subject: `Potvrzení objednávky #${order.orderNumber}`,
-          html: `
-            <p>Děkujeme za Vaši objednávku!</p>
-            <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
-            <p>Celková částka: <strong>${order.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
-            <p>Brzy Vás budeme kontaktovat s podrobnostmi o dopravě.</p>
-          `,
-        });
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM,
+        to: order.email,
+        subject: `Potvrzení objednávky #${order.orderNumber}`,
+        html: `<p>Děkujeme za Vaši objednávku!</p><p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>`
+      });
 
-        await transporter.sendMail({
-          from: process.env.SMTP_FROM,
-          to: process.env.SMTP_ADMIN,
-          subject: `✅ Nová objednávka #${order.orderNumber}`,
-          html: `
-            <h3>Nová objednávka</h3>
-            <p><strong>Jméno:</strong> ${order.fullName}</p>
-            <p><strong>Email:</strong> ${order.email}</p>
-            <p><strong>Telefon:</strong> ${order.phone}</p>
-            <p><strong>Adresa:</strong> ${order.address}, ${order.city}, ${order.zip}, ${order.country}</p>
-            <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
-            <p><strong>Položky:</strong></p>
-            <ul>
-              ${order.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
-            </ul>
-            <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
-            <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
-          `,
-        });
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM,
+        to: process.env.SMTP_ADMIN,
+        subject: `✅ Nová objednávka #${order.orderNumber}`,
+        html: `<h3>Nová objednávka</h3><p><strong>Jméno:</strong> ${order.fullName}</p>`
+      });
 
-        console.log("📧 E-maily odeslány");
-      } catch (emailErr) {
-        console.error("❗ Chyba při odesílání e-mailu:", emailErr);
-      }
+      console.log("📧 E-maily odeslány");
     }
 
     return res.send("OK");
   } catch (err) {
-    console.error("❌ Chyba v /api/gpwebpay/response:", err);
+    console.error("❌ Chyba v callbacku:", err);
     return res.status(500).send("INTERNAL SERVER ERROR");
   }
+};
+
+router.post("/response", express.urlencoded({ extended: true }), async (req, res) => {
+  await handleCallback(req.body, res);
+});
+
+router.get("/response", async (req, res) => {
+  await handleCallback(req.query, res);
 });
 
 export default router;
