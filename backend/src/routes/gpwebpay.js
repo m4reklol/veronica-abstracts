@@ -126,13 +126,53 @@ router.get("/thankyou-handler", async (req, res) => {
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: order.email,
-        subject: `Potvrzení objednávky #${order.orderNumber}`,
+        subject: `Děkuji za Vaši objednávku #${order.orderNumber}`,
         html: `
-          <p>Děkujeme za Vaši objednávku!</p>
-          <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
-          <p>Celková částka: <strong>${order.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
+          <div style="background-color: #ffffff; color: #333; font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px;">
+            <div style="text-align: center;">
+              <img src="https://veronicaabstracts.com/images/Vlogofinalnotext.png" alt="Veronica Abstracts" style="max-width: 100px; margin-bottom: 20px;" />
+              <h2 style="color: #ff6600;">Děkujeme za Vaši objednávku!</h2>
+              <p style="font-size: 16px;">Vaše objednávka byla úspěšně přijata a nyní ji připravuji k odeslání.</p>
+            </div>
+      
+            <hr style="margin: 30px 0;" />
+      
+            <h3>📦 Detaily objednávky</h3>
+            <p><strong>Číslo objednávky:</strong> ${order.orderNumber}</p>
+            <p><strong>Celková částka:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
+      
+            <h3>🖼 Produkty</h3>
+            <ul style="padding-left: 20px;">
+              ${order.cartItems
+                .map(
+                  (item) => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`
+                )
+                .join("")}
+            </ul>
+      
+            <h3>📍 Doručovací adresa</h3>
+            <p>
+              ${order.fullName}<br />
+              ${order.address}<br />
+              ${order.zip} ${order.city}<br />
+              ${order.country}
+            </p>
+      
+            <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+            ${order.note ? `<p><strong>Poznámka:</strong> ${order.note}</p>` : ""}
+      
+            <hr style="margin: 30px 0;" />
+      
+            <p style="text-align: center; font-size: 14px;">
+              V případě jakýchkoliv dotazů mě neváhejte kontaktovat.<br />
+              Sledujte mě na Instagramu: <a href="https://instagram.com/veronica_abstracts" style="color: #ff6600;">@veronica_abstracts</a>
+              <a href="https://veronicaabstracts.com" style="display: inline-block; margin-top: 10px; color: #ffffff; background-color: #ff6600; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                Zpět na web
+              </a>
+            </p>
+          </div>
         `,
-      });
+      });      
 
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
