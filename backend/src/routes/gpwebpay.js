@@ -126,12 +126,12 @@ router.get("/thankyou-handler", async (req, res) => {
       await transporter.sendMail({
         from: `"${process.env.SMTP_FROM}" <${process.env.GMAIL_USER}>`,
         to: order.email,
-        subject: `Děkuji za Vaši objednávku #${order.orderNumber}`,
+        subject: `Potvrzení objednávky #${order.orderNumber}`,
         html: `
           <div style="background-color: #ffffff; color: #333; font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px;">
             <div style="text-align: center;">
               <img src="https://veronicaabstracts.com/images/Vlogofinalnotext.png" alt="Veronica Abstracts" style="max-width: 100px; margin-bottom: 20px;" />
-              <h2 style="color: #ff6600;">Děkujeme za Vaši objednávku!</h2>
+              <h2 style="color: #ff6600;">Děkuji za Vaši objednávku!</h2>
               <p style="font-size: 16px;">Vaše objednávka byla úspěšně přijata a nyní ji připravuji k odeslání.</p>
             </div>
       
@@ -142,13 +142,21 @@ router.get("/thankyou-handler", async (req, res) => {
             <p><strong>Celková částka:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
       
             <h3>🖼 Produkty</h3>
-            <ul style="padding-left: 20px;">
+            <div style="margin-top: 10px;">
               ${order.cartItems
-                .map(
-                  (item) => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`
-                )
-                .join("")}
-            </ul>
+              .map(
+                (item) => `
+                  <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <img src="https://veronicaabstracts.com${item.image}" alt="${item.name}" style="width: 60px; height: auto; margin-right: 15px; border-radius: 4px;" />
+                    <div>
+                      <div style="font-weight: bold;">${item.name}</div>
+                      <div style="color: #555;">${item.price.toLocaleString("cs-CZ")} Kč</div>
+                    </div>
+                  </div>
+                `
+              )
+              .join("")}
+            </div>
       
             <h3>📍 Doručovací adresa</h3>
             <p>
