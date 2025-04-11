@@ -20,10 +20,6 @@ const orderSchema = new mongoose.Schema({
   ],
   shippingCost: Number,
   totalAmount: Number,
-  gpwebpayParams: {
-    type: Object, // ✅ uložení všech GP Webpay parametrů použitých při vytvoření platby
-    required: false,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
