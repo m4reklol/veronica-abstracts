@@ -168,7 +168,8 @@ router.get("/thankyou-handler", async (req, res) => {
               ${order.country}
             </p>
       
-            <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+            <p><strong>Doprava:</strong> ${order.shippingCost === 0 ? "–" : `${order.shippingCost.toLocaleString("cs-CZ")} Kč`}</p>
+            ${order.shippingCost === 0 ? `<p><em>Osobní vyzvednutí po Českých Budějovicích</em></p>` : ""}
             ${order.note ? `<p><strong>Poznámka:</strong> ${order.note}</p>` : ""}
       
             <hr style="margin: 30px 0;" />
@@ -227,7 +228,8 @@ router.get("/thankyou-handler", async (req, res) => {
                 .join("")}
             </div>
       
-            <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+            <p><strong>Doprava:</strong> ${order.shippingCost === 0 ? "–" : `${order.shippingCost.toLocaleString("cs-CZ")} Kč`}</p>
+            ${order.shippingCost === 0 ? `<p><em>Osobní vyzvednutí po Českých Budějovicích</em></p>` : ""}
             <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
           </div>
         `,

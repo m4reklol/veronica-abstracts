@@ -28,16 +28,18 @@ const CheckoutForm = () => {
     termsAccepted: false,
   });
 
+  const [pickupSelected, setPickupSelected] = useState(false);
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
 
   const isEU = euCountries.includes(formData.country);
-  const shippingCost =
-    formData.country === "Czech Republic"
-      ? 500
-      : isEU
-      ? 1000
-      : null;
+  const shippingCost = pickupSelected
+    ? 0
+    : formData.country === "Czech Republic"
+    ? 500
+    : isEU
+    ? 1000
+    : null;
 
   const isOutsideEU = shippingCost === null;
 
@@ -144,6 +146,17 @@ const CheckoutForm = () => {
                 ))}
               <option value="Outside EU">Outside the EU</option>
             </select>
+          </div>
+
+          <div className="form-group">
+            <label className="pickup-checkbox">
+              <input
+                type="checkbox"
+                checked={pickupSelected}
+                onChange={() => setPickupSelected(!pickupSelected)}
+              />
+              Osobní vyzvednutí po Českých Budějovicích <strong>(ZDARMA)</strong>
+            </label>
           </div>
 
           {isOutsideEU && (
