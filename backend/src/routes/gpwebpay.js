@@ -3,7 +3,6 @@
 import express from "express";
 import {
   createPaymentPayload,
-  createDigestInput,
   verifyAnyDigest,
 } from "../utils/gpwebpay.js";
 import Order from "../models/Order.js";
@@ -77,27 +76,26 @@ router.get("/thankyou-handler", async (req, res) => {
   try {
     const {
       ORDERNUMBER,
+      OPERATION,
+      MERORDERNUM = "",
+      MD = "",
+      PRCODE,
+      SRCODE,
+      RESULTTEXT,
       DIGEST,
       DIGEST1,
     } = req.query;
 
     console.log("📩 GP Webpay GET callback:", req.query);
 
-    const order = await Order.findOne({ orderNumber: ORDERNUMBER });
-
-    if (!order || !order.gpDigestInfo) {
-      console.warn("⚠️ Objednávka nenalezena nebo chybí gpDigestInfo:", ORDERNUMBER);
-      return res.redirect("/thankyou?status=notfound");
-    }
-
     const digestInput = [
-      order.gpDigestInfo.OPERATION,
-      order.gpDigestInfo.ORDERNUMBER,
-      order.gpDigestInfo.MERORDERNUM,
-      order.gpDigestInfo.MD,
-      req.query.PRCODE,
-      req.query.SRCODE,
-      req.query.RESULTTEXT,
+      OPERATION,
+      ORDERNUMBER,
+      MERORDERNUM,
+      MD,
+      PRCODE,
+      SRCODE,
+      RESULTTEXT,
     ].join("|");
 
     const isValid = await verifyAnyDigest(digestInput, DIGEST, DIGEST1);
@@ -107,21 +105,21 @@ router.get("/thankyou-handler", async (req, res) => {
       return res.redirect("/thankyou?status=error");
     }
 
-    const paymentStatus = String(req.query.PRCODE) === "0" ? "paid" : "failed";
+    const paymentStatus = String(PRCODE) === "0" ? "paid" : "failed";
 
-    const updatedOrder = await Order.findOneAndUpdate(
+    const order = await Order.findOneAndUpdate(
       { orderNumber: ORDERNUMBER },
       { status: paymentStatus },
       { new: true }
     );
 
-    if (!updatedOrder) {
-      console.warn("⚠️ Nepodařilo se aktualizovat objednávku:", ORDERNUMBER);
+    if (!order) {
+      console.warn("⚠️ Objednávka nenalezena:", ORDERNUMBER);
       return res.redirect("/thankyou?status=notfound");
     }
 
     if (paymentStatus === "paid") {
-      const productIds = updatedOrder.cartItems.map((item) => item._id);
+      const productIds = order.cartItems.map((item) => item._id);
       await Product.updateMany(
         { _id: { $in: productIds } },
         { $set: { sold: true } }
@@ -139,31 +137,31 @@ router.get("/thankyou-handler", async (req, res) => {
 
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
-        to: updatedOrder.email,
-        subject: `Potvrzení objednávky #${updatedOrder.orderNumber}`,
+        to: order.email,
+        subject: `Potvrzení objednávky #${order.orderNumber}`,
         html: `
           <p>Děkujeme za Vaši objednávku!</p>
-          <p>Číslo objednávky: <strong>${updatedOrder.orderNumber}</strong></p>
-          <p>Celková částka: <strong>${updatedOrder.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
+          <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
+          <p>Celková částka: <strong>${order.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
         `,
       });
 
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: process.env.SMTP_ADMIN,
-        subject: `✅ Nová objednávka #${updatedOrder.orderNumber}`,
+        subject: `✅ Nová objednávka #${order.orderNumber}`,
         html: `
           <h3>Nová objednávka</h3>
-          <p><strong>Jméno:</strong> ${updatedOrder.fullName}</p>
-          <p><strong>Email:</strong> ${updatedOrder.email}</p>
-          <p><strong>Telefon:</strong> ${updatedOrder.phone}</p>
-          <p><strong>Adresa:</strong> ${updatedOrder.address}, ${updatedOrder.city}, ${updatedOrder.zip}, ${updatedOrder.country}</p>
-          <p><strong>Poznámka:</strong> ${updatedOrder.note || "-"}</p>
+          <p><strong>Jméno:</strong> ${order.fullName}</p>
+          <p><strong>Email:</strong> ${order.email}</p>
+          <p><strong>Telefon:</strong> ${order.phone}</p>
+          <p><strong>Adresa:</strong> ${order.address}, ${order.city}, ${order.zip}, ${order.country}</p>
+          <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
           <ul>
-            ${updatedOrder.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
+            ${order.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
           </ul>
-          <p><strong>Doprava:</strong> ${updatedOrder.shippingCost.toLocaleString("cs-CZ")} Kč</p>
-          <p><strong>Celkem:</strong> ${updatedOrder.totalAmount.toLocaleString("cs-CZ")} Kč</p>
+          <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+          <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
         `,
       });
 
