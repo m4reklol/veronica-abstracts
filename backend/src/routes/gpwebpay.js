@@ -67,7 +67,6 @@ router.get("/thankyou-handler", async (req, res) => {
       OPERATION,
       ORDERNUMBER,
       MERORDERNUM = "",
-      MD = "",
       PRCODE,
       SRCODE,
       RESULTTEXT,
@@ -77,15 +76,14 @@ router.get("/thankyou-handler", async (req, res) => {
 
     console.log("📩 GP Webpay GET callback:", req.query);
 
-    // ✅ Použijeme hodnoty z query pro ověření podpisu
+    // ✅ Správný digestInput bez MD pokud nepřišel
     const digestInput = [
-      OPERATION || "",
-      ORDERNUMBER || "",
-      MERORDERNUM || "",
-      MD || "",
-      PRCODE || "",
-      SRCODE || "",
-      RESULTTEXT || ""
+      OPERATION,
+      ORDERNUMBER,
+      MERORDERNUM,
+      PRCODE,
+      SRCODE,
+      RESULTTEXT,
     ].join("|");
 
     const isValid = await verifyAnyDigest(digestInput, DIGEST, DIGEST1);
