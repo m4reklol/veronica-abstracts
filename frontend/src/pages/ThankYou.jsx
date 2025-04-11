@@ -17,10 +17,12 @@ const ThankYou = () => {
     setStatus(status);
   }, [location.search]);
 
+  const isSuccess = status === "ok";
+
   return (
     <>
       <div className="thankyou-wrapper">
-        {status === "paid" && (
+        {isSuccess && (
           <div className="heart-bg">
             <div className="heart heart-1">
               <Heart className="heart-icon heart-orange" />
@@ -38,7 +40,7 @@ const ThankYou = () => {
         )}
 
         <div className="thankyou-card">
-          {status === "paid" && (
+          {isSuccess && (
             <div className="thankyou-icon">
               <Heart className="icon-heart" />
               <Sparkles className="icon-sparkle-right" />
@@ -47,8 +49,8 @@ const ThankYou = () => {
           )}
 
           <div className="thankyou-title">
-            <h1>{status === "paid" ? "Děkuji Vám!" : "Platba selhala"}</h1>
-            {status === "paid" && (
+            <h1>{isSuccess ? "Děkuji Vám!" : "Platba selhala"}</h1>
+            {isSuccess && (
               <>
                 <PartyPopper className="icon-popper-right" />
                 <Sparkles className="icon-popper-left" />
@@ -56,7 +58,7 @@ const ThankYou = () => {
             )}
           </div>
 
-          {status === "paid" ? (
+          {isSuccess ? (
             <>
               <p className="thankyou-sub">
                 Jsem nadšená, že jste si vybral/a mé umění! 🎨
