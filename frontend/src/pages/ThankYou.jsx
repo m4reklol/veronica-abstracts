@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Heart, Sparkles, Stars, PartyPopper } from "lucide-react";
 import "../index.css";
 import GalleryCTA from "../components/GalleryCTA";
@@ -7,73 +8,101 @@ import ContactSection from "../components/ContactSection";
 import TrustSection from "../components/TrustSection";
 
 const ThankYou = () => {
+  const location = useLocation();
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const prcode = params.get("PRCODE");
+    setStatus(prcode === "0" ? "paid" : "failed");
+  }, [location.search]);
+
   return (
     <>
-        <div className="thankyou-wrapper">
+      <div className="thankyou-wrapper">
         <div className="heart-bg">
-            <div className="heart heart-1">
+          <div className="heart heart-1">
             <Heart className="heart-icon heart-orange" />
-            </div>
-            <div className="heart heart-2">
+          </div>
+          <div className="heart heart-2">
             <Heart className="heart-icon heart-gold" />
-            </div>
-            <div className="heart heart-3">
+          </div>
+          <div className="heart heart-3">
             <Heart className="heart-icon heart-orange" />
-            </div>
-            <div className="heart heart-4">
+          </div>
+          <div className="heart heart-4">
             <Heart className="heart-icon heart-gold" />
-            </div>
+          </div>
         </div>
 
         <div className="thankyou-card">
-            <div className="thankyou-icon">
+          <div className="thankyou-icon">
             <Heart className="icon-heart" />
             <Sparkles className="icon-sparkle-right" />
             <Stars className="icon-sparkle-left" />
-            </div>
+          </div>
 
-            <div className="thankyou-title">
-            <h1>Děkuji Vám!</h1>
+          <div className="thankyou-title">
+            <h1>{status === "paid" ? "Děkuji Vám!" : "Platba selhala"}</h1>
             <PartyPopper className="icon-popper-right" />
             <Sparkles className="icon-popper-left" />
-            </div>
+          </div>
 
-            <p className="thankyou-sub">Jsem nadšená, že jste si vybral/a mé umění! 🎨</p>
-
-            <div className="divider"></div>
-
-            <p className="thankyou-text">
+          {status === "paid" ? (
+            <>
+              <p className="thankyou-sub">
+                Jsem nadšená, že jste si vybral/a mé umění! 🎨
+              </p>
+              <div className="divider"></div>
+              <p className="thankyou-text">
                 Vaše vybrané dílo právě připravuji s maximální péčí a láskou.
                 Každý tah štětce tvořím s důrazem na detail.
-            </p>
-
-            <p className="thankyou-text">
+              </p>
+              <p className="thankyou-text">
                 Už se nemůžu dočkat, až Vám přinese radost do Vašeho prostoru! ✨
-            </p>
-
-            <div className="thankyou-actions">
-            <button
-                onClick={() => (window.location.href = "/")}
-                className="thankyou-btn"
-            >
-                Zpět na úvodní stránku
-            </button>
-
-            <p className="thankyou-note">
-                Brzy Vám dorazí potvrzení objednávky a informace o doručení. 💌
-            </p>
-
-            <p className="thankyou-signature">
-                S vděčností a nadšením,<br />Veronika Hambergerová
-            </p>
-            </div>
+              </p>
+              <div className="thankyou-actions">
+                <button
+                  onClick={() => (window.location.href = "/")}
+                  className="thankyou-btn"
+                >
+                  Zpět na úvodní stránku
+                </button>
+                <p className="thankyou-note">
+                  Brzy Vám dorazí potvrzení objednávky a informace o doručení. 💌
+                </p>
+                <p className="thankyou-signature">
+                  S vděčností a nadšením,<br />Veronika Hambergerová
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="thankyou-sub">
+                Bohužel se něco pokazilo při zpracování platby. 😔
+              </p>
+              <div className="divider"></div>
+              <p className="thankyou-text">
+                Vaše objednávka nebyla dokončena. Zkuste to prosím znovu nebo
+                nás kontaktujte.
+              </p>
+              <div className="thankyou-actions">
+                <button
+                  onClick={() => (window.location.href = "/")}
+                  className="thankyou-btn"
+                >
+                  Zpět na úvodní stránku
+                </button>
+              </div>
+            </>
+          )}
         </div>
-        </div>
+      </div>
 
-        <GalleryCTA />
-        <InstagramSection />
-        <ContactSection />
-        <TrustSection />
+      <GalleryCTA />
+      <InstagramSection />
+      <ContactSection />
+      <TrustSection />
     </>
   );
 };
