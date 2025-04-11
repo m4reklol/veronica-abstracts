@@ -13,39 +13,47 @@ const ThankYou = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const prcode = params.get("PRCODE");
-    setStatus(prcode === "0" ? "paid" : "failed");
+    const status = params.get("status");
+    setStatus(status);
   }, [location.search]);
 
   return (
     <>
       <div className="thankyou-wrapper">
-        <div className="heart-bg">
-          <div className="heart heart-1">
-            <Heart className="heart-icon heart-orange" />
+        {status === "paid" && (
+          <div className="heart-bg">
+            <div className="heart heart-1">
+              <Heart className="heart-icon heart-orange" />
+            </div>
+            <div className="heart heart-2">
+              <Heart className="heart-icon heart-gold" />
+            </div>
+            <div className="heart heart-3">
+              <Heart className="heart-icon heart-orange" />
+            </div>
+            <div className="heart heart-4">
+              <Heart className="heart-icon heart-gold" />
+            </div>
           </div>
-          <div className="heart heart-2">
-            <Heart className="heart-icon heart-gold" />
-          </div>
-          <div className="heart heart-3">
-            <Heart className="heart-icon heart-orange" />
-          </div>
-          <div className="heart heart-4">
-            <Heart className="heart-icon heart-gold" />
-          </div>
-        </div>
+        )}
 
         <div className="thankyou-card">
-          <div className="thankyou-icon">
-            <Heart className="icon-heart" />
-            <Sparkles className="icon-sparkle-right" />
-            <Stars className="icon-sparkle-left" />
-          </div>
+          {status === "paid" && (
+            <div className="thankyou-icon">
+              <Heart className="icon-heart" />
+              <Sparkles className="icon-sparkle-right" />
+              <Stars className="icon-sparkle-left" />
+            </div>
+          )}
 
           <div className="thankyou-title">
             <h1>{status === "paid" ? "Děkuji Vám!" : "Platba selhala"}</h1>
-            <PartyPopper className="icon-popper-right" />
-            <Sparkles className="icon-popper-left" />
+            {status === "paid" && (
+              <>
+                <PartyPopper className="icon-popper-right" />
+                <Sparkles className="icon-popper-left" />
+              </>
+            )}
           </div>
 
           {status === "paid" ? (
