@@ -24,16 +24,6 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK * 100);
 
-    const gpDigestInfo = {
-      OPERATION: "CREATE_ORDER",
-      ORDERNUMBER,
-      MERORDERNUM: ORDERNUMBER,
-      MD: "",
-      PRCODE: "0",
-      SRCODE: "0",
-      RESULTTEXT: "OK",
-    };
-
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
       ...order,
@@ -41,7 +31,6 @@ router.post("/create-payment", async (req, res) => {
       shippingCost,
       totalAmount: totalAmountCZK,
       status: "pending",
-      gpDigestInfo,
     });
 
     await newOrder.save();
@@ -75,8 +64,8 @@ router.post("/create-payment", async (req, res) => {
 router.get("/thankyou-handler", async (req, res) => {
   try {
     const {
-      ORDERNUMBER,
       OPERATION,
+      ORDERNUMBER,
       MERORDERNUM = "",
       MD = "",
       PRCODE,
@@ -88,14 +77,15 @@ router.get("/thankyou-handler", async (req, res) => {
 
     console.log("📩 GP Webpay GET callback:", req.query);
 
+    // ✅ Použijeme hodnoty z query pro ověření podpisu
     const digestInput = [
-      OPERATION,
-      ORDERNUMBER,
-      MERORDERNUM,
-      MD,
-      PRCODE,
-      SRCODE,
-      RESULTTEXT,
+      OPERATION || "",
+      ORDERNUMBER || "",
+      MERORDERNUM || "",
+      MD || "",
+      PRCODE || "",
+      SRCODE || "",
+      RESULTTEXT || ""
     ].join("|");
 
     const isValid = await verifyAnyDigest(digestInput, DIGEST, DIGEST1);
