@@ -2,6 +2,7 @@ import express from "express";
 import Product from "../models/Product.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -120,7 +121,9 @@ router.post("/check-sold", async (req, res) => {
       return res.status(400).json({ message: "Pole 'ids' je vyžadováno." });
     }
 
-    const soldProducts = await Product.find({ _id: { $in: ids }, sold: true });
+    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id));
+
+    const soldProducts = await Product.find({ _id: { $in: objectIds }, sold: true });
     const soldIds = soldProducts.map((p) => p._id.toString());
 
     res.json({ soldIds });
