@@ -14,36 +14,6 @@ const Cart = () => {
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
 
-  // ✅ Auto-remove sold products from localStorage and context
-  useEffect(() => {
-    const checkSoldItems = async () => {
-      if (cart.length === 0) return;
-
-      const res = await fetch("/api/products/check-sold", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ids: cart.map((item) => item._id) }),
-      });
-
-      const data = await res.json();
-      if (data?.soldIds?.length > 0) {
-        const updatedCart = cart.filter(
-          (item) => !data.soldIds.includes(item._id)
-        );
-
-        // Update localStorage and context
-        localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-        dispatch({ type: "SET_CART", payload: updatedCart });
-
-        showNotification("Některé položky byly prodány a odebrány z košíku.", "error");
-      }
-    };
-
-    checkSoldItems();
-  }, [cart, dispatch]);
-
   const showNotification = (message, type) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 

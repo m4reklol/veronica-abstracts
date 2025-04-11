@@ -15,6 +15,16 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ✅ GET all sold products (moved BEFORE /:id to avoid route conflict)
+router.get("/sold", async (req, res) => {
+  try {
+    const soldProducts = await Product.find({ sold: true });
+    res.json(soldProducts);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 // ✅ GET single product by ID
 router.get("/:id", async (req, res) => {
   try {
@@ -35,6 +45,11 @@ router.post("/", protect, admin, upload.array("images", 4), async (req, res) => 
       return res.status(400).json({ message: "All fields are required." });
     }
 
+    const numericPrice = Number(price);
+    if (isNaN(numericPrice) || numericPrice <= 0) {
+      return res.status(400).json({ message: "Cena musí být platné číslo." });
+    }
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "At least one image is required." });
     }
@@ -44,7 +59,7 @@ router.post("/", protect, admin, upload.array("images", 4), async (req, res) => 
     const newProduct = new Product({
       name,
       description,
-      price,
+      price: numericPrice,
       dimensions,
       image: imagePaths[0],
       additionalImages: imagePaths.slice(1),
@@ -65,12 +80,14 @@ router.put("/:id", protect, admin, upload.array("images", 4), async (req, res) =
     const uploadedImages = req.files.map((file) => `/uploads/${file.filename}`);
     const allImages = [...existingImages, ...uploadedImages];
 
+    const numericPrice = Number(price);
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
         name,
         description,
-        price,
+        price: isNaN(numericPrice) ? 0 : numericPrice,
         dimensions,
         sold: sold === "true" || sold === true,
         image: allImages[0],
@@ -89,17 +106,7 @@ router.put("/:id", protect, admin, upload.array("images", 4), async (req, res) =
 router.delete("/:id", protect, admin, async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
-
-// ✅ GET all sold products
-router.get("/sold", async (req, res) => {
-  try {
-    const soldProducts = await Product.find({ sold: true });
-    res.json(soldProducts);
+    res.json({ message: "Product deleted", id: req.params.id });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

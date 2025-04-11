@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "../index.css";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import Notification from "../components/Notification";
 
 const euCountries = [
   "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic",
@@ -27,6 +28,9 @@ const CheckoutForm = () => {
     termsAccepted: false,
   });
 
+  const [notification, setNotification] = useState(null);
+  const timeoutRef = useRef(null);
+
   const isEU = euCountries.includes(formData.country);
   const shippingCost =
     formData.country === "Czech Republic"
@@ -41,10 +45,27 @@ const CheckoutForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const showNotification = (message, type) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setNotification({ message, type });
+    timeoutRef.current = setTimeout(() => {
+      setNotification(null);
+      timeoutRef.current = null;
+    }, 2000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.termsAccepted || isOutsideEU) return;
-  
+    if (!formData.termsAccepted) {
+      showNotification("Musíte souhlasit s obchodními podmínkami.", "error");
+      return;
+    }
+
+    if (isOutsideEU) {
+      showNotification("Objednávky mimo EU řešíme individuálně. Kontaktujte nás.", "error");
+      return;
+    }
+
     try {
       const res = await fetch("/api/gpwebpay/create-payment", {
         method: "POST",
@@ -55,16 +76,16 @@ const CheckoutForm = () => {
           shippingCost,
         }),
       });
-  
+
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("Nastala chyba při přesměrování na platební bránu.");
+        showNotification("Chyba při přesměrování na platební bránu.", "error");
       }
     } catch (error) {
       console.error("Chyba při odesílání objednávky:", error);
-      alert("Nastala chyba při odesílání objednávky.");
+      showNotification("Nastala chyba při odesílání objednávky.", "error");
     }
   };
 
@@ -76,6 +97,13 @@ const CheckoutForm = () => {
       <Link to="/cart" className="back-link">
         <i className="ri-arrow-left-s-line"></i> Zpět do košíku
       </Link>
+
+      {notification && (
+        <Notification
+          {...notification}
+          onClose={() => setNotification(null)}
+        />
+      )}
 
       <h2>Dokončení objednávky</h2>
 

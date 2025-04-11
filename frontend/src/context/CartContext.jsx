@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 
-const BASE_URL = ``;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const normalizeImagePath = (path) => {
   return path?.startsWith("/uploads") ? `${BASE_URL}${path}` : path;
@@ -50,6 +50,41 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  // ⬇️ Funkce pro odfiltrování již prodaných produktů z localStorage
+  const filterSoldItems = async () => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    if (cart.length === 0) return;
+
+    const ids = cart.map((item) => item._id);
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/products/check-sold`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+
+      const data = await response.json();
+
+      if (data?.availableIds) {
+        const filtered = cart.filter((item) =>
+          data.availableIds.includes(item._id)
+        );
+        localStorage.setItem("cart", JSON.stringify(filtered));
+        dispatch({ type: "CLEAR_CART" }); // nejprve vymažeme
+        filtered.forEach((item) => {
+          dispatch({ type: "ADD_TO_CART", payload: item });
+        });
+      }
+    } catch (error) {
+      console.error("Error filtering sold items:", error);
+    }
+  };
+
+  useEffect(() => {
+    filterSoldItems();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state.cart));
