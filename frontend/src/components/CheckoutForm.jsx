@@ -148,13 +148,14 @@ const CheckoutForm = () => {
             </select>
           </div>
 
-          <div className="form-group">
-            <label className="pickup-checkbox">
-              <input
-                type="checkbox"
-                checked={pickupSelected}
-                onChange={() => setPickupSelected(!pickupSelected)}
-              />
+          <div className="pickup-checkbox-row">
+            <input
+              type="checkbox"
+              id="pickup"
+              checked={pickupSelected}
+              onChange={() => setPickupSelected(!pickupSelected)}
+            />
+            <label htmlFor="pickup">
               Osobní vyzvednutí po Českých Budějovicích <strong>(ZDARMA)</strong>
             </label>
           </div>

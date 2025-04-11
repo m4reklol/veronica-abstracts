@@ -4312,6 +4312,26 @@ textarea {
     text-decoration: none;
 }
 
+.pickup-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 1.5rem 0;
+}
+  
+.pickup-checkbox-row input[type="checkbox"] {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+  
+.pickup-checkbox-row label {
+    margin: 0;
+    font-weight: 500;
+    cursor: pointer;
+}
+
 .required {
     color: #ff6600;
     font-weight: bold;
@@ -4363,6 +4383,22 @@ textarea {
 @media (max-width: 480px) {
     .terms-checkbox {
       font-size: 0.85rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .pickup-checkbox-row {
+      font-size: 0.95rem;
+      gap: 6px;
+    }
+  
+    .pickup-checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+    }
+  
+    .pickup-checkbox-row label {
+      line-height: 1.3;
     }
 }
 
