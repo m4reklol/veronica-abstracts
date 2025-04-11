@@ -105,4 +105,21 @@ router.get("/sold", async (req, res) => {
   }
 });
 
+// ✅ CHECK which products are sold (used by Cart.jsx)
+router.post("/check-sold", async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids)) {
+      return res.status(400).json({ message: "Pole 'ids' je vyžadováno." });
+    }
+
+    const soldProducts = await Product.find({ _id: { $in: ids }, sold: true });
+    const soldIds = soldProducts.map((p) => p._id.toString());
+
+    res.json({ soldIds });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 export default router;

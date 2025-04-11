@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useCart } from "../context/CartContext.jsx";
 import { Link } from "react-router-dom";
 import Notification from "../components/Notification.jsx";
@@ -13,6 +13,36 @@ const Cart = () => {
   const { cart, dispatch } = useCart();
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
+
+  // ✅ Auto-remove sold products from localStorage and context
+  useEffect(() => {
+    const checkSoldItems = async () => {
+      if (cart.length === 0) return;
+
+      const res = await fetch("/api/products/check-sold", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids: cart.map((item) => item._id) }),
+      });
+
+      const data = await res.json();
+      if (data?.soldIds?.length > 0) {
+        const updatedCart = cart.filter(
+          (item) => !data.soldIds.includes(item._id)
+        );
+
+        // Update localStorage and context
+        localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+        dispatch({ type: "SET_CART", payload: updatedCart });
+
+        showNotification("Některé položky byly prodány a odebrány z košíku.", "error");
+      }
+    };
+
+    checkSoldItems();
+  }, [cart, dispatch]);
 
   const showNotification = (message, type) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -31,9 +61,7 @@ const Cart = () => {
   };
 
   const normalizeImagePath = (path) =>
-    path?.startsWith("/uploads")
-      ? `${path}`
-      : path;
+    path?.startsWith("/uploads") ? `${path}` : path;
 
   const totalItems = cart.length;
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
@@ -48,7 +76,6 @@ const Cart = () => {
         />
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://veronicaabstracts.com/cart" />
-
         <meta property="og:title" content="Košík | Veronica Abstracts" />
         <meta property="og:description" content="Vaše položky k objednání." />
         <meta
@@ -57,7 +84,6 @@ const Cart = () => {
         />
         <meta property="og:url" content="https://veronicaabstracts.com/cart" />
         <meta property="og:type" content="website" />
-
         <meta name="twitter:title" content="Košík | Veronica Abstracts" />
         <meta
           name="twitter:description"
@@ -69,6 +95,7 @@ const Cart = () => {
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+
       <div className="cart-container">
         {notification && (
           <Notification
