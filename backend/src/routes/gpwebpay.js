@@ -144,18 +144,20 @@ router.get("/thankyou-handler", async (req, res) => {
             <h3>🖼 Produkty</h3>
             <div style="margin-top: 10px;">
               ${order.cartItems
-              .map(
-                (item) => `
-                  <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                    <img src="https://veronicaabstracts.com${item.image}" alt="${item.name}" style="width: 60px; height: auto; margin-right: 15px; border-radius: 4px;" />
-                    <div>
-                      <div style="font-weight: bold;">${item.name}</div>
-                      <div style="color: #555;">${item.price.toLocaleString("cs-CZ")} Kč</div>
+                .map(
+                  (item) => `
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                      <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; margin-right: 15px;">
+                        <img src="https://veronicaabstracts.com${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                      </div>
+                      <div>
+                        <div style="font-weight: bold;">${item.name}</div>
+                        <div style="color: #555;">${item.price.toLocaleString("cs-CZ")} Kč</div>
+                      </div>
                     </div>
-                  </div>
-                `
-              )
-              .join("")}
+                  `
+                )
+                .join("")}
             </div>
       
             <h3>📍 Doručovací adresa</h3>
@@ -173,7 +175,7 @@ router.get("/thankyou-handler", async (req, res) => {
       
             <p style="text-align: center; font-size: 14px;">
               V případě jakýchkoliv dotazů mě neváhejte kontaktovat.<br />
-              Sledujte mě na Instagramu: <a href="https://instagram.com/veronica.abstracts" style="color: #ff6600;">@veronica.abstracts</a>
+              Sledujte mě na Instagramu: <a href="https://instagram.com/veronica_abstracts" style="color: #ff6600;">@veronica_abstracts</a>
             </p>
 
             <div style="text-align: center; margin-top: 20px;">
@@ -207,14 +209,23 @@ router.get("/thankyou-handler", async (req, res) => {
             <hr style="margin: 20px 0;" />
       
             <h3>🖼 Produkty</h3>
-            <ul style="padding-left: 20px;">
+            <div style="margin-top: 10px;">
               ${order.cartItems
                 .map(
-                  (item) =>
-                    `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`
+                  (item) => `
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                      <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; margin-right: 15px;">
+                        <img src="https://veronicaabstracts.com${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                      </div>
+                      <div>
+                        <div style="font-weight: bold;">${item.name}</div>
+                        <div style="color: #555;">${item.price.toLocaleString("cs-CZ")} Kč</div>
+                      </div>
+                    </div>
+                  `
                 )
                 .join("")}
-            </ul>
+            </div>
       
             <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
             <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
