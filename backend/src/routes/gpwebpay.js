@@ -32,6 +32,7 @@ router.post("/create-payment", async (req, res) => {
       shippingCost,
       totalAmount: totalAmountCZK,
       status: "pending",
+      gpwebpayParams: params
     });
 
     await newOrder.save();
