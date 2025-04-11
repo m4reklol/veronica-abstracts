@@ -3,7 +3,6 @@
 import express from "express";
 import {
   createPaymentPayload,
-  createDigestInput,
   verifyAnyDigest,
 } from "../utils/gpwebpay.js";
 import Order from "../models/Order.js";
@@ -25,6 +24,28 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK * 100);
 
+    const gpDigestInfo = {
+      OPERATION: "CREATE_ORDER",
+      ORDERNUMBER,
+      MERORDERNUM: ORDERNUMBER,
+      MD: "",
+      PRCODE: "0",
+      SRCODE: "0",
+      RESULTTEXT: "OK",
+    };
+
+    const newOrder = new Order({
+      orderNumber: ORDERNUMBER,
+      ...order,
+      cartItems,
+      shippingCost,
+      totalAmount: totalAmountCZK,
+      status: "pending",
+      gpDigestInfo,
+    });
+
+    await newOrder.save();
+
     const params = {
       MERCHANTNUMBER: process.env.GP_MERCHANT_NUMBER,
       OPERATION: "CREATE_ORDER",
@@ -37,20 +58,6 @@ router.post("/create-payment", async (req, res) => {
       DESCRIPTION: `Objednavka_${ORDERNUMBER}`,
       LANG: "CZ",
     };
-
-    const digestInput = createDigestInput(params);
-
-    const newOrder = new Order({
-      orderNumber: ORDERNUMBER,
-      ...order,
-      cartItems,
-      shippingCost,
-      totalAmount: totalAmountCZK,
-      status: "pending",
-      gpDigestInput: digestInput, // ✅ uložíme pro pozdější ověření
-    });
-
-    await newOrder.save();
 
     const payload = await createPaymentPayload(params);
     const query = new URLSearchParams(payload).toString();
@@ -69,41 +76,50 @@ router.get("/thankyou-handler", async (req, res) => {
   try {
     const {
       ORDERNUMBER,
+      OPERATION,
+      MERORDERNUM = "",
+      MD = "",
+      PRCODE,
+      SRCODE,
+      RESULTTEXT,
       DIGEST,
       DIGEST1,
     } = req.query;
 
     console.log("📩 GP Webpay GET callback:", req.query);
 
-    const order = await Order.findOne({ orderNumber: ORDERNUMBER });
+    const digestInput = [
+      OPERATION,
+      ORDERNUMBER,
+      MERORDERNUM,
+      MD,
+      PRCODE,
+      SRCODE,
+      RESULTTEXT,
+    ].join("|");
 
-    if (!order || !order.gpDigestInput) {
-      console.warn("⚠️ Objednávka nenalezena nebo chybí gpDigestInput:", ORDERNUMBER);
-      return res.redirect("/thankyou?status=notfound");
-    }
-
-    const isValid = await verifyAnyDigest(order.gpDigestInput, DIGEST, DIGEST1);
+    const isValid = await verifyAnyDigest(digestInput, DIGEST, DIGEST1);
 
     if (!isValid) {
       console.warn("❌ Neplatný podpis od GP Webpay (GET)");
       return res.redirect("/thankyou?status=error");
     }
 
-    const paymentStatus = String(req.query.PRCODE) === "0" ? "paid" : "failed";
+    const paymentStatus = String(PRCODE) === "0" ? "paid" : "failed";
 
-    const updatedOrder = await Order.findOneAndUpdate(
+    const order = await Order.findOneAndUpdate(
       { orderNumber: ORDERNUMBER },
       { status: paymentStatus },
       { new: true }
     );
 
-    if (!updatedOrder) {
-      console.warn("⚠️ Nepodařilo se aktualizovat objednávku:", ORDERNUMBER);
+    if (!order) {
+      console.warn("⚠️ Objednávka nenalezena:", ORDERNUMBER);
       return res.redirect("/thankyou?status=notfound");
     }
 
     if (paymentStatus === "paid") {
-      const productIds = updatedOrder.cartItems.map((item) => item._id);
+      const productIds = order.cartItems.map((item) => item._id);
       await Product.updateMany(
         { _id: { $in: productIds } },
         { $set: { sold: true } }
@@ -121,31 +137,31 @@ router.get("/thankyou-handler", async (req, res) => {
 
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
-        to: updatedOrder.email,
-        subject: `Potvrzení objednávky #${updatedOrder.orderNumber}`,
+        to: order.email,
+        subject: `Potvrzení objednávky #${order.orderNumber}`,
         html: `
           <p>Děkujeme za Vaši objednávku!</p>
-          <p>Číslo objednávky: <strong>${updatedOrder.orderNumber}</strong></p>
-          <p>Celková částka: <strong>${updatedOrder.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
+          <p>Číslo objednávky: <strong>${order.orderNumber}</strong></p>
+          <p>Celková částka: <strong>${order.totalAmount.toLocaleString("cs-CZ")} Kč</strong></p>
         `,
       });
 
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: process.env.SMTP_ADMIN,
-        subject: `✅ Nová objednávka #${updatedOrder.orderNumber}`,
+        subject: `✅ Nová objednávka #${order.orderNumber}`,
         html: `
           <h3>Nová objednávka</h3>
-          <p><strong>Jméno:</strong> ${updatedOrder.fullName}</p>
-          <p><strong>Email:</strong> ${updatedOrder.email}</p>
-          <p><strong>Telefon:</strong> ${updatedOrder.phone}</p>
-          <p><strong>Adresa:</strong> ${updatedOrder.address}, ${updatedOrder.city}, ${updatedOrder.zip}, ${updatedOrder.country}</p>
-          <p><strong>Poznámka:</strong> ${updatedOrder.note || "-"}</p>
+          <p><strong>Jméno:</strong> ${order.fullName}</p>
+          <p><strong>Email:</strong> ${order.email}</p>
+          <p><strong>Telefon:</strong> ${order.phone}</p>
+          <p><strong>Adresa:</strong> ${order.address}, ${order.city}, ${order.zip}, ${order.country}</p>
+          <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
           <ul>
-            ${updatedOrder.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
+            ${order.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
           </ul>
-          <p><strong>Doprava:</strong> ${updatedOrder.shippingCost.toLocaleString("cs-CZ")} Kč</p>
-          <p><strong>Celkem:</strong> ${updatedOrder.totalAmount.toLocaleString("cs-CZ")} Kč</p>
+          <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+          <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
         `,
       });
 
