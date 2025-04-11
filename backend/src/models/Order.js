@@ -20,6 +20,15 @@ const orderSchema = new mongoose.Schema({
   ],
   shippingCost: Number,
   totalAmount: Number,
+  gpDigestInfo: {
+    OPERATION: String,
+    ORDERNUMBER: String,
+    MERORDERNUM: String,
+    MD: String,
+    PRCODE: String,
+    SRCODE: String,
+    RESULTTEXT: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
