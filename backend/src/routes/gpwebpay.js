@@ -124,7 +124,7 @@ router.get("/thankyou-handler", async (req, res) => {
       });
 
       await transporter.sendMail({
-        from: process.env.SMTP_FROM,
+        from: `"${process.env.SMTP_FROM}" <${process.env.GMAIL_USER}>`,
         to: order.email,
         subject: `Děkuji za Vaši objednávku #${order.orderNumber}`,
         html: `
@@ -165,31 +165,52 @@ router.get("/thankyou-handler", async (req, res) => {
       
             <p style="text-align: center; font-size: 14px;">
               V případě jakýchkoliv dotazů mě neváhejte kontaktovat.<br />
-              Sledujte mě na Instagramu: <a href="https://instagram.com/veronica_abstracts" style="color: #ff6600;">@veronica_abstracts</a>
-              <a href="https://veronicaabstracts.com" style="display: inline-block; margin-top: 10px; color: #ffffff; background-color: #ff6600; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+              Sledujte mě na Instagramu: <a href="https://instagram.com/veronica.abstracts" style="color: #ff6600;">@veronica.abstracts</a>
+            </p>
+
+            <div style="text-align: center; margin-top: 20px;">
+              <a href="https://veronicaabstracts.com" style="display: inline-block; color: #ffffff; background-color: #ff6600; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
                 Zpět na web
               </a>
-            </p>
+            </div>
           </div>
         `,
       });      
 
       await transporter.sendMail({
-        from: process.env.SMTP_FROM,
+        from: `"${process.env.SMTP_FROM}" <${process.env.GMAIL_USER}>`,
         to: process.env.SMTP_ADMIN,
         subject: `✅ Nová objednávka #${order.orderNumber}`,
         html: `
-          <h3>Nová objednávka</h3>
-          <p><strong>Jméno:</strong> ${order.fullName}</p>
-          <p><strong>Email:</strong> ${order.email}</p>
-          <p><strong>Telefon:</strong> ${order.phone}</p>
-          <p><strong>Adresa:</strong> ${order.address}, ${order.city}, ${order.zip}, ${order.country}</p>
-          <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
-          <ul>
-            ${order.cartItems.map(item => `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`).join("")}
-          </ul>
-          <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
-          <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
+          <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;">
+            <h2 style="color: #ff6600;">🧾 Nová objednávka #${order.orderNumber}</h2>
+            
+            <p><strong>Jméno:</strong> ${order.fullName}</p>
+            <p><strong>Email:</strong> ${order.email}</p>
+            <p><strong>Telefon:</strong> ${order.phone}</p>
+            <p><strong>Adresa:</strong><br/>
+              ${order.address}<br/>
+              ${order.zip} ${order.city}<br/>
+              ${order.country}
+            </p>
+            
+            <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
+      
+            <hr style="margin: 20px 0;" />
+      
+            <h3>🖼 Produkty</h3>
+            <ul style="padding-left: 20px;">
+              ${order.cartItems
+                .map(
+                  (item) =>
+                    `<li>${item.name} – ${item.price.toLocaleString("cs-CZ")} Kč</li>`
+                )
+                .join("")}
+            </ul>
+      
+            <p><strong>Doprava:</strong> ${order.shippingCost.toLocaleString("cs-CZ")} Kč</p>
+            <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
+          </div>
         `,
       });
 
