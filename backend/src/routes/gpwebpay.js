@@ -4,7 +4,7 @@ import express from "express";
 import {
   createPaymentPayload,
   createDigestInput,
-  verifyDigest,
+  verifyAnyDigest,
 } from "../utils/gpwebpay.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
@@ -61,7 +61,7 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
-// ✅ NEW: GP Webpay callback přes GET, přesměrování na tento endpoint
+// ✅ GP Webpay callback přes GET (thankyou-handler)
 router.get("/thankyou-handler", async (req, res) => {
   try {
     const {
@@ -73,12 +73,13 @@ router.get("/thankyou-handler", async (req, res) => {
       SRCODE,
       RESULTTEXT,
       DIGEST,
+      DIGEST1,
     } = req.query;
 
     console.log("📩 GP Webpay GET callback:", req.query);
 
     const digestInput = [OPERATION, ORDERNUMBER, MERORDERNUM, MD, PRCODE, SRCODE, RESULTTEXT].join("|");
-    const isValid = await verifyDigest(digestInput, DIGEST);
+    const isValid = await verifyAnyDigest(digestInput, DIGEST, DIGEST1);
 
     if (!isValid) {
       console.warn("❌ Neplatný podpis od GP Webpay (GET)");
@@ -147,7 +148,7 @@ router.get("/thankyou-handler", async (req, res) => {
       console.log("📧 E-maily odeslány");
     }
 
-    return res.redirect("/thankyou?status=ok");
+    return res.redirect("/thankyou?status=" + (paymentStatus === "paid" ? "ok" : "fail"));
   } catch (err) {
     console.error("❌ Chyba v /thankyou-handler:", err);
     return res.redirect("/thankyou?status=fail");

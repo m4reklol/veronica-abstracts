@@ -58,6 +58,30 @@ export async function verifyDigest(digestInput, digest) {
 }
 
 /**
+ * Ověří DIGEST i DIGEST1 z GET response
+ * @param {string} digestInput
+ * @param {string} digest
+ * @param {string} digest1
+ * @returns {Promise<boolean>}
+ */
+export async function verifyAnyDigest(digestInput, digest, digest1) {
+  const publicKeyPem = await fs.readFile(publicKeyPath, 'utf-8');
+
+  const verifyOne = async (digestValue) => {
+    if (!digestValue) return false;
+    const verifier = crypto.createVerify('SHA1');
+    verifier.update(digestInput, 'utf-8');
+    verifier.end();
+    return verifier.verify(publicKeyPem, digestValue, 'base64');
+  };
+
+  const isDigestValid = await verifyOne(digest);
+  const isDigest1Valid = await verifyOne(digest1);
+
+  return isDigestValid || isDigest1Valid;
+}
+
+/**
  * Vytvoří payload pro přesměrování na GP Webpay včetně DIGEST
  * @param {Object} params 
  * @returns {Promise<Object>}
@@ -66,7 +90,7 @@ export async function createPaymentPayload(params) {
   const digestInput = createDigestInput(params);
   const digest = await signDigestInput(digestInput);
 
-  // Debug logy pro ladění (volitelně zakomentuj v produkci)
+  // Debug logy pro ladění
   console.log("🔐 digestInput:", digestInput);
   console.log("📄 digest:", digest);
 
