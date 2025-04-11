@@ -41,6 +41,10 @@ const cartReducer = (state, action) => {
       localStorage.removeItem("cart");
       return { cart: [] };
 
+    case "SET_CART":
+      localStorage.setItem("cart", JSON.stringify(action.payload));
+      return { cart: action.payload };
+
     default:
       return state;
   }
@@ -67,15 +71,11 @@ export const CartProvider = ({ children }) => {
 
       const data = await response.json();
 
-      if (data?.availableIds) {
-        const filtered = cart.filter((item) =>
-          data.availableIds.includes(item._id)
+      if (data?.soldIds) {
+        const filtered = cart.filter(
+          (item) => !data.soldIds.includes(item._id)
         );
-        localStorage.setItem("cart", JSON.stringify(filtered));
-        dispatch({ type: "CLEAR_CART" }); // nejprve vymažeme
-        filtered.forEach((item) => {
-          dispatch({ type: "ADD_TO_CART", payload: item });
-        });
+        dispatch({ type: "SET_CART", payload: filtered });
       }
     } catch (error) {
       console.error("Error filtering sold items:", error);
