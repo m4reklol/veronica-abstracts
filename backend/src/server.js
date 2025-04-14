@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -18,20 +17,10 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Uploads directory: backend/uploads
-const uploadDir = path.join(__dirname, "..", "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-  console.log("📁 Created /uploads folder");
-}
-
 // ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
-// ✅ Serve uploaded images
-app.use("/uploads", express.static(uploadDir));
 
 // ✅ API routes — musí být před frontendem
 app.use("/api/products", productRoutes);

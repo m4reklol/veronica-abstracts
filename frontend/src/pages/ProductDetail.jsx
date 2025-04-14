@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../context/CartContext.jsx";
 import "../index.css";
@@ -26,7 +26,6 @@ const ProductDetail = () => {
 
   const isZooming = useRef(false);
   const startDistance = useRef(0);
-  const startScale = useRef(1);
   const currentScale = useRef(1);
   const panOffset = useRef({ x: 0, y: 0 });
   const startCenter = useRef({ x: 0, y: 0 });
@@ -35,15 +34,6 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(`/api/products/${id}`);
-
-        const normalize = (imgPath) =>
-          imgPath.startsWith("/uploads") ? `${imgPath}` : imgPath;
-
-        if (data.image) data.image = normalize(data.image);
-        if (data.additionalImages && Array.isArray(data.additionalImages)) {
-          data.additionalImages = data.additionalImages.map(normalize);
-        }
-
         setProduct(data);
         setMainImage(data.image);
       } catch (error) {
@@ -82,15 +72,9 @@ const ProductDetail = () => {
 
     if (!cart.some((item) => item._id === product._id)) {
       dispatch({ type: "ADD_TO_CART", payload: product });
-      setNotification({
-        message: "Položka byla přidána do košíku!",
-        type: "success",
-      });
+      setNotification({ message: "Položka byla přidána do košíku!", type: "success" });
     } else {
-      setNotification({
-        message: "Tato položka je již v košíku.",
-        type: "error",
-      });
+      setNotification({ message: "Tato položka je již v košíku.", type: "error" });
     }
 
     timeoutRef.current = setTimeout(() => {
@@ -104,12 +88,10 @@ const ProductDetail = () => {
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  const getCenter = (touches) => {
-    return {
-      x: (touches[0].clientX + touches[1].clientX) / 2,
-      y: (touches[0].clientY + touches[1].clientY) / 2,
-    };
-  };
+  const getCenter = (touches) => ({
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2,
+  });
 
   const handleSliderTouchStart = (e) => {
     if (e.touches.length === 2) {
@@ -151,7 +133,7 @@ const ProductDetail = () => {
     }
   };
 
-  const handleSliderTouchEnd = (e) => {
+  const handleSliderTouchEnd = () => {
     if (isZooming.current) {
       isZooming.current = false;
       currentScale.current = 1;
@@ -184,13 +166,11 @@ const ProductDetail = () => {
         <meta name="description" content={`Obraz "${product.name}" od Veroniky – originál k zakoupení.`} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`https://veronicaabstracts.com/product/${product._id}`} />
-
         <meta property="og:title" content={`${product.name} | Veronica Abstracts`} />
         <meta property="og:description" content="Originální abstraktní obraz od Veroniky." />
         <meta property="og:image" content={product.image} />
         <meta property="og:url" content={`https://veronicaabstracts.com/product/${product._id}`} />
         <meta property="og:type" content="product" />
-
         <meta name="twitter:title" content={`${product.name} | Veronica Abstracts`} />
         <meta name="twitter:description" content="Originální abstraktní obraz od Veroniky." />
         <meta name="twitter:image" content={product.image} />

@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, useEffect } from "react";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const normalizeImagePath = (path) => {
-  return path?.startsWith("/uploads") ? `${BASE_URL}${path}` : path;
+  return path?.startsWith("http") ? path : "/images/placeholder.jpg";
 };
 
 const initialState = {
@@ -19,9 +19,7 @@ const cartReducer = (state, action) => {
       const normalizedProduct = {
         ...action.payload,
         image: normalizeImagePath(action.payload.image),
-        additionalImages: (action.payload.additionalImages || []).map(
-          normalizeImagePath
-        ),
+        additionalImages: (action.payload.additionalImages || []).map(normalizeImagePath),
       };
 
       const updatedCart = [...state.cart, normalizedProduct];
@@ -30,9 +28,7 @@ const cartReducer = (state, action) => {
     }
 
     case "REMOVE_FROM_CART": {
-      const filteredCart = state.cart.filter(
-        (item) => item._id !== action.payload
-      );
+      const filteredCart = state.cart.filter((item) => item._id !== action.payload);
       localStorage.setItem("cart", JSON.stringify(filteredCart));
       return { cart: filteredCart };
     }
@@ -55,7 +51,6 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  // ⬇️ Funkce pro odfiltrování již prodaných produktů z localStorage
   const filterSoldItems = async () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     if (cart.length === 0) return;

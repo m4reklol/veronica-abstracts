@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
 import mongoose from "mongoose";
+import cloudinary from "cloudinary";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ GET all sold products (moved BEFORE /:id to avoid route conflict)
+// ✅ GET all sold products
 router.get("/sold", async (req, res) => {
   try {
     const soldProducts = await Product.find({ sold: true });
@@ -37,7 +38,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ✅ CREATE new product (max 4 images)
+// ✅ CREATE new product
 router.post("/", protect, admin, upload.array("images", 4), async (req, res) => {
   try {
     const { name, description, price, dimensions } = req.body;
@@ -55,7 +56,7 @@ router.post("/", protect, admin, upload.array("images", 4), async (req, res) => 
       return res.status(400).json({ message: "At least one image is required." });
     }
 
-    const imagePaths = req.files.map((file) => `/uploads/${file.filename}`);
+    const imagePaths = req.files.map((file) => file.path);
 
     const newProduct = new Product({
       name,
@@ -73,12 +74,12 @@ router.post("/", protect, admin, upload.array("images", 4), async (req, res) => 
   }
 });
 
-// ✅ UPDATE product with optional new images
+// ✅ UPDATE product
 router.put("/:id", protect, admin, upload.array("images", 4), async (req, res) => {
   try {
     const { name, description, price, dimensions, sold } = req.body;
     const existingImages = JSON.parse(req.body.existingImages || "[]");
-    const uploadedImages = req.files.map((file) => `/uploads/${file.filename}`);
+    const uploadedImages = req.files.map((file) => file.path);
     const allImages = [...existingImages, ...uploadedImages];
 
     const numericPrice = Number(price);
@@ -106,14 +107,23 @@ router.put("/:id", protect, admin, upload.array("images", 4), async (req, res) =
 // ✅ DELETE product
 router.delete("/:id", protect, admin, async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Produkt nebyl nalezen." });
+
+    const allImages = [product.image, ...product.additionalImages];
+    for (const imageUrl of allImages) {
+      const publicId = imageUrl.split("/").pop().split(".")[0];
+      await cloudinary.v2.uploader.destroy(`veronica/${publicId}`, { invalidate: true });
+    }
+
+    await product.deleteOne();
     res.json({ message: "Product deleted", id: req.params.id });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
-// ✅ CHECK which products are sold (used by Cart.jsx)
+// ✅ CHECK which products are sold
 router.post("/check-sold", async (req, res) => {
   try {
     const { ids } = req.body;

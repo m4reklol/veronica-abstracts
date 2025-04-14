@@ -43,14 +43,7 @@ const Header = () => {
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-  const normalizeImagePath = (path) => {
-    if (!path) return "";
-    return path.startsWith("http")
-      ? path
-      : path.startsWith("/")
-      ? path
-      : `/uploads/${path}`;
-  };
+  const normalizeImagePath = (path) => path || "/images/placeholder.jpg";
 
   return (
     <header className="header">

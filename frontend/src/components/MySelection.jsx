@@ -9,18 +9,14 @@ const MySelection = () => {
   useEffect(() => {
     const fetchNewestProducts = async () => {
       try {
-        const { data } = await axios.get(
-          `/api/products`
-        );
+        const { data } = await axios.get(`/api/products`);
         const sorted = data
           .filter((p) => !p.sold)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 3)
           .map((product) => ({
             ...product,
-            image: product.image.startsWith("/uploads")
-              ? `${product.image}`
-              : product.image,
+            image: product.image || "/images/placeholder.jpg",
           }));
         setNewestProducts(sorted);
       } catch (err) {

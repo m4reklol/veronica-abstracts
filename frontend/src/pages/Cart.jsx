@@ -31,7 +31,7 @@ const Cart = () => {
   };
 
   const normalizeImagePath = (path) =>
-    path?.startsWith("/uploads") ? `${path}` : path;
+    path?.startsWith("http") ? path : "/images/placeholder.jpg";
 
   const totalItems = cart.length;
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);

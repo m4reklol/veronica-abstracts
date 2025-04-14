@@ -16,19 +16,15 @@ const RelatedProducts = ({ currentProductId }) => {
 
   const isMobile = window.innerWidth <= 768;
 
-  const normalizeImagePath = (path) =>
-    path.startsWith("/uploads")
-      ? `${path}`
-      : path;
-
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await axios.get(
-        `/api/products`
-      );
+      const { data } = await axios.get(`/api/products`);
       const filtered = data
         .filter((p) => p._id !== currentProductId && !p.sold)
-        .map((p) => ({ ...p, image: normalizeImagePath(p.image) }));
+        .map((p) => ({
+          ...p,
+          image: p.image || "/images/placeholder.jpg",
+        }));
 
       const shuffled = filtered.sort(() => 0.5 - Math.random()).slice(0, 10);
       setProducts(shuffled);
@@ -100,7 +96,10 @@ const RelatedProducts = ({ currentProductId }) => {
           {products.map((product) => (
             <div className="related-product" key={product._id}>
               <Link to={`/product/${product._id}`}>
-                <img src={product.image} alt={product.name} />
+                <img
+                  src={product.image || "/images/placeholder.jpg"}
+                  alt={product.name}
+                />
               </Link>
               <h4>{product.name}</h4>
               <p>{product.price.toLocaleString("cs-CZ")} Kč</p>

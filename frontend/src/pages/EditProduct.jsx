@@ -53,9 +53,7 @@ const EditProduct = () => {
 
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(
-          `/api/products/${id}`
-        );
+        const { data } = await axios.get(`/api/products/${id}`);
         setFormData({
           name: data.name,
           description: data.description,
@@ -64,14 +62,9 @@ const EditProduct = () => {
           sold: data.sold,
         });
 
-        const normalize = (img) =>
-          img.startsWith("/uploads")
-            ? `${img}`
-            : img;
-
         const allImages = [data.image, ...(data.additionalImages || [])].map(
           (img) => ({
-            url: normalize(img),
+            url: img,
             file: null,
           })
         );
@@ -132,30 +125,23 @@ const EditProduct = () => {
       formDataToSend.append("dimensions", formData.dimensions);
       formDataToSend.append("sold", formData.sold);
 
-      const newImages = [];
-      const existingImages = [];
+      const existingImages = images
+        .filter((img) => !img.file)
+        .map((img) => img.url);
+      const newImages = images.filter((img) => img.file);
 
-      images.forEach((img) => {
-        if (img.file) {
-          formDataToSend.append("images", img.file);
-        } else {
-          const relative = new URL(img.url, window.location.origin).pathname;
-          existingImages.push(relative);
-        }
+      newImages.forEach((img) => {
+        formDataToSend.append("images", img.file);
       });
 
       formDataToSend.append("existingImages", JSON.stringify(existingImages));
 
-      await axios.put(
-        `/api/products/${id}`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.put(`/api/products/${id}`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       showNotification("Produkt aktualizován úspěšně!", "success");
       setTimeout(() => navigate("/admin/dashboard"), 1500);

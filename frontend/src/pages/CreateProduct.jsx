@@ -11,6 +11,7 @@ const CreateProduct = () => {
     description: "",
     price: "",
     dimensions: "",
+    sold: false,
   });
   const [images, setImages] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -28,12 +29,20 @@ const CreateProduct = () => {
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, type, value, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files).slice(0, 4);
-    setImages(files);
+    const selected = Array.from(e.target.files);
+    if (selected.length > 4) {
+      showNotification("Můžeš nahrát maximálně 4 obrázky.", "error");
+      return;
+    }
+    setImages(selected);
   };
 
   const handleTextareaResize = (e) => {
@@ -130,12 +139,35 @@ const CreateProduct = () => {
               handleTextareaResize(e);
             }}
           ></textarea>
+
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              name="sold"
+              checked={formData.sold}
+              onChange={handleChange}
+            />
+            Označit obraz jako prodaný
+          </label>
+
           <input
             type="file"
             accept="image/*"
             multiple
             onChange={handleFileChange}
           />
+
+          <div className="preview-images">
+            {images.map((file, i) => (
+              <img
+                key={i}
+                src={URL.createObjectURL(file)}
+                alt={`preview-${i}`}
+                style={{ width: "80px", height: "80px", objectFit: "cover", marginRight: "10px" }}
+              />
+            ))}
+          </div>
+
           <button type="submit" className="admin-create-button">
             Vytvořit produkt
           </button>
