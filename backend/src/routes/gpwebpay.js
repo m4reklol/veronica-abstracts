@@ -147,8 +147,8 @@ router.get("/thankyou-handler", async (req, res) => {
                 .map(
                   (item) => `
                     <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                      <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; margin-right: 15px;">
-                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                      <div style="margin-right: 15px;">
+                        <img src="${item.image}" alt="${item.name}" width="60" height="60" style="border-radius: 4px; display: block;" />
                       </div>
                       <div>
                         <div style="font-weight: bold;">${item.name}</div>
@@ -178,7 +178,7 @@ router.get("/thankyou-handler", async (req, res) => {
               V případě jakýchkoliv dotazů mě neváhejte kontaktovat.<br />
               Sledujte mě na Instagramu: <a href="https://instagram.com/veronica_abstracts" style="color: #ff6600;">@veronica_abstracts</a>
             </p>
-
+      
             <div style="text-align: center; margin-top: 20px;">
               <a href="https://veronicaabstracts.com" style="display: inline-block; color: #ffffff; background-color: #ff6600; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
                 Zpět na web
@@ -186,8 +186,8 @@ router.get("/thankyou-handler", async (req, res) => {
             </div>
           </div>
         `,
-      });      
-
+      });
+      
       await transporter.sendMail({
         from: `"${process.env.SMTP_FROM}" <${process.env.GMAIL_USER}>`,
         to: process.env.SMTP_ADMIN,
@@ -195,7 +195,7 @@ router.get("/thankyou-handler", async (req, res) => {
         html: `
           <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;">
             <h2 style="color: #ff6600;">🧾 Nová objednávka #${order.orderNumber}</h2>
-            
+      
             <p><strong>Jméno:</strong> ${order.fullName}</p>
             <p><strong>Email:</strong> ${order.email}</p>
             <p><strong>Telefon:</strong> ${order.phone}</p>
@@ -204,7 +204,7 @@ router.get("/thankyou-handler", async (req, res) => {
               ${order.zip} ${order.city}<br/>
               ${order.country}
             </p>
-            
+      
             <p><strong>Poznámka:</strong> ${order.note || "-"}</p>
       
             <hr style="margin: 20px 0;" />
@@ -215,8 +215,8 @@ router.get("/thankyou-handler", async (req, res) => {
                 .map(
                   (item) => `
                     <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                      <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; margin-right: 15px;">
-                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                      <div style="margin-right: 15px;">
+                        <img src="${item.image}" alt="${item.name}" width="60" height="60" style="border-radius: 4px; display: block;" />
                       </div>
                       <div>
                         <div style="font-weight: bold;">${item.name}</div>
@@ -233,7 +233,7 @@ router.get("/thankyou-handler", async (req, res) => {
             <p><strong>Celkem:</strong> ${order.totalAmount.toLocaleString("cs-CZ")} Kč</p>
           </div>
         `,
-      });
+      });      
 
       console.log("📧 E-maily odeslány");
     }
