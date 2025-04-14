@@ -148,7 +148,7 @@ router.get("/thankyou-handler", async (req, res) => {
                   (item) => `
                     <div style="display: flex; align-items: center; margin-bottom: 15px;">
                       <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; margin-right: 15px;">
-                        <img src="https://veronicaabstracts.com${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
                       </div>
                       <div>
                         <div style="font-weight: bold;">${item.name}</div>
@@ -216,7 +216,7 @@ router.get("/thankyou-handler", async (req, res) => {
                   (item) => `
                     <div style="display: flex; align-items: center; margin-bottom: 15px;">
                       <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px; margin-right: 15px;">
-                        <img src="https://veronicaabstracts.com${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
                       </div>
                       <div>
                         <div style="font-weight: bold;">${item.name}</div>
