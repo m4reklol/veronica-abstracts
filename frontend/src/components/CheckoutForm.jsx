@@ -148,18 +148,6 @@ const CheckoutForm = () => {
             </select>
           </div>
 
-          <div className="pickup-checkbox-row">
-            <input
-              type="checkbox"
-              id="pickup"
-              checked={pickupSelected}
-              onChange={() => setPickupSelected(!pickupSelected)}
-            />
-            <label htmlFor="pickup">
-              Osobní vyzvednutí po Českých Budějovicích <strong>(ZDARMA)</strong>
-            </label>
-          </div>
-
           {isOutsideEU && (
             <div className="country-warning">
               Pro objednávky mimo EU mě prosím <Link to="/contact">kontaktujte</Link>.
@@ -173,6 +161,38 @@ const CheckoutForm = () => {
         </div>
 
         <div className="checkout-summary-side">
+          <div className="payment-section-wrapper">
+            <div className="payment-section">
+              <h3>Způsob doručení</h3>
+              <label className="payment-option">
+                <input
+                  type="radio"
+                  name="delivery"
+                  checked={!pickupSelected}
+                  onChange={() => setPickupSelected(false)}
+                />
+                <span style={{ flex: 1 }}>Doručení na adresu</span>
+                <span className="order-value">
+                  {formData.country === "Czech Republic"
+                    ? "500 Kč"
+                    : isEU
+                    ? "1000 Kč"
+                    : "—"}
+                </span>
+              </label>
+              <label className="payment-option">
+                <input
+                  type="radio"
+                  name="delivery"
+                  checked={pickupSelected}
+                  onChange={() => setPickupSelected(true)}
+                />
+                <span style={{ flex: 1 }}>Osobní odběr – Č. Budějovice</span>
+                <span className="order-value">0 Kč</span>
+              </label>
+            </div>
+          </div>
+
           <div className="order-summary">
             <h3>Souhrn objednávky</h3>
             {cartItems.map((item) => (

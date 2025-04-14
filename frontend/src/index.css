@@ -4219,12 +4219,17 @@ textarea {
 .payment-option {
     display: flex;
     align-items: center;
+    gap: 0.3rem;
     margin-bottom: 1rem;
+}
+
+.payment-option:last-child {
+    margin-bottom: 0;
 }
   
 .comgate-logo {
     height: 40px;
-    margin-left: 1rem;
+    margin-left: 0.7rem;
 }
   
 .payment-icons-info {
