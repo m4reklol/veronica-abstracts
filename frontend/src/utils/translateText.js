@@ -1,5 +1,8 @@
 // frontend/src/utils/translateText.js
 
+const memoryCache = new Map();
+const pendingRequests = new Map();
+
 export const translateText = async (text, lang) => {
   try {
     const res = await fetch("/api/translate", {
@@ -11,11 +14,7 @@ export const translateText = async (text, lang) => {
     const data = await res.json();
     const translated = data.translated?.trim();
 
-    if (translated && translated !== text) {
-      return translated;
-    } else {
-      return text;
-    }
+    return translated && translated !== text ? translated : text;
   } catch (err) {
     console.error("❌ Translation API error:", err);
     return text;
@@ -23,29 +22,48 @@ export const translateText = async (text, lang) => {
 };
 
 export const getCachedTranslation = async (text, lang) => {
-  const key = `original:${text}`;
-  let cached = {};
+  if (!text || !lang || lang === "cz") return text;
 
+  const key = `original:${text}`;
+  const memKey = `${lang}:${text}`;
+
+  // ✅ Check in-memory cache
+  if (memoryCache.has(memKey)) {
+    return memoryCache.get(memKey);
+  }
+
+  // ✅ Check localStorage cache
+  let cached = {};
   try {
     const raw = localStorage.getItem(key);
     cached = raw ? JSON.parse(raw) : {};
   } catch (err) {
-    console.warn("⚠️ Failed to parse cache:", err);
+    console.warn("⚠️ Failed to parse localStorage cache:", err);
   }
 
-  if (typeof cached[lang] === "string" && cached[lang].trim() && cached[lang] !== text) {
+  if (typeof cached[lang] === "string" && cached[lang].trim()) {
+    memoryCache.set(memKey, cached[lang]);
     return cached[lang];
   }
 
-  const translated = await translateText(text, lang);
-
-  const updated = { ...cached, [lang]: translated };
-
-  try {
-    localStorage.setItem(key, JSON.stringify(updated));
-  } catch (err) {
-    console.warn("⚠️ Could not write to localStorage:", err);
+  // ✅ Prevent duplicate requests
+  if (pendingRequests.has(memKey)) {
+    return pendingRequests.get(memKey);
   }
 
-  return translated;
+  const request = translateText(text, lang).then((translated) => {
+    memoryCache.set(memKey, translated);
+
+    try {
+      localStorage.setItem(key, JSON.stringify({ ...cached, [lang]: translated }));
+    } catch (err) {
+      console.warn("⚠️ Could not write to localStorage:", err);
+    }
+
+    pendingRequests.delete(memKey);
+    return translated;
+  });
+
+  pendingRequests.set(memKey, request);
+  return request;
 };

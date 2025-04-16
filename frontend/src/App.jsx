@@ -19,12 +19,14 @@ import "aos/dist/aos.css";
 import { useEffect } from "react";
 import Checkout from "./pages/Checkout";
 import ThankYou from "./pages/ThankYou";
-import { LanguageProvider } from "./context/LanguageContext";
+import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 
-function App() {
+function InnerApp() {
+  const { language } = useLanguage();
+  const isReady = !!language;
+
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
-  
     AOS.init({
       duration: 800,
       once: true,
@@ -32,30 +34,38 @@ function App() {
     });
   }, []);
 
+  if (!isReady) return <div className="loading">Načítání jazyka…</div>;
+
+  return (
+    <HelmetProvider>
+      <Router>
+        <ScrollToTop />
+        <Header />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/process" element={<Process />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/create" element={<CreateProduct />} />
+          <Route path="/admin/edit/:id" element={<EditProduct />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/thankyou" element={<ThankYou />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </HelmetProvider>
+  );
+}
+
+function App() {
   return (
     <CartProvider>
       <LanguageProvider>
-        <HelmetProvider>
-          <Router>
-            <ScrollToTop />
-              <Header />
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/gallery" element={<Gallery />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/process" element={<Process />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/admin" element={<AdminLogin />} />
-                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/create" element={<CreateProduct />} />
-                  <Route path="/admin/edit/:id" element={<EditProduct />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/thankyou" element={<ThankYou />} />
-                </Routes>
-              <Footer />
-          </Router>
-        </HelmetProvider>
+        <InnerApp />
       </LanguageProvider>
     </CartProvider>
   );
