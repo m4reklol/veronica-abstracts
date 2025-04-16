@@ -4,7 +4,6 @@ import "../index.css";
 import { useCart } from "../context/CartContext.jsx";
 import LanguageDropdown from "./LanguageDropdown.jsx";
 import { useLanguage } from "../context/LanguageContext";
-import { getCachedTranslation } from "../utils/translateText";
 
 const Header = () => {
   const { cart } = useCart();
@@ -49,32 +48,60 @@ const Header = () => {
   };
 
   useEffect(() => {
-    const original = {
-      home: "Domů",
-      gallery: "Galerie",
-      process: "Proces",
-      contact: "Kontakt",
-      faq: language === "cz" ? "Nejčastější dotazy" : "FAQ",
-      shipping: "Doprava & Platba",
-      terms: "Obchodní podmínky",
-      total: "Celkem"
+    const manual = {
+      cz: {
+        home: "Domů",
+        gallery: "Galerie",
+        process: "Proces",
+        contact: "Kontakt",
+        faq: "Nejčastější dotazy",
+        shipping: "Doprava & Platba",
+        terms: "Obchodní podmínky",
+        total: "Celkem",
+      },
+      en: {
+        home: "Home",
+        gallery: "Gallery",
+        process: "Process",
+        contact: "Contact",
+        faq: "FAQ",
+        shipping: "Shipping",
+        terms: "Terms",
+        total: "Total",
+      },
+      de: {
+        home: "Start",
+        gallery: "Galerie",
+        process: "Ablauf",
+        contact: "Kontakt",
+        faq: "FAQ",
+        shipping: "Versand",
+        terms: "AGB",
+        total: "Summe",
+      },
+      it: {
+        home: "Casa",
+        gallery: "Galleria",
+        process: "Procedura",
+        contact: "Contatti",
+        faq: "FAQ",
+        shipping: "Spedizione",
+        terms: "Termini",
+        total: "Totale",
+      },
+      es: {
+        home: "Inicio",
+        gallery: "Galería",
+        process: "Proceso",
+        contact: "Contacto",
+        faq: "FAQ",
+        shipping: "Envío",
+        terms: "Términos",
+        total: "Total",
+      },
     };
 
-    if (language === "cz") {
-      setT(original);
-      return;
-    }
-
-    const keys = Object.keys(original);
-    Promise.all(
-      keys.map((key) => getCachedTranslation(original[key], language))
-    ).then((translatedValues) => {
-      const translated = keys.reduce((acc, key, index) => {
-        acc[key] = translatedValues[index];
-        return acc;
-      }, {});
-      setT(translated);
-    });
+    setT(manual[language] || manual.cz);
   }, [language]);
 
   return (
