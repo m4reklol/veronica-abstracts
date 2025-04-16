@@ -27,7 +27,7 @@ export const getCachedTranslation = async (text, lang) => {
   const key = `original:${text}`;
   const memKey = `${lang}:${text}`;
 
-  // ✅ Check in-memory cache
+  // ✅ Check in-memory cache first
   if (memoryCache.has(memKey)) {
     return memoryCache.get(memKey);
   }
@@ -46,24 +46,30 @@ export const getCachedTranslation = async (text, lang) => {
     return cached[lang];
   }
 
-  // ✅ Prevent duplicate requests
+  // ✅ Prevent duplicate concurrent requests
   if (pendingRequests.has(memKey)) {
     return pendingRequests.get(memKey);
   }
 
-  const request = translateText(text, lang).then((translated) => {
-    memoryCache.set(memKey, translated);
+  const requestPromise = translateText(text, lang)
+    .then((translated) => {
+      memoryCache.set(memKey, translated);
 
-    try {
-      localStorage.setItem(key, JSON.stringify({ ...cached, [lang]: translated }));
-    } catch (err) {
-      console.warn("⚠️ Could not write to localStorage:", err);
-    }
+      try {
+        localStorage.setItem(
+          key,
+          JSON.stringify({ ...cached, [lang]: translated })
+        );
+      } catch (err) {
+        console.warn("⚠️ Could not write to localStorage:", err);
+      }
 
-    pendingRequests.delete(memKey);
-    return translated;
-  });
+      return translated;
+    })
+    .finally(() => {
+      pendingRequests.delete(memKey);
+    });
 
-  pendingRequests.set(memKey, request);
-  return request;
+  pendingRequests.set(memKey, requestPromise);
+  return requestPromise;
 };
