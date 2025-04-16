@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Hero from "../components/Hero";
 import AboutSection from "../components/AboutSection.jsx";
@@ -10,9 +10,56 @@ import FinalMessageSection from "../components/FinalMessageSection.jsx";
 import { Helmet } from "react-helmet-async";
 import GalleryCTA from "../components/GalleryCTA.jsx";
 import ExhibitionsSection from "../components/ExhibitionsSection.jsx";
+import { getCachedTranslation } from "../utils/translateText";
+import { useLanguage } from "../context/LanguageContext";
+
+const BRAND_NAME = "Veronica Abstracts";
 
 const Home = () => {
+  const { language: lang } = useLanguage();
   const location = useLocation();
+  const [translations, setTranslations] = useState(null);
+
+  useEffect(() => {
+    const fetchTranslations = async () => {
+      const original = {
+        title: `Domů | ${BRAND_NAME}`,
+        description: "Vítejte ve světě abstraktního umění Veroniky. Prohlédněte si ručně malované originály plné emocí a barev.",
+        ogDescription: "Vítejte ve světě abstraktního umění Veroniky. Objevte originální obrazy.",
+        twitterDescription: "Vítejte ve světě abstraktního umění Veroniky."
+      };
+
+      if (lang === "cz") {
+        setTranslations(original);
+        return;
+      }
+
+      try {
+        const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
+
+        const [titleRaw, description, ogDescription, twitterDescription] = await Promise.all([
+          getCachedTranslation(clean(original.title), lang),
+          getCachedTranslation(original.description, lang),
+          getCachedTranslation(original.ogDescription, lang),
+          getCachedTranslation(original.twitterDescription, lang)
+        ]);
+
+        const title = titleRaw.replace("___BRAND___", BRAND_NAME);
+
+        setTranslations({
+          title,
+          description,
+          ogDescription,
+          twitterDescription
+        });
+      } catch (err) {
+        console.error("❌ Chyba překladu:", err);
+        setTranslations(original);
+      }
+    };
+
+    fetchTranslations();
+  }, [lang]);
 
   useEffect(() => {
     const hash = location.hash;
@@ -28,25 +75,28 @@ const Home = () => {
     }
   }, [location]);
 
+  if (!translations) return <p className="loading-text">Načítání překladu...</p>;
+
   return (
     <>
       <Helmet>
-        <title>Domů | Veronica Abstracts</title>
-        <meta name="description" content="Vítejte ve světě abstraktního umění Veroniky. Prohlédněte si ručně malované originály plné emocí a barev." />
+        <title>{translations.title}</title>
+        <meta name="description" content={translations.description} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://veronicaabstracts.com/" />
 
-        <meta property="og:title" content="Domů | Veronica Abstracts" />
-        <meta property="og:description" content="Vítejte ve světě abstraktního umění Veroniky. Objevte originální obrazy." />
+        <meta property="og:title" content={translations.title} />
+        <meta property="og:description" content={translations.ogDescription} />
         <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta property="og:url" content="https://veronicaabstracts.com/" />
         <meta property="og:type" content="website" />
 
-        <meta name="twitter:title" content="Domů | Veronica Abstracts" />
-        <meta name="twitter:description" content="Vítejte ve světě abstraktního umění Veroniky." />
+        <meta name="twitter:title" content={translations.title} />
+        <meta name="twitter:description" content={translations.twitterDescription} />
         <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+
       <Hero />
       <section id="about-section">
         <AboutSection />

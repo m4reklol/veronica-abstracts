@@ -6,7 +6,6 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Scroll nahoru při změně cesty
     window.scrollTo({ top: 0, behavior: "instant" });
 
     const timeout = setTimeout(() => {
@@ -23,7 +22,6 @@ const ScrollToTop = () => {
 
       const href = anchor.getAttribute("href");
       if (href === window.location.pathname) {
-        // Scrolluj nahoru i při kliknutí na stejnou URL
         window.scrollTo({ top: 0, behavior: "instant" });
         AOS.refresh();
       }

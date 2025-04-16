@@ -9,6 +9,10 @@ import ContactSection from "../components/ContactSection.jsx";
 import TrustSection from "../components/TrustSection.jsx";
 import InstagramSection from "../components/InstagramSection.jsx";
 import { Helmet } from "react-helmet-async";
+import { getCachedTranslation } from "../utils/translateText";
+import { useLanguage } from "../context/LanguageContext";
+
+const BRAND_NAME = "Veronica Abstracts";
 
 const Gallery = () => {
   const [products, setProducts] = useState([]);
@@ -17,6 +21,59 @@ const Gallery = () => {
   const [notification, setNotification] = useState(null);
   const { cart, dispatch } = useCart();
   const timeoutRef = useRef(null);
+  const { language: lang } = useLanguage();
+
+  const [t, setT] = useState({});
+
+  useEffect(() => {
+    const fallback = {
+      title: `Galerie | ${BRAND_NAME}`,
+      description: "Prohlédněte si galerii abstraktního umění. Každý obraz je originál s vlastním příběhem.",
+      ogDescription: "Prohlédněte si ručně malované abstraktní obrazy.",
+      twitterDescription: "Galerie originálních abstraktních obrazů.",
+      galleryHeading: "ABSTRAKTNÍ OBRAZY",
+      galleryIntro:
+        "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele. Nechte se inspirovat unikátními díly, která přinášejí barvu a energii do každého prostoru.",
+      sortLabel: "Řadit podle: ",
+      sortDefault: "Výchozí",
+      sortAsc: "Cena: od nejnižší",
+      sortDesc: "Cena: od nejvyšší",
+      addToCart: "Přidat do košíku",
+      noProducts: "Žádné produkty k dispozici.",
+      sold: "Prodáno",
+      successMessage: "Položka byla přidána do košíku!",
+      errorMessage: "Tato položka je již v košíku.",
+    };
+
+    const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
+    const restore = (str) => str.replace("___BRAND___", BRAND_NAME);
+
+    const loadTranslations = async () => {
+      if (lang === "cz") {
+        setT(fallback);
+        return;
+      }
+
+      try {
+        const keys = Object.keys(fallback);
+        const translatedPairs = await Promise.all(
+          keys.map(async (key) => {
+            const original = fallback[key];
+            const translated = await getCachedTranslation(clean(original), lang);
+            return [key, restore(translated || original)];
+          })
+        );
+
+        const translated = Object.fromEntries(translatedPairs);
+        setT(translated);
+      } catch (err) {
+        console.warn("❌ Gallery translation error:", err);
+        setT(fallback);
+      }
+    };
+
+    loadTranslations();
+  }, [lang]);
 
   useEffect(() => {
     fetchProducts();
@@ -50,17 +107,13 @@ const Gallery = () => {
     const isAlreadyInCart = cart.some((item) => item._id === product._id);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
+    setNotification({
+      message: isAlreadyInCart ? t.errorMessage : t.successMessage,
+      type: isAlreadyInCart ? "error" : "success",
+    });
+
     if (!isAlreadyInCart) {
       dispatch({ type: "ADD_TO_CART", payload: product });
-      setNotification({
-        message: "Položka byla přidána do košíku!",
-        type: "success",
-      });
-    } else {
-      setNotification({
-        message: "Tato položka je již v košíku.",
-        type: "error",
-      });
     }
 
     timeoutRef.current = setTimeout(() => {
@@ -72,33 +125,18 @@ const Gallery = () => {
   return (
     <>
       <Helmet>
-        <title>Galerie | Veronica Abstracts</title>
-        <meta
-          name="description"
-          content="Prohlédněte si galerii abstraktního umění. Každý obraz je originál s vlastním příběhem."
-        />
+        <title>{t.title}</title>
+        <meta name="description" content={t.description} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://veronicaabstracts.com/gallery" />
-        <meta property="og:title" content="Galerie | Veronica Abstracts" />
-        <meta
-          property="og:description"
-          content="Prohlédněte si ručně malované abstraktní obrazy."
-        />
-        <meta
-          property="og:image"
-          content="https://veronicaabstracts.com/images/Vlogofinal2.png"
-        />
+        <meta property="og:title" content={t.title} />
+        <meta property="og:description" content={t.ogDescription} />
+        <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta property="og:url" content="https://veronicaabstracts.com/gallery" />
         <meta property="og:type" content="website" />
-        <meta name="twitter:title" content="Galerie | Veronica Abstracts" />
-        <meta
-          name="twitter:description"
-          content="Galerie originálních abstraktních obrazů."
-        />
-        <meta
-          name="twitter:image"
-          content="https://veronicaabstracts.com/images/Vlogofinal2.png"
-        />
+        <meta name="twitter:title" content={t.title} />
+        <meta name="twitter:description" content={t.twitterDescription} />
+        <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
@@ -117,17 +155,12 @@ const Gallery = () => {
         )}
 
         <div className="gallery-header">
-          <h2 className="gallery-title">ABSTRAKTNÍ OBRAZY</h2>
-          <p className="gallery-description">
-            Abstraktní umění je vizuální forma, která přináší emoce a nálady bez
-            nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu,
-            který čeká na svého objevitele. Nechte se inspirovat unikátními díly,
-            která přinášejí barvu a energii do každého prostoru.
-          </p>
+          <h2 className="gallery-title">{t.galleryHeading}</h2>
+          <p className="gallery-description">{t.galleryIntro}</p>
         </div>
 
         <div className="sort-bar">
-          <label>Řadit podle: </label>
+          <label style={{ marginRight: "4px" }}>{t.sortLabel}</label>
           <select
             value={sortOption}
             onChange={(e) => {
@@ -135,26 +168,26 @@ const Gallery = () => {
               sortProducts(e.target.value);
             }}
           >
-            <option value="default">Výchozí</option>
-            <option value="price-asc">Cena: od nejnižší</option>
-            <option value="price-desc">Cena: od nejvyšší</option>
+            <option value="default">{t.sortDefault}</option>
+            <option value="price-asc">{t.sortAsc}</option>
+            <option value="price-desc">{t.sortDesc}</option>
           </select>
         </div>
 
         <div className="gallery-grid">
           {products.length > 0 ? (
             products.map((product) => (
-              <Link to={`/product/${product._id}`} key={product._id} className="gallery-item-link">
+              <Link
+                to={`/product/${product._id}`}
+                key={product._id}
+                className="gallery-item-link"
+              >
                 <div className="gallery-item">
                   <div className="image-container">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="gallery-img"
-                    />
+                    <img src={product.image} alt={product.name} className="gallery-img" />
                     {product.additionalImages.length > 0 && (
                       <img
-                        src={product.additionalImages[0]}
+                        src={product.additionalImages[2]}
                         alt="alt-preview"
                         className="hover-img"
                       />
@@ -172,23 +205,23 @@ const Gallery = () => {
                   <button
                     className="add-to-cart"
                     onClick={(e) => {
-                      e.preventDefault(); // ⛔️ zabrání přesměrování
+                      e.preventDefault();
                       handleAddToCart(product);
                     }}
                   >
-                    Přidat do košíku
+                    {t.addToCart}
                   </button>
                 </div>
               </Link>
             ))
           ) : (
-            <p className="no-products">Žádné produkty k dispozici.</p>
+            <p className="no-products">{t.noProducts}</p>
           )}
         </div>
 
         {soldProducts.length > 0 && (
           <>
-            <h2 className="gallery-title sold-title">Prodáno</h2>
+            <h2 className="gallery-title sold-title">{t.sold}</h2>
             <div className="gallery-grid">
               {soldProducts.map((product) => (
                 <div key={product._id} className="gallery-item sold">
@@ -201,7 +234,7 @@ const Gallery = () => {
                       />
                       {product.additionalImages.length > 0 && (
                         <img
-                          src={product.additionalImages[0]}
+                          src={product.additionalImages[2]}
                           alt="alt-preview"
                           className="hover-img"
                         />

@@ -3,17 +3,25 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import axios from "axios";
 import Notification from "./Notification";
+import { useLanguage } from "../context/LanguageContext";
+import { getCachedTranslation } from "../utils/translateText";
 import "../index.css";
 
 const RelatedProducts = ({ currentProductId }) => {
   const [products, setProducts] = useState([]);
+  const [texts, setTexts] = useState({
+    heading: "Mohlo by se Vám líbit",
+    addToCart: "Přidat do košíku",
+  });
+
   const { dispatch, cart } = useCart();
+  const { language: lang } = useLanguage();
+
   const containerRef = useRef(null);
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
-
   const isMobile = window.innerWidth <= 768;
 
   useEffect(() => {
@@ -50,6 +58,27 @@ const RelatedProducts = ({ currentProductId }) => {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [products]);
 
+  useEffect(() => {
+    if (lang === "cz") {
+      setTexts({
+        heading: "Mohlo by se Vám líbit",
+        addToCart: "Přidat do košíku",
+      });
+    } else {
+      (async () => {
+        try {
+          const [heading, addToCart] = await Promise.all([
+            getCachedTranslation("Mohlo by se Vám líbit", lang),
+            getCachedTranslation("Přidat do košíku", lang),
+          ]);
+          setTexts({ heading, addToCart });
+        } catch (err) {
+          console.error("❌ Chyba překladu RelatedProducts:", err);
+        }
+      })();
+    }
+  }, [lang]);
+
   const scroll = (direction) => {
     const container = containerRef.current;
     const cardWidth = container.firstChild?.offsetWidth || 300;
@@ -79,7 +108,7 @@ const RelatedProducts = ({ currentProductId }) => {
 
   return (
     <section className="related-products-section">
-      <h3>Mohlo by se Vám líbit</h3>
+      <h3>{texts.heading}</h3>
 
       {notification && (
         <Notification {...notification} onClose={() => setNotification(null)} />
@@ -104,7 +133,7 @@ const RelatedProducts = ({ currentProductId }) => {
               <h4>{product.name}</h4>
               <p>{product.price.toLocaleString("cs-CZ")} Kč</p>
               <button onClick={() => handleAddToCart(product)}>
-                Přidat do košíku
+                {texts.addToCart}
               </button>
             </div>
           ))}

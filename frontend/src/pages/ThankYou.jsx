@@ -6,16 +6,57 @@ import GalleryCTA from "../components/GalleryCTA";
 import InstagramSection from "../components/InstagramSection";
 import ContactSection from "../components/ContactSection";
 import TrustSection from "../components/TrustSection";
+import { getCachedTranslation } from "../utils/translateText";
+import { useLanguage } from "../context/LanguageContext";
 
 const ThankYou = () => {
   const location = useLocation();
+  const { language } = useLanguage();
   const [status, setStatus] = useState(null);
+  const [t, setT] = useState({});
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const status = params.get("status");
-    setStatus(status);
+    setStatus(params.get("status"));
   }, [location.search]);
+
+  useEffect(() => {
+    const fetchTranslations = async () => {
+      const original = {
+        sub: "Jsem nadšená, že jste si vybral/a mé umění! 🎨",
+        text1:
+          "Vaše vybrané dílo právě připravuji s maximální péčí a láskou. Každý tah štětce tvořím s důrazem na detail.",
+        text2:
+          "Už se nemůžu dočkat, až Vám přinese radost do Vašeho prostoru! ✨",
+        note: "Brzy Vám dorazí potvrzení objednávky a informace o doručení. 📬",
+        signature: "S věděčností a nadšením,",
+        failTitle: "Platba selhala",
+        failSub: "Bohužel se něco pokazilo při zpracování platby. 😔",
+        failText:
+          "Vaše objednávka nebyla dokončena. Zkuste to prosím znovu nebo nás kontaktujte.",
+        back: "Zpět na úvodní stránku"
+      };
+
+      if (language === "cz") {
+        setT(original);
+        return;
+      }
+
+      const keys = Object.keys(original);
+      const translations = await Promise.all(
+        keys.map((key) => getCachedTranslation(original[key], language))
+      );
+
+      const translated = keys.reduce((acc, key, i) => {
+        acc[key] = translations[i];
+        return acc;
+      }, {});
+
+      setT(translated);
+    };
+
+    fetchTranslations();
+  }, [language]);
 
   const isSuccess = status === "ok";
 
@@ -49,7 +90,7 @@ const ThankYou = () => {
           )}
 
           <div className="thankyou-title">
-            <h1>{isSuccess ? "Děkuji Vám!" : "Platba selhala"}</h1>
+            <h1>{isSuccess ? "Děkuji Vám!" : t.failTitle}</h1>
             {isSuccess && (
               <>
                 <PartyPopper className="icon-popper-right" />
@@ -60,48 +101,36 @@ const ThankYou = () => {
 
           {isSuccess ? (
             <>
-              <p className="thankyou-sub">
-                Jsem nadšená, že jste si vybral/a mé umění! 🎨
-              </p>
+              <p className="thankyou-sub">{t.sub}</p>
               <div className="divider"></div>
-              <p className="thankyou-text">
-                Vaše vybrané dílo právě připravuji s maximální péčí a láskou.
-                Každý tah štětce tvořím s důrazem na detail.
-              </p>
-              <p className="thankyou-text">
-                Už se nemůžu dočkat, až Vám přinese radost do Vašeho prostoru! ✨
-              </p>
+              <p className="thankyou-text">{t.text1}</p>
+              <p className="thankyou-text">{t.text2}</p>
               <div className="thankyou-actions">
                 <button
                   onClick={() => (window.location.href = "/")}
                   className="thankyou-btn"
                 >
-                  Zpět na úvodní stránku
+                  {t.back}
                 </button>
-                <p className="thankyou-note">
-                  Brzy Vám dorazí potvrzení objednávky a informace o doručení. 💌
-                </p>
+                <p className="thankyou-note">{t.note}</p>
                 <p className="thankyou-signature">
-                  S vděčností a nadšením,<br />Veronika Hambergerová
+                  {t.signature}
+                  <br />
+                  Veronika Hambergerová
                 </p>
               </div>
             </>
           ) : (
             <>
-              <p className="thankyou-sub">
-                Bohužel se něco pokazilo při zpracování platby. 😔
-              </p>
+              <p className="thankyou-sub">{t.failSub}</p>
               <div className="divider"></div>
-              <p className="thankyou-text">
-                Vaše objednávka nebyla dokončena. Zkuste to prosím znovu nebo
-                nás kontaktujte.
-              </p>
+              <p className="thankyou-text">{t.failText}</p>
               <div className="thankyou-actions">
                 <button
                   onClick={() => (window.location.href = "/")}
                   className="thankyou-btn"
                 >
-                  Zpět na úvodní stránku
+                  {t.back}
                 </button>
               </div>
             </>

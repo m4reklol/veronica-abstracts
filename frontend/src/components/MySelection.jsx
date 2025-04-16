@@ -2,9 +2,28 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../index.css";
+import { getCachedTranslation } from "../utils/translateText";
+import { useLanguage } from "../context/LanguageContext";
 
 const MySelection = () => {
   const [newestProducts, setNewestProducts] = useState([]);
+  const { language } = useLanguage();
+  const [t, setT] = useState({ title: "", explore: "" });
+
+  const fallbackTranslations = {
+    title: {
+      en: "My personal selection for you",
+      es: "Mi selección personal para ti",
+      de: "Meine persönliche Auswahl für Sie",
+      it: "La mia selezione personale per te",
+    },
+    explore: {
+      en: "Explore detail",
+      es: "Explorar detalle",
+      de: "Details ansehen",
+      it: "Esplora il dettaglio",
+    },
+  };
 
   useEffect(() => {
     const fetchNewestProducts = async () => {
@@ -27,10 +46,50 @@ const MySelection = () => {
     fetchNewestProducts();
   }, []);
 
+  useEffect(() => {
+    const loadTranslations = async () => {
+      const original = {
+        title: "Můj osobní výběr pro Vás",
+        explore: "Prozkoumat detail",
+      };
+
+      if (language === "cz") {
+        setT(original);
+        return;
+      }
+
+      try {
+        const [title, explore] = await Promise.all([
+          getCachedTranslation(original.title, language),
+          getCachedTranslation(original.explore, language),
+        ]);
+
+        setT({
+          title:
+            !title || title.trim().toLowerCase() === original.title.toLowerCase()
+              ? fallbackTranslations.title[language] || original.title
+              : title,
+          explore:
+            !explore || explore.trim().toLowerCase() === original.explore.toLowerCase()
+              ? fallbackTranslations.explore[language] || original.explore
+              : explore,
+        });
+      } catch (error) {
+        console.warn("Translation fallback used due to error:", error);
+        setT({
+          title: fallbackTranslations.title[language] || original.title,
+          explore: fallbackTranslations.explore[language] || original.explore,
+        });
+      }
+    };
+
+    loadTranslations();
+  }, [language]);
+
   return (
     <section className="selection-section" data-aos="fade-up">
       <h2 className="selection-title" data-aos="fade-up" data-aos-delay="100">
-        Můj osobní výběr pro Vás
+        {t.title}
       </h2>
       <div className="selection-container">
         {newestProducts.map((product, index) => (
@@ -46,7 +105,7 @@ const MySelection = () => {
               className="selection-image"
             />
             <Link to={`/product/${product._id}`} className="selection-overlay">
-              <span>Prozkoumat detail</span>
+              <span>{t.explore}</span>
             </Link>
           </div>
         ))}

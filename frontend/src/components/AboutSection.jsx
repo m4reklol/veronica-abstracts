@@ -1,36 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../index.css";
+import { getCachedTranslation } from "../utils/translateText";
+import { useLanguage } from "../context/LanguageContext";
 
 const AboutSection = () => {
+  const { language } = useLanguage();
+  const [t, setT] = useState({});
+
+  const VERONIKA = "Veronika Hambergerová";
+  const BRAND = "Veronica Abstracts";
+
+  const replacePlaceholders = (text) =>
+    text.replace(/{{VERONIKA}}/g, VERONIKA).replace(/{{BRAND}}/g, BRAND);
+
+  useEffect(() => {
+    const original = {
+      title: "O mně",
+      p1: `Jmenuji se {{VERONIKA}}, ale ve světě umění tvořím pod jménem {{BRAND}}.
+        Pocházím z Českých Budějovic a celý život mě provází kreativita, touha tvořit a hledání vnitřního klidu.
+        Po letech práce v korporátu jsem se rozhodla vydat cestou svobody – a díky podpoře svého bratra jsem se stala OSVČ.`,
+      p2: `Zásadním momentem v mém životě bylo narození mé dcery Lucie, která je pro mě největším darem a připomínkou toho,
+        co je skutečně důležité – láska, čas a vzájemná podpora. Právě s ní vznikl i můj první obraz – spontánně, doma, jen s plátnem a barvami.
+        Netušila jsem, že tím začne nová kapitola mého života.`,
+      p3: `Malování mi pomohlo projít i těžkými chvílemi, jako byla ztráta mého tatínka. Plátno se stalo místem, kde mohu
+        svobodně vyjádřit emoce, které se slovy vyjádřit nedají. Barvy mi přinášejí klid, svobodu a radost.`,
+      p4: `Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
+        intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.`,
+    };
+
+    const keys = Object.keys(original);
+
+    if (language === "cz") {
+      const withNames = keys.reduce((acc, key) => {
+        acc[key] = replacePlaceholders(original[key]);
+        return acc;
+      }, {});
+      setT(withNames);
+      return;
+    }
+
+    Promise.all(
+      keys.map((key) => getCachedTranslation(original[key], language))
+    ).then((translatedValues) => {
+      const translated = keys.reduce((acc, key, i) => {
+        acc[key] = replacePlaceholders(translatedValues[i]);
+        return acc;
+      }, {});
+      setT(translated);
+    });
+  }, [language]);
+
   return (
     <section id="about-section" className="about-section" data-aos="fade-up">
       <div className="about-container">
         <div className="about-text" data-aos="fade-right" data-aos-delay="100">
-          <h2 className="about-title">O mně</h2>
-
-          <p>
-            Jmenuji se Veronika Hambergerová, ale ve světě umění tvořím pod jménem Veronica Abstracts.
-            Pocházím z Českých Budějovic a celý život mě provází kreativita, touha tvořit a hledání vnitřního klidu.
-            Po letech práce v korporátu jsem se rozhodla vydat cestou svobody – a díky podpoře svého bratra jsem se stala OSVČ.
-          </p>
-
-          <p>
-            Zásadním momentem v mém životě bylo narození mé dcery Lucie, která je pro mě největším darem a připomínkou toho,
-            co je skutečně důležité – láska, čas a vzájemná podpora. Právě s ní vznikl i můj první obraz – spontánně, doma, jen s plátnem a barvami.
-            Netušila jsem, že tím začne nová kapitola mého života.
-          </p>
-
-          <p>
-            Malování mi pomohlo projít i těžkými chvílemi, jako byla ztráta mého tatínka. Plátno se stalo místem, kde mohu
-            svobodně vyjádřit emoce, které se slovy vyjádřit nedají. Barvy mi přinášejí klid, svobodu a radost.
-          </p>
-
-          <p>
-            Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
-            intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.
-          </p>
+          <h2 className="about-title">{t.title}</h2>
+          <p>{t.p1}</p>
+          <p>{t.p2}</p>
+          <p>{t.p3}</p>
+          <p>{t.p4}</p>
         </div>
-
         <div className="about-image" data-aos="fade-left" data-aos-delay="200">
           <img src="/images/avatar.jpeg" alt="Veronika Hambergerová" />
         </div>

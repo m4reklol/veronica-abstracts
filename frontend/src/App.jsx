@@ -19,6 +19,7 @@ import "aos/dist/aos.css";
 import { useEffect } from "react";
 import Checkout from "./pages/Checkout";
 import ThankYou from "./pages/ThankYou";
+import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
   useEffect(() => {
@@ -33,27 +34,29 @@ function App() {
 
   return (
     <CartProvider>
-      <HelmetProvider>
-        <Router>
-          <ScrollToTop />
-            <Header />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/gallery" element={<Gallery />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/process" element={<Process />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/admin" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/create" element={<CreateProduct />} />
-                <Route path="/admin/edit/:id" element={<EditProduct />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/thankyou" element={<ThankYou />} />
-              </Routes>
-            <Footer />
-        </Router>
-      </HelmetProvider>
+      <LanguageProvider>
+        <HelmetProvider>
+          <Router>
+            <ScrollToTop />
+              <Header />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/process" element={<Process />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/admin" element={<AdminLogin />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/create" element={<CreateProduct />} />
+                  <Route path="/admin/edit/:id" element={<EditProduct />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/thankyou" element={<ThankYou />} />
+                </Routes>
+              <Footer />
+          </Router>
+        </HelmetProvider>
+      </LanguageProvider>
     </CartProvider>
   );
 }

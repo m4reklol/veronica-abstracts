@@ -9,6 +9,7 @@ import productRoutes from "./routes/products.js";
 import adminRoutes from "./routes/admin.js";
 import contactRoute from "./routes/contact.js";
 import gpwebpayRoutes from "./routes/gpwebpay.js";
+import translateRoute from "./routes/translate.js";
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/contact", contactRoute);
 app.use("/api/gpwebpay", gpwebpayRoutes);
+app.use("/api/translate", translateRoute);
 
 // ✅ Serve frontend build (React)
 const publicDir = path.join(__dirname, "..", "public");

@@ -1,17 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import "../index.css";
+
+const languages = [
+  { code: "cz", label: "Čeština", flag: "/flags/cz.png" },
+  { code: "en", label: "English", flag: "/flags/gb.png" },
+  { code: "de", label: "Deutsch", flag: "/flags/de.png" },
+  { code: "it", label: "Italiano", flag: "/flags/it.png" },
+  { code: "es", label: "Español", flag: "/flags/es.png" },
+];
 
 const LanguageDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const timeoutRef = useRef(null);
+  const { language, setLanguage } = useLanguage();
 
-  const toggleDropdown = () => {
-    setIsOpen((prev) => !prev);
-  };
+  const toggleDropdown = () => setIsOpen((prev) => !prev);
 
-  const handleLangSelect = (code) => {
-    console.log("Zvolen jazyk:", code);
+  const handleSelect = (code) => {
+    setLanguage(code);
     setIsOpen(false);
   };
 
@@ -30,6 +38,9 @@ const LanguageDropdown = () => {
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
+  const mainLang = languages.find((l) => l.code === language);
+  const otherLangs = languages.filter((l) => l.code !== language);
+
   return (
     <div
       className="language-dropdown"
@@ -42,22 +53,19 @@ const LanguageDropdown = () => {
         className="lang-btn"
         aria-label="Změna jazyka"
       >
-        <img src="/flags/cz.png" alt="Čeština" />
+        <img src={mainLang.flag} alt={mainLang.label} />
       </button>
 
       <div className={`lang-menu ${isOpen ? "visible" : ""}`}>
-        <button onClick={() => handleLangSelect("en")}>
-          <img src="/flags/gb.png" alt="English" />
-        </button>
-        <button onClick={() => handleLangSelect("de")}>
-          <img src="/flags/de.png" alt="Deutsch" />
-        </button>
-        <button onClick={() => handleLangSelect("it")}>
-          <img src="/flags/it.png" alt="Italiano" />
-        </button>
-        <button onClick={() => handleLangSelect("es")}>
-          <img src="/flags/es.png" alt="Español" />
-        </button>
+        {otherLangs.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => handleSelect(lang.code)}
+            aria-label={lang.label}
+          >
+            <img src={lang.flag} alt={lang.label} />
+          </button>
+        ))}
       </div>
     </div>
   );

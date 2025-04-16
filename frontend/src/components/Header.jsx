@@ -3,14 +3,21 @@ import { Link } from "react-router-dom";
 import "../index.css";
 import { useCart } from "../context/CartContext.jsx";
 import LanguageDropdown from "./LanguageDropdown.jsx";
+import { useLanguage } from "../context/LanguageContext";
+import { getCachedTranslation } from "../utils/translateText";
 
 const Header = () => {
   const { cart } = useCart();
+  const { language } = useLanguage();
+  const [t, setT] = useState({});
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const timeoutRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  const normalizeImagePath = (path) => path || "/images/placeholder.jpg";
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -41,9 +48,34 @@ const Header = () => {
     }, 100);
   };
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  useEffect(() => {
+    const original = {
+      home: "Domů",
+      gallery: "Galerie",
+      process: "Proces",
+      contact: "Kontakt",
+      faq: language === "cz" ? "Nejčastější dotazy" : "FAQ",
+      shipping: "Doprava & Platba",
+      terms: "Obchodní podmínky",
+      total: "Celkem"
+    };
 
-  const normalizeImagePath = (path) => path || "/images/placeholder.jpg";
+    if (language === "cz") {
+      setT(original);
+      return;
+    }
+
+    const keys = Object.keys(original);
+    Promise.all(
+      keys.map((key) => getCachedTranslation(original[key], language))
+    ).then((translatedValues) => {
+      const translated = keys.reduce((acc, key, index) => {
+        acc[key] = translatedValues[index];
+        return acc;
+      }, {});
+      setT(translated);
+    });
+  }, [language]);
 
   return (
     <header className="header">
@@ -58,10 +90,10 @@ const Header = () => {
         <div className="header-right desktop-only">
           <nav className="nav-bar">
             <ul className="nav-list">
-              <li><Link to="/" className="nav-link">Domů</Link></li>
-              <li><Link to="/gallery" className="nav-link">Galerie</Link></li>
-              <li><Link to="/process" className="nav-link">Proces</Link></li>
-              <li><Link to="/contact" className="nav-link">Kontakt</Link></li>
+              <li><Link to="/" className="nav-link">{t.home}</Link></li>
+              <li><Link to="/gallery" className="nav-link">{t.gallery}</Link></li>
+              <li><Link to="/process" className="nav-link">{t.process}</Link></li>
+              <li><Link to="/contact" className="nav-link">{t.contact}</Link></li>
             </ul>
           </nav>
 
@@ -99,7 +131,7 @@ const Header = () => {
                   ))}
                 </ul>
                 <div className="cart-dropdown-total">
-                  <span>Celkem:</span>
+                  <span>{t.total}:</span>
                   <span>{totalPrice.toLocaleString("cs-CZ")} Kč</span>
                 </div>
               </div>
@@ -131,20 +163,13 @@ const Header = () => {
           className={`mobile-menu ${isMobileMenuOpen ? "open" : ""}`}
           ref={mobileMenuRef}
         >
-          <div
-            className="mobile-menu-close"
-            onClick={() => setMobileMenuOpen(false)}
-          >
+          <div className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)}>
             <i className="ri-close-line"></i>
           </div>
 
           <div className="mobile-menu-header">
             <LanguageDropdown />
-            <Link
-              to="/cart"
-              className="shopping-cart"
-              onClick={() => setMobileMenuOpen(false)}
-            >
+            <Link to="/cart" className="shopping-cart" onClick={() => setMobileMenuOpen(false)}>
               <i className="ri-shopping-cart-line"></i>
               {cart.length > 0 && (
                 <span className="cart-count">{cart.length}</span>
@@ -175,28 +200,28 @@ const Header = () => {
             ))}
             {cart.length > 0 && (
               <div className="mobile-cart-total">
-                <span>Celkem:</span>
+                <span>{t.total}:</span>
                 <span>{totalPrice.toLocaleString("cs-CZ")} Kč</span>
               </div>
             )}
           </div>
 
           <nav className="mobile-nav">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)}>Domů</Link>
-            <Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>Galerie</Link>
-            <Link to="/process" onClick={() => setMobileMenuOpen(false)}>Proces</Link>
-            <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Kontakt</Link>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)}>{t.home}</Link>
+            <Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>{t.gallery}</Link>
+            <Link to="/process" onClick={() => setMobileMenuOpen(false)}>{t.process}</Link>
+            <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>{t.contact}</Link>
           </nav>
 
           <div className="mobile-extra-links">
             <Link to="/contact#faq" onClick={() => setMobileMenuOpen(false)}>
-              <i className="ri-question-line"></i> Nejčastější dotazy
+              <i className="ri-question-line"></i> {t.faq}
             </Link>
             <Link to="/contact#payment-shipping" onClick={() => setMobileMenuOpen(false)}>
-              <i className="ri-truck-line"></i> Doprava & Platba
+              <i className="ri-truck-line"></i> {t.shipping}
             </Link>
             <Link to="/obchodni-podminky.pdf" target="_blank" rel="noopener noreferrer">
-              <i className="ri-article-line"></i> Obchodní podmínky
+              <i className="ri-article-line"></i> {t.terms}
             </Link>
           </div>
         </div>

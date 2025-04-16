@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../context/CartContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
+import { getCachedTranslation } from "../utils/translateText";
 import "../index.css";
 import TrustSection from "../components/TrustSection.jsx";
 import Notification from "../components/Notification.jsx";
@@ -9,9 +11,13 @@ import GalleryCTA from "../components/GalleryCTA.jsx";
 import RelatedProducts from "../components/RelatedProducts.jsx";
 import { Helmet } from "react-helmet-async";
 
+const BRAND_NAME = "Veronica Abstracts";
+
 const ProductDetail = () => {
   const { id } = useParams();
+  const { language: lang } = useLanguage();
   const [product, setProduct] = useState(null);
+  const [translated, setTranslated] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [showSlider, setShowSlider] = useState(false);
   const [sliderIndex, setSliderIndex] = useState(0);
@@ -19,11 +25,10 @@ const ProductDetail = () => {
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
 
-  const sliderTouchStartX = useRef(0);
-  const sliderTranslateX = useRef(0);
   const imageWrapperRef = useRef(null);
   const imageRef = useRef(null);
-
+  const sliderTouchStartX = useRef(0);
+  const sliderTranslateX = useRef(0);
   const isZooming = useRef(false);
   const startDistance = useRef(0);
   const currentScale = useRef(1);
@@ -36,15 +41,36 @@ const ProductDetail = () => {
         const { data } = await axios.get(`/api/products/${id}`);
         setProduct(data);
         setMainImage(data.image);
+
+        if (lang === "cz") {
+          setTranslated({
+            name: data.name,
+            description: data.description,
+            dimensions: data.dimensions,
+            backToGallery: "Zpět do galerie",
+            addToCart: "PŘIDAT DO KOŠÍKU",
+            sold: "Prodáno",
+          });
+        } else {
+          const [name, description, dimensions, backToGallery, addToCart, sold] = await Promise.all([
+            getCachedTranslation(data.name, lang),
+            getCachedTranslation(data.description, lang),
+            getCachedTranslation(data.dimensions, lang),
+            getCachedTranslation("Zpět do galerie", lang),
+            getCachedTranslation("PŘIDAT DO KOŠÍKU", lang),
+            getCachedTranslation("Prodáno", lang),
+          ]);
+          setTranslated({ name, description, dimensions, backToGallery, addToCart, sold });
+        }
       } catch (error) {
         console.error("Error fetching product details:", error);
       }
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, lang]);
 
-  if (!product) return <p>Načítání...</p>;
+  if (!product || !translated) return <p>Načítání...</p>;
 
   const allImages = [product.image, ...(product.additionalImages || [])];
 
@@ -162,34 +188,32 @@ const ProductDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{`${product.name} | Veronica Abstracts`}</title>
-        <meta name="description" content={`Obraz "${product.name}" od Veroniky – originál k zakoupení.`} />
+        <title>{`${translated.name} | ${BRAND_NAME}`}</title>
+        <meta name="description" content={`Obraz "${translated.name}" od Veroniky – originál k zakoupení.`} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`https://veronicaabstracts.com/product/${product._id}`} />
-        <meta property="og:title" content={`${product.name} | Veronica Abstracts`} />
+        <meta property="og:title" content={`${translated.name} | ${BRAND_NAME}`} />
         <meta property="og:description" content="Originální abstraktní obraz od Veroniky." />
         <meta property="og:image" content={product.image} />
         <meta property="og:url" content={`https://veronicaabstracts.com/product/${product._id}`} />
         <meta property="og:type" content="product" />
-        <meta name="twitter:title" content={`${product.name} | Veronica Abstracts`} />
+        <meta name="twitter:title" content={`${translated.name} | ${BRAND_NAME}`} />
         <meta name="twitter:description" content="Originální abstraktní obraz od Veroniky." />
         <meta name="twitter:image" content={product.image} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       <div className="product-detail-container">
-        {notification && (
-          <Notification {...notification} onClose={() => setNotification(null)} />
-        )}
+        {notification && <Notification {...notification} onClose={() => setNotification(null)} />}
 
         <div className="product-gallery">
           <div className="main-image-container">
             <Link to="/gallery" className="back-to-gallery-link">
-              <i className="ri-arrow-left-s-line"></i> Zpět do galerie
+              <i className="ri-arrow-left-s-line"></i> {translated.backToGallery}
             </Link>
             <img
               src={mainImage}
-              alt={product.name}
+              alt={translated.name}
               className="product-main-image"
               onClick={() => openSlider(allImages.indexOf(mainImage))}
             />
@@ -199,7 +223,7 @@ const ProductDetail = () => {
               <img
                 key={index}
                 src={img}
-                alt={`${product.name} ${index + 1}`}
+                alt={`${translated.name} ${index + 1}`}
                 className="thumbnail"
                 onClick={() => setMainImage(img)}
               />
@@ -208,9 +232,9 @@ const ProductDetail = () => {
         </div>
 
         <div className="product-info">
-          <h2>{product.name}</h2>
-          <p className="product-description">{product.description}</p>
-          <p className="product-dimensions">{product.dimensions}</p>
+          <h2>{translated.name}</h2>
+          <p className="product-description">{translated.description}</p>
+          <p className="product-dimensions">{translated.dimensions}</p>
 
           {!product.sold ? (
             <>
@@ -221,11 +245,11 @@ const ProductDetail = () => {
                 }).format(product.price)} Kč
               </p>
               <button className="add-to-cart-button" onClick={handleAddToCart}>
-                <i className="ri-shopping-cart-line"></i> PŘIDAT DO KOŠÍKU
+                <i className="ri-shopping-cart-line"></i> {translated.addToCart}
               </button>
             </>
           ) : (
-            <p className="sold-label">Prodáno</p>
+            <p className="sold-label">{translated.sold}</p>
           )}
         </div>
 
@@ -240,39 +264,17 @@ const ProductDetail = () => {
             <button className="close-slider" onClick={() => setShowSlider(false)}>
               <i className="ri-close-line"></i>
             </button>
-            <button
-              className="prev-slide"
-              onClick={(e) => {
-                e.stopPropagation();
-                prevImage();
-              }}
-            >
+            <button className="prev-slide" onClick={(e) => { e.stopPropagation(); prevImage(); }}>
               <i className="ri-arrow-left-s-line"></i>
             </button>
             <div
               ref={imageWrapperRef}
               className="slider-image-wrapper"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                willChange: "transform",
-              }}
+              style={{ display: "flex", justifyContent: "center", alignItems: "center", willChange: "transform" }}
             >
-              <img
-                ref={imageRef}
-                src={allImages[sliderIndex]}
-                alt="Fullscreen"
-                className="slider-image"
-              />
+              <img ref={imageRef} src={allImages[sliderIndex]} alt="Fullscreen" className="slider-image" />
             </div>
-            <button
-              className="next-slide"
-              onClick={(e) => {
-                e.stopPropagation();
-                nextImage();
-              }}
-            >
+            <button className="next-slide" onClick={(e) => { e.stopPropagation(); nextImage(); }}>
               <i className="ri-arrow-right-s-line"></i>
             </button>
           </div>

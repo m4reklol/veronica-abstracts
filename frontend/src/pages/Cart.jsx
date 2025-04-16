@@ -6,13 +6,17 @@ import "../index.css";
 import TrustSection from "../components/TrustSection.jsx";
 import ContactSection from "../components/ContactSection.jsx";
 import GalleryCTA from "../components/GalleryCTA.jsx";
-import { Helmet } from "react-helmet-async";
 import InstagramSection from "../components/InstagramSection.jsx";
+import { Helmet } from "react-helmet-async";
+import { getCachedTranslation } from "../utils/translateText.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 const Cart = () => {
   const { cart, dispatch } = useCart();
+  const { language } = useLanguage();
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
+  const [t, setT] = useState({});
 
   const showNotification = (message, type) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -27,7 +31,7 @@ const Cart = () => {
 
   const handleRemove = (id, name) => {
     dispatch({ type: "REMOVE_FROM_CART", payload: id });
-    showNotification(`"${name}" byl odstraněn z košíku.`, "error");
+    showNotification(`"${name}" ${t.removed}`, "error");
   };
 
   const normalizeImagePath = (path) =>
@@ -36,17 +40,49 @@ const Cart = () => {
   const totalItems = cart.length;
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
+  useEffect(() => {
+    const original = {
+      title: "Můj košík",
+      empty1: "Váš košík je prázdný",
+      empty2: "Prozkoumejte moji galerii",
+      empty3: "a najděte svůj ideální obraz!",
+      summary: "Souhrn objednávky",
+      items: "Počet položek:",
+      subtotal: "Mezisoučet:",
+      checkout: "Pokračovat v objednávce",
+      or: "nebo",
+      continue: "Pokračovat v nakupování",
+      removed: "byl odstraněn z košíku."
+    };
+
+    if (language === "cz") {
+      setT(original);
+      return;
+    }
+
+    const keys = Object.keys(original);
+    Promise.all(keys.map((k) => getCachedTranslation(original[k], language))).then(
+      (translated) => {
+        const result = keys.reduce((acc, key, i) => {
+          acc[key] = translated[i];
+          return acc;
+        }, {});
+        setT(result);
+      }
+    );
+  }, [language]);
+
   return (
     <>
       <Helmet>
-        <title>Košík | Veronica Abstracts</title>
+        <title>{`${t.title || "Košík"} | Veronica Abstracts`}</title>
         <meta
           name="description"
           content="Zkontrolujte obsah vašeho košíku před odesláním objednávky."
         />
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://veronicaabstracts.com/cart" />
-        <meta property="og:title" content="Košík | Veronica Abstracts" />
+        <meta property="og:title" content={`${t.title || "Košík"} | Veronica Abstracts`} />
         <meta property="og:description" content="Vaše položky k objednání." />
         <meta
           property="og:image"
@@ -54,7 +90,7 @@ const Cart = () => {
         />
         <meta property="og:url" content="https://veronicaabstracts.com/cart" />
         <meta property="og:type" content="website" />
-        <meta name="twitter:title" content="Košík | Veronica Abstracts" />
+        <meta name="twitter:title" content={`${t.title || "Košík"} | Veronica Abstracts`} />
         <meta
           name="twitter:description"
           content="Zkontrolujte si svůj nákupní košík."
@@ -75,18 +111,18 @@ const Cart = () => {
         )}
 
         <h2 className="cart-title">
-          <i className="ri-shopping-bag-4-line"></i> Můj košík
+          <i className="ri-shopping-bag-4-line"></i> {t.title}
         </h2>
 
         {cart.length === 0 ? (
           <>
-            <p className="empty-cart">Váš košík je prázdný</p>
+            <p className="empty-cart">{t.empty1}</p>
             <p>
               <Link to="/gallery" className="empty-cart-link">
-                Prozkoumejte moji galerii
+                {t.empty2}
               </Link>
             </p>
-            <p className="empty-cart">a najděte svůj ideální obraz!</p>
+            <p className="empty-cart">{t.empty3}</p>
           </>
         ) : (
           <>
@@ -127,26 +163,25 @@ const Cart = () => {
 
             <div className="order-summary-container">
               <div className="order-summary">
-                <h3>Souhrn objednávky</h3>
+                <h3>{t.summary}</h3>
                 <div className="order-details">
-                  <p className="order-label">Počet položek:</p>
+                  <p className="order-label">{t.items}</p>
                   <p className="order-value">{totalItems}</p>
                 </div>
                 <div className="order-details">
-                  <p className="order-label">Mezisoučet:</p>
+                  <p className="order-label">{t.subtotal}</p>
                   <p className="order-value">
                     {totalPrice.toLocaleString("cs-CZ")} Kč
                   </p>
                 </div>
                 <Link to="/checkout">
                   <button className="checkout-btn">
-                    Pokračovat v objednávce{" "}
-                    <i className="ri-arrow-right-s-fill"></i>
+                    {t.checkout} <i className="ri-arrow-right-s-fill"></i>
                   </button>
                 </Link>
-                <p className="or-text">nebo</p>
+                <p className="or-text">{t.or}</p>
                 <Link to="/gallery" className="continue-shopping">
-                  Pokračovat v nakupování
+                  {t.continue}
                 </Link>
               </div>
             </div>
