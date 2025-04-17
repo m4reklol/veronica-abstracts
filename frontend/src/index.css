@@ -1068,7 +1068,6 @@ a {
     display: block;
   }
   
-  /* mobilní úpravy */
   @media (max-width: 768px) {
     .footer-payment-icons-line {
       margin: 1.5rem 0;
@@ -4150,6 +4149,14 @@ a {
       font-size: 1.1rem;
       text-align: center;
     }
+}
+
+.checkout-form-section {
+    padding: 4rem 1.5rem;
+    background-color: #ffffff;
+    color: #333333;
+    max-width: 1200px;
+    margin: 0 auto;
 }
   
 .checkout-form-section h2 {
