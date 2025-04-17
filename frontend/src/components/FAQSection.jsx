@@ -47,7 +47,8 @@ const FAQSection = () => {
   const [faqContent, setFaqContent] = useState(originalFaqs);
   const [t, setT] = useState({
     heading: "Často kladené otázky",
-    subtitle: "Objevte odpovědi na nejčastější dotazy o mé tvorbě a procesu vzniku uměleckých děl",
+    subtitle:
+      "Objevte odpovědi na nejčastější dotazy o mé tvorbě a procesu vzniku uměleckých děl",
     subsection: "Platba a doprava",
     shippingInfo:
       "Cena dopravy je vyšší kvůli rozměrům a váze obrazů – jedná se o křehké zboží, které vyžaduje speciální balení. Cena zahrnuje balné a pojištění. Pokud jste z okolí Českých Budějovic, je možné domluvit osobní odběr zdarma.",
@@ -55,9 +56,18 @@ const FAQSection = () => {
     shippingEu: "Země EU: 1000 Kč",
     shippingNote: "Mimo EU: prosím kontaktujte mě předem",
     paymentFull:
-      "Platba probíhá bezpečně přes <strong>Comgate</strong> – podporujeme moderní metody jako platby kartou i mobilem:",
+      'Platba probíhá bezpečně přes <strong><a href="https://www.comgate.cz/cz/platebni-brana" target="_blank" rel="noopener noreferrer">Comgate</a></strong> – podporujeme moderní metody jako platby kartou i mobilem:',
     methodsIntro: "Přijímáme tyto platební metody:",
     morePayments: "…a mnoho dalších",
+    paymentDocsIntro: "Více info o metodách:",
+    docLinkCard: "Platby kartou",
+    docLinkBank: "Bankovní tlačítka",
+    contactHeading: "Kontakty na Comgate, a.s.",
+    contactAddress: "Gočárova třída 1754/48b, 500 03 Hradec Králové",
+    contactEmailLabel: "E‑mail:",
+    contactEmail: "platby-podpora@comgate.cz",
+    contactPhoneLabel: "Tel:",
+    contactPhone: "+420 228 224 267",
     footer: "Nenašli jste odpověď na Váš dotaz? Přečtěte si",
     terms: "obchodní podmínky",
     or: "nebo",
@@ -74,7 +84,6 @@ const FAQSection = () => {
         setFaqContent(originalFaqs);
         return;
       }
-
       try {
         const translatedFaqs = await Promise.all(
           originalFaqs.map(async (faq) => {
@@ -87,24 +96,20 @@ const FAQSection = () => {
             };
           })
         );
-
         const keys = Object.keys(t);
         const translatedValues = await Promise.all(
           keys.map((key) => getCachedTranslation(t[key], lang))
         );
-
-        const translatedT = keys.reduce((acc, key, index) => {
-          acc[key] = translatedValues[index]?.trim() || t[key];
+        const translatedT = keys.reduce((acc, key, i) => {
+          acc[key] = translatedValues[i]?.trim() || t[key];
           return acc;
         }, {});
-
         setFaqContent(translatedFaqs);
         setT(translatedT);
       } catch (err) {
         console.warn("❌ FAQ translation failed:", err);
       }
     };
-
     translateFaqs();
   }, [lang]);
 
@@ -124,7 +129,11 @@ const FAQSection = () => {
             >
               <div className="faq-question">
                 <span>{item.question}</span>
-                <i className={`faq-arrow ri-arrow-down-s-line ${isActive ? "rotated" : ""}`} />
+                <i
+                  className={`faq-arrow ri-arrow-down-s-line ${
+                    isActive ? "rotated" : ""
+                  }`}
+                />
               </div>
               <div
                 className="faq-answer"
@@ -160,12 +169,51 @@ const FAQSection = () => {
           </div>
           <p className="more-payments">{t.morePayments}</p>
         </div>
+
+        <p className="payment-docs">
+          {t.paymentDocsIntro}{" "}
+          <a
+            href="https://help.comgate.cz/v1/docs/cs/platby-kartou"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.docLinkCard}
+          </a>
+          ,{" "}
+          <a
+            href="https://help.comgate.cz/docs/bankovni-prevody"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.docLinkBank}
+          </a>
+          .
+        </p>
+
+        <div className="payment-contact">
+          <h4>{t.contactHeading}</h4>
+          <address>
+            {t.contactAddress}
+            <br />
+            {t.contactEmailLabel}{" "}
+            <a href={`mailto:${t.contactEmail}`}>{t.contactEmail}</a>
+            <br />
+            {t.contactPhoneLabel}{" "}
+            <a href={`tel:${t.contactPhone.replace(/\s/g, "")}`}>
+              {t.contactPhone}
+            </a>
+          </address>
+        </div>
       </div>
 
       <div className="faq-footer-note">
         <p>
-          {t.footer} {" "}
-          <a href="/obchodni-podminky.pdf" target="_blank" rel="noopener noreferrer">
+          {t.footer}{" "}
+          <a
+            href="/obchodni-podminky.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {t.terms}
           </a>{" "}
           {t.or} <a href="/contact">{t.contact}</a>.

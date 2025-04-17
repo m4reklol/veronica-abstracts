@@ -1055,6 +1055,38 @@ a {
     }
 }
 
+.footer-payment-icons-line {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+  }
+  
+  .footer-payment-icons-line img {
+    max-width: 600px;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* mobilní úpravy */
+  @media (max-width: 768px) {
+    .footer-payment-icons-line {
+      margin: 1.5rem 0;
+    }
+    .footer-payment-icons-line img {
+      max-width: 350px;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    .footer-payment-icons-line {
+      margin: 1rem 0;
+    }
+    .footer-payment-icons-line img {
+      max-width: 250px;
+    }
+  }
+
 .gallery-container {
     text-align: center;
     padding: 40px;
@@ -3958,6 +3990,17 @@ a {
     line-height: 1.6;
     font-size: 1rem;
 }
+
+.faq-subsection strong a {
+    color: #333333;
+    font-weight: bold;
+    text-decoration: none;
+    transition: text-decoration 0.2s ease;
+}
+
+.faq-subsection strong a:hover {
+    text-decoration: underline;
+}
   
 .faq-subsection ul {
     list-style: disc;
@@ -4045,12 +4088,68 @@ a {
     }
 }
 
-.checkout-form-section {
-    padding: 4rem 1.5rem;
-    background-color: #ffffff;
+.payment-docs {
+    font-size: 1rem;
+    margin-top: 1.5rem;
     color: #333333;
-    max-width: 1200px;
-    margin: 0 auto;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.payment-docs a {
+    color: #333333;
+    text-decoration: underline;
+    transition: text-decoration 0.2s ease;
+    margin: 0 0.2rem;
+}
+
+.payment-docs a:hover {
+    text-decoration: none;
+}
+  
+.payment-contact {
+    margin-top: 2rem;
+    font-size: 1rem;
+    color: #333333;
+    text-align: left;
+}
+
+.payment-contact h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #222222;
+    font-family: "Nunito Sans", sans-serif;
+}
+
+.payment-contact address {
+    font-style: normal;
+    line-height: 1.6;
+}
+
+.payment-contact address a {
+    color: inherit;
+    text-decoration: underline;
+    transition: text-decoration 0.2s ease;
+}
+
+.payment-contact address a:hover {
+    text-decoration: none;
+}
+  
+@media (max-width: 768px) {
+    .payment-docs {
+      font-size: 0.95rem;
+      margin-top: 1rem;
+    }
+    .payment-contact {
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .payment-contact h4 {
+      font-size: 1.1rem;
+      text-align: center;
+    }
 }
   
 .checkout-form-section h2 {

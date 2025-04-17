@@ -41,7 +41,7 @@ const Footer = () => {
         setT(Object.fromEntries(translatedEntries));
       } catch (err) {
         console.warn("❌ Footer translation failed:", err);
-        setT(original); // fallback to Czech
+        setT(original);
       }
     };
 
@@ -77,7 +77,7 @@ const Footer = () => {
         <div className="footer-icon-wrapper center">
           <a href="tel:+420724848240" className="footer-icon">
             <i className="ri-phone-line"></i>
-            <span>+420 724 848 240</span>
+            <span>+420 724 848 240</span>
           </a>
         </div>
 
@@ -103,6 +103,14 @@ const Footer = () => {
         <div className="footer-link-item">
           <a href="/contact#payment-shipping">{t.shipping}</a>
         </div>
+      </div>
+
+      {/* --- ZDE VLOŽTE ŘÁDEK IKON --- */}
+      <div className="footer-payment-icons-line">
+        <img
+          src="/images/footericonsline.png"
+          alt="Platební metody: Comgate, Visa, Mastercard, Google Pay a Apple Pay"
+        />
       </div>
 
       <p className="footer-copyright">
