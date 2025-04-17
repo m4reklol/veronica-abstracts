@@ -105,11 +105,10 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* --- ZDE VLOŽTE ŘÁDEK IKON --- */}
       <div className="footer-payment-icons-line">
         <img
           src="/images/footericonsline.png"
-          alt="Platební metody: Comgate, Visa, Mastercard, Google Pay a Apple Pay"
+          alt="Platební metody: Comgate, Visa, Mastercard, Google Pay a Apple Pay"
         />
       </div>
 
