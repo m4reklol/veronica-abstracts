@@ -8,6 +8,7 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
+// 🌍 Převod názvu země na ISO kód
 const convertToCountryCode = (name) => {
   const map = {
     "Czech Republic": "CZ", "Slovakia": "SK", "Germany": "DE", "Austria": "AT",
@@ -20,9 +21,11 @@ const convertToCountryCode = (name) => {
   return map[name] || "CZ";
 };
 
+// ✅ Vytvoření platby
 router.post("/create-payment", async (req, res) => {
   try {
     const { order, cartItems, shippingCost } = req.body;
+
     if (!order || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Neplatná data objednávky." });
     }
@@ -30,11 +33,12 @@ router.post("/create-payment", async (req, res) => {
     const ORDERNUMBER = Date.now().toString();
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
+    const countryCode = convertToCountryCode(order.country || "CZ");
 
     console.log("🛒 Order:", ORDERNUMBER);
     console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
     console.log("💰 Cena celkem:", AMOUNT);
-    console.log("🌍 Použité country:", convertToCountryCode(order.country || "CZ"));
+    console.log("🌍 Použité country:", countryCode);
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
@@ -55,10 +59,10 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: "false",
+      prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
-      country: convertToCountryCode(order.country || "CZ"),
+      country: countryCode,
       returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
       cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
       pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
@@ -68,7 +72,7 @@ router.post("/create-payment", async (req, res) => {
     console.log("📤 Comgate payload:", decodeURIComponent(payload.toString()));
 
     const response = await axios.post(
-      `${process.env.COMGATE_API_URL}/create`,
+      `${process.env.COMGATE_API_URL}/v1.0/create`,
       payload.toString(),
       {
         headers: {
@@ -108,6 +112,7 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
+// ✅ Callback z Comgate
 router.post("/callback", async (req, res) => {
   try {
     const { transId, status, refId } = req.body;
