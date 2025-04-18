@@ -79,7 +79,6 @@ router.post("/create-payment", async (req, res) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Accept": "text/plain",
-          "User-Agent": "Mozilla/5.0 (Node.js test)",
         },
         responseType: "text",
         maxRedirects: 0,
