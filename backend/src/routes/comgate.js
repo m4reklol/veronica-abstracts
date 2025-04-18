@@ -54,7 +54,7 @@ router.post("/create-payment", async (req, res) => {
 
     const ORDERNUMBER = Date.now().toString();
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
-    const AMOUNT = Math.round(totalAmountCZK); // Comgate expects CZK, not haléře
+    const AMOUNT = Math.round(totalAmountCZK);
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
@@ -93,9 +93,11 @@ router.post("/create-payment", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "text/plain", // důležité
+          "Accept": "text/plain",
         },
-        responseType: "text", // důležité
+        responseType: "text",
+        maxRedirects: 0,
+        validateStatus: (status) => status < 400,
       }
     );
 
