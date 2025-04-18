@@ -53,7 +53,7 @@ router.post("/create-payment", async (req, res) => {
     console.log("📤 Comgate payload:", payload.toString());
 
     const response = await axios.post(
-      `${process.env.COMGATE_API_URL}/init`,
+      `${process.env.COMGATE_API_URL}/create`,
       payload.toString(),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
