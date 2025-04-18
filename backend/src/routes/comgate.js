@@ -8,6 +8,41 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
+// 🔁 Pomocná funkce pro převod názvu země na ISO kód (dvoupísmenný)
+const convertToCountryCode = (name) => {
+  const map = {
+    "Czech Republic": "CZ",
+    "Slovakia": "SK",
+    "Germany": "DE",
+    "Austria": "AT",
+    "France": "FR",
+    "Italy": "IT",
+    "Spain": "ES",
+    "Poland": "PL",
+    "Netherlands": "NL",
+    "Belgium": "BE",
+    "Ireland": "IE",
+    "Portugal": "PT",
+    "Greece": "GR",
+    "Hungary": "HU",
+    "Sweden": "SE",
+    "Finland": "FI",
+    "Denmark": "DK",
+    "Croatia": "HR",
+    "Romania": "RO",
+    "Bulgaria": "BG",
+    "Slovenia": "SI",
+    "Lithuania": "LT",
+    "Latvia": "LV",
+    "Estonia": "EE",
+    "Luxembourg": "LU",
+    "Cyprus": "CY",
+    "Malta": "MT",
+    "Outside EU": "", // případně validovat jinde
+  };
+  return map[name] || "CZ";
+};
+
 // ✅ CREATE PAYMENT — Comgate
 router.post("/create-payment", async (req, res) => {
   try {
@@ -40,10 +75,10 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka ${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: true,
+      prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
-      country: order.country || "CZ",
+      country: convertToCountryCode(order.country || "CZ"),
       returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok`,
       cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel`,
       pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending`,
