@@ -33,10 +33,12 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
 
+    const COUNTRY = convertToCountryCode(order.country || "CZ");
+
     console.log("🛒 Order:", ORDERNUMBER);
     console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
     console.log("💰 Cena celkem:", AMOUNT);
-    console.log("🌍 Použité country:", convertToCountryCode(order.country || "CZ"));
+    console.log("🌍 Použité country:", COUNTRY);
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
@@ -49,29 +51,28 @@ router.post("/create-payment", async (req, res) => {
 
     await newOrder.save();
 
-    const payload = new URLSearchParams({
-      merchant: process.env.COMGATE_MERCHANT,
-      secret: process.env.COMGATE_SECRET,
-      price: AMOUNT.toString(),
-      curr: "CZK",
-      label: `Objednavka ${ORDERNUMBER}`,
-      refId: ORDERNUMBER,
-      method: "ALL",
-      prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
-      email: order.email,
-      name: order.fullName,
-      country: convertToCountryCode(order.country || "CZ"),
-      returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
-      cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
-      pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
-      notifyUrl: process.env.COMGATE_NOTIFY_URL,
-    });
+    const payload =
+      `merchant=${process.env.COMGATE_MERCHANT}` +
+      `&secret=${process.env.COMGATE_SECRET}` +
+      `&price=${AMOUNT}` +
+      `&curr=CZK` +
+      `&label=Objednavka ${ORDERNUMBER}` +
+      `&refId=${ORDERNUMBER}` +
+      `&method=ALL` +
+      `&prepareOnly=${process.env.NODE_ENV !== "production" ? "true" : "false"}` +
+      `&email=${order.email}` +
+      `&name=${order.fullName}` +
+      `&country=${COUNTRY}` +
+      `&returnUrl=${process.env.FRONTEND_URL}/thankyou?status=ok&id=${ORDERNUMBER}&ref=${ORDERNUMBER}` +
+      `&cancelUrl=${process.env.FRONTEND_URL}/thankyou?status=cancel&id=${ORDERNUMBER}&ref=${ORDERNUMBER}` +
+      `&pendingUrl=${process.env.FRONTEND_URL}/thankyou?status=pending&id=${ORDERNUMBER}&ref=${ORDERNUMBER}` +
+      `&notifyUrl=${process.env.COMGATE_NOTIFY_URL}`;
 
-    console.log("📤 Comgate payload:", payload.toString());
+    console.log("📤 Comgate payload:\n", payload);
 
     const response = await axios.post(
       `${process.env.COMGATE_API_URL}/create`,
-      payload.toString(),
+      payload,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
