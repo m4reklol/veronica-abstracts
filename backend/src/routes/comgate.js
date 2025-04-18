@@ -59,7 +59,7 @@ router.post("/create-payment", async (req, res) => {
       curr: "CZK",
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
-      method: isForeign ? "BANK" : "BANK",
+      method: "BANK_CZ_OTHER",
       prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
