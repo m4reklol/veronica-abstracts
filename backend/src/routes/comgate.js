@@ -38,7 +38,7 @@ const convertToCountryCode = (name) => {
     "Luxembourg": "LU",
     "Cyprus": "CY",
     "Malta": "MT",
-    "Outside EU": "", // případně validovat jinde
+    "Outside EU": "",
   };
   return map[name] || "CZ";
 };
@@ -103,6 +103,10 @@ router.post("/create-payment", async (req, res) => {
 
     console.log("📨 Comgate response:", response.data);
 
+    if (!response.data || typeof response.data !== "string") {
+      throw new Error("Comgate nevrátil žádnou odpověď.");
+    }
+
     const data = Object.fromEntries(new URLSearchParams(response.data));
     console.log("📨 Parsed response:", data);
 
@@ -117,7 +121,7 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
-// ✅ CALLBACK — zpracování výsledku platby
+// ✅ CALLBACK
 router.post("/callback", async (req, res) => {
   try {
     const { transId, status, refId } = req.body;
