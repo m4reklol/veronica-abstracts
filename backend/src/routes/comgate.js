@@ -20,11 +20,9 @@ const convertToCountryCode = (name) => {
   return map[name] || "CZ";
 };
 
-// ✅ CREATE PAYMENT
 router.post("/create-payment", async (req, res) => {
   try {
     const { order, cartItems, shippingCost } = req.body;
-
     if (!order || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Neplatná data objednávky." });
     }
@@ -33,12 +31,10 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
 
-    const COUNTRY = convertToCountryCode(order.country || "CZ");
-
     console.log("🛒 Order:", ORDERNUMBER);
     console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
     console.log("💰 Cena celkem:", AMOUNT);
-    console.log("🌍 Použité country:", COUNTRY);
+    console.log("🌍 Použité country:", convertToCountryCode(order.country || "CZ"));
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
@@ -51,28 +47,29 @@ router.post("/create-payment", async (req, res) => {
 
     await newOrder.save();
 
-    const payload =
-      `merchant=${process.env.COMGATE_MERCHANT}` +
-      `&secret=${process.env.COMGATE_SECRET}` +
-      `&price=${AMOUNT}` +
-      `&curr=CZK` +
-      `&label=Objednavka ${ORDERNUMBER}` +
-      `&refId=${ORDERNUMBER}` +
-      `&method=ALL` +
-      `&prepareOnly=${process.env.NODE_ENV !== "production" ? "true" : "false"}` +
-      `&email=${order.email}` +
-      `&name=${order.fullName}` +
-      `&country=${COUNTRY}` +
-      `&returnUrl=${process.env.FRONTEND_URL}/thankyou?status=ok&id=${ORDERNUMBER}&ref=${ORDERNUMBER}` +
-      `&cancelUrl=${process.env.FRONTEND_URL}/thankyou?status=cancel&id=${ORDERNUMBER}&ref=${ORDERNUMBER}` +
-      `&pendingUrl=${process.env.FRONTEND_URL}/thankyou?status=pending&id=${ORDERNUMBER}&ref=${ORDERNUMBER}` +
-      `&notifyUrl=${process.env.COMGATE_NOTIFY_URL}`;
+    const payload = new URLSearchParams({
+      merchant: process.env.COMGATE_MERCHANT,
+      secret: process.env.COMGATE_SECRET,
+      price: AMOUNT.toString(),
+      curr: "CZK",
+      label: `Objednavka_${ORDERNUMBER}`,
+      refId: ORDERNUMBER,
+      method: "ALL",
+      prepareOnly: "false",
+      email: order.email,
+      name: order.fullName,
+      country: convertToCountryCode(order.country || "CZ"),
+      returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
+      cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
+      pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
+      notifyUrl: process.env.COMGATE_NOTIFY_URL,
+    });
 
-    console.log("📤 Comgate payload:\n", payload);
+    console.log("📤 Comgate payload:", decodeURIComponent(payload.toString()));
 
     const response = await axios.post(
       `${process.env.COMGATE_API_URL}/create`,
-      payload,
+      payload.toString(),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -106,16 +103,14 @@ router.post("/create-payment", async (req, res) => {
 
     return res.json({ url: data.redirect });
   } catch (err) {
-    console.error("❌ Chyba při vytváření Comgate platby:", err);
+    console.error("❌ Chyba při vytváření Comgate platby:", err.message || err);
     return res.status(500).json({ error: "Chyba při vytváření platby." });
   }
 });
 
-// ✅ CALLBACK
 router.post("/callback", async (req, res) => {
   try {
     const { transId, status, refId } = req.body;
-
     console.log("📩 Comgate callback:", req.body);
 
     if (!refId || !transId) return res.status(400).send("Missing refId or transId");
@@ -157,7 +152,7 @@ router.post("/callback", async (req, res) => {
 
     return res.send("OK");
   } catch (err) {
-    console.error("❌ Chyba v Comgate callbacku:", err);
+    console.error("❌ Chyba v Comgate callbacku:", err.message || err);
     return res.status(500).send("ERROR");
   }
 });
