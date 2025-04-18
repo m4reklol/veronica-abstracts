@@ -112,6 +112,51 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
+router.get("/test-comgate", async (req, res) => {
+  const payload = new URLSearchParams({
+    merchant: process.env.COMGATE_MERCHANT,
+    secret: process.env.COMGATE_SECRET,
+    price: "100",
+    curr: "CZK",
+    label: "Test",
+    refId: "test-123",
+    method: "ALL",
+    prepareOnly: "true",
+    email: "test@example.com",
+    name: "Tester",
+    country: "CZ",
+    returnUrl: "https://www.veronicaabstracts.com/thankyou",
+    cancelUrl: "https://www.veronicaabstracts.com/thankyou",
+    pendingUrl: "https://www.veronicaabstracts.com/thankyou",
+    notifyUrl: "https://www.veronicaabstracts.com/api/comgate/callback",
+  });
+
+  try {
+    const response = await axios.post(
+      "https://payments.comgate.cz/v1.0/create",
+      payload.toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "text/plain",
+          "User-Agent": "Mozilla/5.0 (Node.js test)",
+        },
+        responseType: "text",
+        maxRedirects: 0,
+        validateStatus: (status) => status < 400 || status === 302,
+      }
+    );
+
+    return res.send({
+      status: response.status,
+      headers: response.headers,
+      data: response.data,
+    });
+  } catch (err) {
+    return res.status(500).send(err.message || "Error");
+  }
+});
+
 // ✅ Callback z Comgate
 router.post("/callback", async (req, res) => {
   try {
