@@ -78,7 +78,7 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka ${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: true,
+      prepareOnly: false,
       email: order.email,
       name: order.fullName,
       country: countryCode, // Zkus zakomentovat tuto řádku, pokud bude i nadále problém
