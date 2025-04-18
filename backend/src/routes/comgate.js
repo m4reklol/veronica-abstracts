@@ -67,6 +67,8 @@ router.post("/create-payment", async (req, res) => {
 
     await newOrder.save();
 
+    const countryCode = convertToCountryCode(order.country || "CZ");
+
     const payload = new URLSearchParams({
       merchant: process.env.COMGATE_MERCHANT,
       secret: process.env.COMGATE_SECRET,
@@ -78,7 +80,7 @@ router.post("/create-payment", async (req, res) => {
       prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
-      country: convertToCountryCode(order.country || "CZ"),
+      country: countryCode,
       returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok`,
       cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel`,
       pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending`,
@@ -96,11 +98,14 @@ router.post("/create-payment", async (req, res) => {
           "Accept": "text/plain",
         },
         responseType: "text",
+        timeout: 8000,
         maxRedirects: 0,
-        validateStatus: (status) => status < 400,
+        validateStatus: () => true,
       }
     );
 
+    console.log("📨 Comgate status:", response.status);
+    console.log("📨 Comgate headers:", response.headers);
     console.log("📨 Comgate response:", response.data);
 
     if (!response.data || typeof response.data !== "string") {
@@ -116,6 +121,9 @@ router.post("/create-payment", async (req, res) => {
 
     return res.json({ url: data.redirect });
   } catch (err) {
+    if (err.code === "ECONNABORTED") {
+      console.error("❌ Timeout při spojení s Comgate");
+    }
     console.error("❌ Chyba při vytváření Comgate platby:", err);
     return res.status(500).json({ error: "Chyba při vytváření platby." });
   }
