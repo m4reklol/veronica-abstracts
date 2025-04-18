@@ -108,8 +108,9 @@ router.post("/create-payment", async (req, res) => {
     console.log("📨 Comgate headers:", response.headers);
     console.log("📨 Comgate response:", response.data);
 
-    if (!response.data || typeof response.data !== "string") {
-      throw new Error("Comgate nevrátil žádnou odpověď.");
+    if (response.status === 302 && response.headers.location?.includes("error")) {
+      console.error("⚠️ Comgate redirect to error page:", response.headers.location);
+      throw new Error("Chybný požadavek – Comgate přesměrovává na chybovou stránku.");
     }
 
     const data = Object.fromEntries(new URLSearchParams(response.data));
