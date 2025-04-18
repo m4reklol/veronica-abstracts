@@ -8,42 +8,19 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
-// 🔁 Pomocná funkce pro převod názvu země na ISO kód (dvoupísmenný)
 const convertToCountryCode = (name) => {
   const map = {
-    "Czech Republic": "CZ",
-    "Slovakia": "SK",
-    "Germany": "DE",
-    "Austria": "AT",
-    "France": "FR",
-    "Italy": "IT",
-    "Spain": "ES",
-    "Poland": "PL",
-    "Netherlands": "NL",
-    "Belgium": "BE",
-    "Ireland": "IE",
-    "Portugal": "PT",
-    "Greece": "GR",
-    "Hungary": "HU",
-    "Sweden": "SE",
-    "Finland": "FI",
-    "Denmark": "DK",
-    "Croatia": "HR",
-    "Romania": "RO",
-    "Bulgaria": "BG",
-    "Slovenia": "SI",
-    "Lithuania": "LT",
-    "Latvia": "LV",
-    "Estonia": "EE",
-    "Luxembourg": "LU",
-    "Cyprus": "CY",
-    "Malta": "MT",
-    "Outside EU": "",
+    "Czech Republic": "CZ", "Slovakia": "SK", "Germany": "DE", "Austria": "AT",
+    "France": "FR", "Italy": "IT", "Spain": "ES", "Poland": "PL", "Netherlands": "NL",
+    "Belgium": "BE", "Ireland": "IE", "Portugal": "PT", "Greece": "GR", "Hungary": "HU",
+    "Sweden": "SE", "Finland": "FI", "Denmark": "DK", "Croatia": "HR", "Romania": "RO",
+    "Bulgaria": "BG", "Slovenia": "SI", "Lithuania": "LT", "Latvia": "LV", "Estonia": "EE",
+    "Luxembourg": "LU", "Cyprus": "CY", "Malta": "MT", "Outside EU": "",
   };
   return map[name] || "CZ";
 };
 
-// ✅ CREATE PAYMENT — Comgate
+// ✅ CREATE PAYMENT
 router.post("/create-payment", async (req, res) => {
   try {
     const { order, cartItems, shippingCost } = req.body;
@@ -56,8 +33,10 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
 
-    const countryCode = convertToCountryCode(order.country || "CZ");
-    console.log("🪪 Použité country:", countryCode);
+    console.log("🛒 Order:", ORDERNUMBER);
+    console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
+    console.log("💰 Cena celkem:", AMOUNT);
+    console.log("🌍 Použité country:", convertToCountryCode(order.country || "CZ"));
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
@@ -78,10 +57,10 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka ${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: false,
+      prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
-      country: countryCode, // Zkus zakomentovat tuto řádku, pokud bude i nadále problém
+      country: convertToCountryCode(order.country || "CZ"),
       returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok`,
       cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel`,
       pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending`,
@@ -96,7 +75,7 @@ router.post("/create-payment", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "text/plain",
+          "Accept": "text/plain",
         },
         responseType: "text",
         maxRedirects: 0,
@@ -108,8 +87,8 @@ router.post("/create-payment", async (req, res) => {
     console.log("📨 Comgate headers:", response.headers);
     console.log("📨 Comgate response:", response.data);
 
-    if (response.status === 302 && response.headers.location?.includes("error")) {
-      console.error("⚠️ Comgate redirect to error page:", response.headers.location);
+    if (response.status === 302 && response.headers.location?.includes("/error")) {
+      console.warn("⚠️ Comgate redirect to error page:", response.headers.location);
       throw new Error("Chybný požadavek – Comgate přesměrovává na chybovou stránku.");
     }
 
@@ -131,10 +110,11 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
-// ✅ CALLBACK — zpracování výsledku platby
+// ✅ CALLBACK
 router.post("/callback", async (req, res) => {
   try {
     const { transId, status, refId } = req.body;
+
     console.log("📩 Comgate callback:", req.body);
 
     if (!refId || !transId) return res.status(400).send("Missing refId or transId");
@@ -147,10 +127,7 @@ router.post("/callback", async (req, res) => {
       await order.save();
 
       const productIds = order.cartItems.map((item) => item._id);
-      await Product.updateMany(
-        { _id: { $in: productIds } },
-        { $set: { sold: true } }
-      );
+      await Product.updateMany({ _id: { $in: productIds } }, { $set: { sold: true } });
 
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
