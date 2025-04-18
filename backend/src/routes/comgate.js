@@ -19,7 +19,7 @@ router.post("/create-payment", async (req, res) => {
 
     const ORDERNUMBER = Date.now().toString();
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
-    const AMOUNT = Math.round(totalAmountCZK * 100);
+    const AMOUNT = Math.round(totalAmountCZK); // Comgate expects CZK, not haléře
 
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
@@ -40,15 +40,17 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka ${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: "true",
-      email: order.email,
-      country: order.country || "CZ",
       prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
+      email: order.email,
+      name: order.fullName,
+      country: order.country || "CZ",
       returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok`,
       cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel`,
       pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending`,
-      notifyUrl: `${process.env.COMGATE_NOTIFY_URL}`,
+      notifyUrl: process.env.COMGATE_NOTIFY_URL,
     });
+
+    console.log("📤 Comgate payload:", payload.toString());
 
     const response = await axios.post(
       `${process.env.COMGATE_API_URL}/create`,
@@ -56,9 +58,11 @@ router.post("/create-payment", async (req, res) => {
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
-    const data = Object.fromEntries(new URLSearchParams(response.data));
     console.log("📨 Comgate response:", response.data);
+
+    const data = Object.fromEntries(new URLSearchParams(response.data));
     console.log("📨 Parsed response:", data);
+
     if (data.code !== "0") {
       throw new Error(`Chyba Comgate: ${data?.message || "žádná zpráva"}`);
     }
