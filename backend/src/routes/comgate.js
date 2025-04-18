@@ -34,6 +34,7 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
     const countryCode = convertToCountryCode(order.country || "CZ");
+    const isForeign = countryCode !== "CZ" && countryCode !== "SK";
 
     console.log("🛒 Order:", ORDERNUMBER);
     console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
@@ -58,7 +59,7 @@ router.post("/create-payment", async (req, res) => {
       curr: "CZK",
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
-      method: "ALL",
+      method: isForeign ? "CARD" : "ALL",
       prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
@@ -78,6 +79,7 @@ router.post("/create-payment", async (req, res) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Accept": "text/plain",
+          "User-Agent": "Mozilla/5.0 (Node.js test)",
         },
         responseType: "text",
         maxRedirects: 0,
@@ -109,51 +111,6 @@ router.post("/create-payment", async (req, res) => {
   } catch (err) {
     console.error("❌ Chyba při vytváření Comgate platby:", err.message || err);
     return res.status(500).json({ error: "Chyba při vytváření platby." });
-  }
-});
-
-router.get("/test-comgate", async (req, res) => {
-  const payload = new URLSearchParams({
-    merchant: process.env.COMGATE_MERCHANT,
-    secret: process.env.COMGATE_SECRET,
-    price: "100",
-    curr: "CZK",
-    label: "Test",
-    refId: "test-123",
-    method: "ALL",
-    prepareOnly: "true",
-    email: "test@example.com",
-    name: "Tester",
-    country: "CZ",
-    returnUrl: "https://www.veronicaabstracts.com/thankyou",
-    cancelUrl: "https://www.veronicaabstracts.com/thankyou",
-    pendingUrl: "https://www.veronicaabstracts.com/thankyou",
-    notifyUrl: "https://www.veronicaabstracts.com/api/comgate/callback",
-  });
-
-  try {
-    const response = await axios.post(
-      "https://payments.comgate.cz/v1.0/create",
-      payload.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "text/plain",
-          "User-Agent": "Mozilla/5.0 (Node.js test)",
-        },
-        responseType: "text",
-        maxRedirects: 0,
-        validateStatus: (status) => status < 400 || status === 302,
-      }
-    );
-
-    return res.send({
-      status: response.status,
-      headers: response.headers,
-      data: response.data,
-    });
-  } catch (err) {
-    return res.status(500).send(err.message || "Error");
   }
 });
 
