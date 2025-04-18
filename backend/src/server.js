@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import productRoutes from "./routes/products.js";
 import adminRoutes from "./routes/admin.js";
 import contactRoute from "./routes/contact.js";
-import gpwebpayRoutes from "./routes/gpwebpay.js";
+import comgateRoutes from "./routes/comgate.js";
 import translateRoute from "./routes/translate.js";
 
 dotenv.config();
@@ -27,7 +27,7 @@ app.use(cors());
 app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/contact", contactRoute);
-app.use("/api/gpwebpay", gpwebpayRoutes);
+app.use("/api/comgate", comgateRoutes);
 app.use("/api/translate", translateRoute);
 
 // ✅ Serve frontend build (React)

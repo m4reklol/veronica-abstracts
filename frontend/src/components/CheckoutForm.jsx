@@ -137,7 +137,7 @@ const CheckoutForm = () => {
     }
 
     try {
-      const res = await fetch("/api/gpwebpay/create-payment", {
+      const res = await fetch("/api/comgate/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: formData, cartItems, shippingCost }),
