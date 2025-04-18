@@ -40,7 +40,7 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka ${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
+      prepareOnly: true,
       email: order.email,
       name: order.fullName,
       country: order.country || "CZ",
