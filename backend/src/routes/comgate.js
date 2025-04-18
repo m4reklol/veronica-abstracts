@@ -61,9 +61,9 @@ router.post("/create-payment", async (req, res) => {
       email: order.email,
       name: order.fullName,
       country: convertToCountryCode(order.country || "CZ"),
-      returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok`,
-      cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel`,
-      pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending`,
+      returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
+      cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
+      pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending&id=${ORDERNUMBER}&ref=${ORDERNUMBER}`,
       notifyUrl: process.env.COMGATE_NOTIFY_URL,
     });
 
