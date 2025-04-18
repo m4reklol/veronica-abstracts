@@ -56,9 +56,10 @@ router.post("/create-payment", async (req, res) => {
     );
 
     const data = Object.fromEntries(new URLSearchParams(response.data));
-
+    console.log("📨 Comgate response:", response.data);
+    console.log("📨 Parsed response:", data);
     if (data.code !== "0") {
-      throw new Error(`Chyba Comgate: ${data.message}`);
+      throw new Error(`Chyba Comgate: ${data?.message || "žádná zpráva"}`);
     }
 
     return res.json({ url: data.redirect });
