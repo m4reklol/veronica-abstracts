@@ -56,6 +56,9 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
 
+    const countryCode = convertToCountryCode(order.country || "CZ");
+    console.log("🪪 Použité country:", countryCode);
+
     const newOrder = new Order({
       orderNumber: ORDERNUMBER,
       ...order,
@@ -66,8 +69,6 @@ router.post("/create-payment", async (req, res) => {
     });
 
     await newOrder.save();
-
-    const countryCode = convertToCountryCode(order.country || "CZ");
 
     const payload = new URLSearchParams({
       merchant: process.env.COMGATE_MERCHANT,
@@ -80,7 +81,7 @@ router.post("/create-payment", async (req, res) => {
       prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
       email: order.email,
       name: order.fullName,
-      country: countryCode,
+      country: countryCode, // Zkus zakomentovat tuto řádku, pokud bude i nadále problém
       returnUrl: `${process.env.FRONTEND_URL}/thankyou?status=ok`,
       cancelUrl: `${process.env.FRONTEND_URL}/thankyou?status=cancel`,
       pendingUrl: `${process.env.FRONTEND_URL}/thankyou?status=pending`,
@@ -95,12 +96,11 @@ router.post("/create-payment", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "text/plain",
+          Accept: "text/plain",
         },
         responseType: "text",
-        timeout: 8000,
         maxRedirects: 0,
-        validateStatus: () => true,
+        validateStatus: (status) => status < 400 || status === 302,
       }
     );
 
@@ -113,6 +113,10 @@ router.post("/create-payment", async (req, res) => {
       throw new Error("Chybný požadavek – Comgate přesměrovává na chybovou stránku.");
     }
 
+    if (!response.data || typeof response.data !== "string") {
+      throw new Error("Comgate nevrátil žádnou odpověď.");
+    }
+
     const data = Object.fromEntries(new URLSearchParams(response.data));
     console.log("📨 Parsed response:", data);
 
@@ -122,19 +126,15 @@ router.post("/create-payment", async (req, res) => {
 
     return res.json({ url: data.redirect });
   } catch (err) {
-    if (err.code === "ECONNABORTED") {
-      console.error("❌ Timeout při spojení s Comgate");
-    }
     console.error("❌ Chyba při vytváření Comgate platby:", err);
     return res.status(500).json({ error: "Chyba při vytváření platby." });
   }
 });
 
-// ✅ CALLBACK
+// ✅ CALLBACK — zpracování výsledku platby
 router.post("/callback", async (req, res) => {
   try {
     const { transId, status, refId } = req.body;
-
     console.log("📩 Comgate callback:", req.body);
 
     if (!refId || !transId) return res.status(400).send("Missing refId or transId");
