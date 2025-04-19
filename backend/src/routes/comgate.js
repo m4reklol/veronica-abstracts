@@ -34,7 +34,6 @@ router.post("/create-payment", async (req, res) => {
     const totalAmountCZK = cartItems.reduce((sum, item) => sum + item.price, 0) + shippingCost;
     const AMOUNT = Math.round(totalAmountCZK);
     const countryCode = convertToCountryCode(order.country || "CZ");
-    const isForeign = countryCode !== "CZ" && countryCode !== "SK";
 
     console.log("🛒 Order:", ORDERNUMBER);
     console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
@@ -59,8 +58,8 @@ router.post("/create-payment", async (req, res) => {
       curr: "CZK",
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
-      method: "BANK_CZ_OTHER",
-      prepareOnly: process.env.NODE_ENV !== "production" ? "true" : "false",
+      method: "ALL",
+      prepareOnly: "false",
       email: order.email,
       name: order.fullName,
       country: countryCode,
@@ -73,7 +72,7 @@ router.post("/create-payment", async (req, res) => {
     console.log("📤 Comgate payload:", decodeURIComponent(payload.toString()));
 
     const response = await axios.post(
-      `${process.env.COMGATE_API_URL}/create`,
+      "https://payments.comgate.cz/v1.0/create",
       payload.toString(),
       {
         headers: {
