@@ -58,7 +58,7 @@ router.post("/create-payment", async (req, res) => {
       curr: "CZK",
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
-      method: "ALL",
+      method: "BANK_CZ_OTHER,BANK_CZ_CS_PSD2,BANK_CZ_KB_PSD2",
       prepareOnly: "false",
       email: order.email,
       name: order.fullName,
