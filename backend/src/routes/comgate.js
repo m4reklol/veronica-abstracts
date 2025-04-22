@@ -53,7 +53,6 @@ router.post("/create-payment", async (req, res) => {
 
     const payload = new URLSearchParams({
       merchant: process.env.COMGATE_MERCHANT,
-      secret: process.env.COMGATE_SECRET,
       price: AMOUNT.toString(),
       curr: "CZK",
       label: `Objednavka_${ORDERNUMBER}`,
