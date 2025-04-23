@@ -17,23 +17,23 @@ const Hero = () => {
   const [t, setT] = useState({});
 
   useEffect(() => {
-    let loadedCount = 0;
+    let loaded = 0;
     images.forEach((src) => {
       const img = new Image();
       img.src = src;
       img.onload = () => {
-        loadedCount++;
-        if (loadedCount === images.length) {
+        loaded++;
+        if (loaded === images.length) {
           setImagesLoaded(true);
         }
       };
     });
-  }, []);
+  }, [images]);
 
   useEffect(() => {
     if (!imagesLoaded) return;
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }, 5000);
     return () => clearInterval(interval);
   }, [imagesLoaded]);
@@ -65,12 +65,15 @@ const Hero = () => {
   }, [language]);
 
   return (
-    <section
-      className="hero"
-      style={{
-        backgroundImage: `url(${images[currentImageIndex]})`,
-      }}
-    >
+    <section className="hero">
+      {images.map((src, index) => (
+        <div
+          key={index}
+          className={`hero-bg ${index === currentImageIndex ? "active" : ""}`}
+          style={{ backgroundImage: `url(${src})` }}
+        ></div>
+      ))}
+
       <div className="hero-overlay"></div>
 
       <div className="hero-content">
