@@ -59,7 +59,6 @@ router.post("/create-payment", async (req, res) => {
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      test: "true",
       prepareOnly: "true",
       email: order.email,
       name: order.fullName,
