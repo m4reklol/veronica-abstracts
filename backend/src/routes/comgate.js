@@ -35,7 +35,7 @@ router.post("/create-payment", async (req, res) => {
     const AMOUNT = Math.round(totalAmountCZK);
     const countryCode = convertToCountryCode(order.country || "CZ");
 
-    console.log("🛒 Order:", ORDERNUMBER);
+    console.log("🍎 Order:", ORDERNUMBER);
     console.log("📦 Zboží:", cartItems.map(i => i.name).join(", "));
     console.log("💰 Cena celkem:", AMOUNT);
     console.log("🌍 Použité country:", countryCode);
@@ -53,12 +53,13 @@ router.post("/create-payment", async (req, res) => {
 
     const payload = new URLSearchParams({
       merchant: process.env.COMGATE_MERCHANT,
+      secret: process.env.COMGATE_SECRET,
       price: AMOUNT.toString(),
       curr: "CZK",
       label: `Objednavka_${ORDERNUMBER}`,
       refId: ORDERNUMBER,
       method: "ALL",
-      prepareOnly: "false",
+      prepareOnly: "true",
       email: order.email,
       name: order.fullName,
       country: countryCode,
@@ -87,11 +88,6 @@ router.post("/create-payment", async (req, res) => {
     console.log("📨 Comgate status:", response.status);
     console.log("📨 Comgate headers:", response.headers);
     console.log("📨 Comgate response:", response.data);
-
-    if (response.status === 302 && response.headers.location?.includes("/error")) {
-      console.warn("⚠️ Comgate redirect to error page:", response.headers.location);
-      throw new Error("Chybný požadavek – Comgate přesměrovává na chybovou stránku.");
-    }
 
     if (!response.data || typeof response.data !== "string") {
       throw new Error("Comgate nevrátil žádnou odpověď.");
