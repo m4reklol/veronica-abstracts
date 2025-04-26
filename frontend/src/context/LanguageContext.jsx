@@ -6,6 +6,7 @@ const LanguageContext = createContext();
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState("cz");
   const [isReady, setIsReady] = useState(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedLang");
@@ -16,10 +17,15 @@ export const LanguageProvider = ({ children }) => {
   const changeLanguage = (lang) => {
     localStorage.setItem("selectedLang", lang);
     setLanguage(lang);
+    setRefreshCounter((prev) => prev + 1);
+  };
+
+  const triggerRefresh = () => { 
+    setRefreshCounter((prev) => prev + 1); 
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, isReady }}>
+    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, isReady, refreshCounter, triggerRefresh }}>
       {children}
     </LanguageContext.Provider>
   );

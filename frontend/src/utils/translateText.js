@@ -1,4 +1,6 @@
 // frontend/src/utils/translateText.js
+import { LanguageContext } from "../context/LanguageContext";
+import { useContext } from "react";
 
 const memoryCache = new Map();
 const pendingRequests = new Map();
@@ -27,12 +29,10 @@ export const getCachedTranslation = async (text, lang) => {
   const key = `original:${text}`;
   const memKey = `${lang}:${text}`;
 
-  // ✅ Check in-memory cache first
   if (memoryCache.has(memKey)) {
     return memoryCache.get(memKey);
   }
 
-  // ✅ Check localStorage cache
   let cached = {};
   try {
     const raw = localStorage.getItem(key);
@@ -46,7 +46,6 @@ export const getCachedTranslation = async (text, lang) => {
     return cached[lang];
   }
 
-  // ✅ Prevent duplicate concurrent requests
   if (pendingRequests.has(memKey)) {
     return pendingRequests.get(memKey);
   }
@@ -63,6 +62,10 @@ export const getCachedTranslation = async (text, lang) => {
       } catch (err) {
         console.warn("⚠️ Could not write to localStorage:", err);
       }
+
+      // ✅ Zavoláme refresh stránky, aby nové překlady byly zobrazeny
+      const { triggerRefresh } = useContext(LanguageContext);
+      triggerRefresh();
 
       return translated;
     })
