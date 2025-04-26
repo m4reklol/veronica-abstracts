@@ -78,13 +78,13 @@ const CheckoutForm = () => {
       if (lang === "cz") return;
 
       try {
-        const keys = Object.entries(t);
+        const entries = Object.entries(t);
         const newT = {};
 
-        for (const [key, value] of keys) {
+        for (const [key, value] of entries) {
           if (typeof value === "string") {
             newT[key] = await getCachedTranslation(value, lang);
-          } else {
+          } else if (typeof value === "object" && value !== null) {
             newT[key] = {};
             for (const subKey in value) {
               newT[key][subKey] = await getCachedTranslation(value[subKey], lang);
@@ -115,7 +115,7 @@ const CheckoutForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const showNotification = (message, type) => {
+  const showNotification = (message, type = "error") => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setNotification({ message, type });
     timeoutRef.current = setTimeout(() => {
@@ -127,12 +127,12 @@ const CheckoutForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.termsAccepted) {
-      showNotification(t.errorTerms, "error");
+      showNotification(t.errorTerms);
       return;
     }
 
     if (isOutsideEU) {
-      showNotification(t.errorOutsideEU, "error");
+      showNotification(t.errorOutsideEU);
       return;
     }
 
@@ -147,11 +147,11 @@ const CheckoutForm = () => {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        showNotification(t.errorPayment, "error");
+        showNotification(t.errorPayment);
       }
     } catch (error) {
       console.error("Chyba při odesílání objednávky:", error);
-      showNotification(t.errorSend, "error");
+      showNotification(t.errorSend);
     }
   };
 
@@ -199,7 +199,7 @@ const CheckoutForm = () => {
             <label>{t.form.country} <span className="required">*</span></label>
             <select name="country" value={formData.country} onChange={handleChange} required>
               <option value="Czech Republic">{lang === "cz" ? "Česká republika" : "Czech Republic"}</option>
-              {euCountries.filter(c => c !== "Czech Republic").map(country => (
+              {euCountries.filter(c => c !== "Czech Republic").map((country) => (
                 <option key={country} value={country}>{country}</option>
               ))}
               <option value="Outside EU">Outside the EU</option>
@@ -311,7 +311,7 @@ const CheckoutForm = () => {
                 }
               />
               <label htmlFor="terms">
-                {t.terms} {" "}
+                {t.terms}{" "}
                 <a href="/obchodni-podminky.pdf" target="_blank" rel="noopener noreferrer">
                   {t.conditions}
                 </a>.

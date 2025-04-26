@@ -4,7 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getCachedTranslation } from "../utils/translateText";
 
 const QuoteSection = () => {
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [translatedQuote, setTranslatedQuote] = useState("");
 
   const originalQuote =
@@ -18,7 +18,7 @@ const QuoteSection = () => {
       }
 
       try {
-        const translated = await getCachedTranslation(originalQuote, lang);
+        const translated = await getCachedTranslation(originalQuote, lang, triggerRefresh);
         setTranslatedQuote(translated?.trim() || originalQuote);
       } catch (err) {
         console.warn("❌ Quote translation failed:", err);
@@ -27,7 +27,7 @@ const QuoteSection = () => {
     };
 
     fetchTranslation();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   return (
     <section className="quote-section">

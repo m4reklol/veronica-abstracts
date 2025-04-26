@@ -4,7 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getCachedTranslation } from "../utils/translateText";
 
 const ImportantThings = () => {
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [content, setContent] = useState(null);
 
   const original = {
@@ -39,13 +39,12 @@ const ImportantThings = () => {
       }
 
       try {
-        const heading = await getCachedTranslation(original.heading, lang);
+        const heading = await getCachedTranslation(original.heading, lang, triggerRefresh);
 
-        // Kombinuj title + text pro lepší kontext
         const cards = await Promise.all(
           original.cards.map(async (item) => {
             const combined = `${item.title}. ${item.text}`;
-            const fullTranslated = await getCachedTranslation(combined, lang);
+            const fullTranslated = await getCachedTranslation(combined, lang, triggerRefresh);
             const [translatedTitle, ...translatedTextArr] = fullTranslated.split(". ");
             return {
               icon: item.icon,
@@ -66,7 +65,7 @@ const ImportantThings = () => {
     };
 
     translate();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   if (!content) return null;
 

@@ -1,5 +1,5 @@
 // src/context/LanguageContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const LanguageContext = createContext();
 
@@ -10,19 +10,21 @@ export const LanguageProvider = ({ children }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedLang");
-    if (stored) setLanguage(stored);
+    if (stored) {
+      setLanguage(stored);
+    }
     setIsReady(true);
   }, []);
 
-  const changeLanguage = (lang) => {
+  const changeLanguage = useCallback((lang) => {
     localStorage.setItem("selectedLang", lang);
     setLanguage(lang);
     setRefreshCounter((prev) => prev + 1);
-  };
+  }, []);
 
-  const triggerRefresh = () => { 
-    setRefreshCounter((prev) => prev + 1); 
-  };
+  const triggerRefresh = useCallback(() => {
+    setRefreshCounter((prev) => prev + 1);
+  }, []);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, isReady, refreshCounter, triggerRefresh }}>

@@ -4,7 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getCachedTranslation } from "../utils/translateText";
 
 const InstagramSection = () => {
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [title, setTitle] = useState("Sledujte můj");
 
   const fallbackTranslations = {
@@ -31,7 +31,7 @@ const InstagramSection = () => {
     if (language === "cz") {
       setTitle("Sledujte můj");
     } else {
-      getCachedTranslation("Follow my", language).then((translated) => {
+      getCachedTranslation("Follow my", language, triggerRefresh).then((translated) => {
         const fallback = fallbackTranslations[language] || "Follow my";
         if (!translated || translated.trim().toLowerCase() === "follow my") {
           setTitle(fallback);
@@ -40,7 +40,7 @@ const InstagramSection = () => {
         }
       });
     }
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   return (
     <section className="instagram-section">

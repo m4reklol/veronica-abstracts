@@ -7,7 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 
 const Header = () => {
   const { cart } = useCart();
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [t, setT] = useState({});
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,7 +102,7 @@ const Header = () => {
     };
 
     setT(manual[language] || manual.cz);
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   return (
     <header className="header">

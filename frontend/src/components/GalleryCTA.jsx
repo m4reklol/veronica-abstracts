@@ -5,8 +5,12 @@ import { useLanguage } from "../context/LanguageContext";
 import { getCachedTranslation } from "../utils/translateText";
 
 const GalleryCTA = () => {
-  const { language } = useLanguage();
-  const [t, setT] = useState({});
+  const { language, triggerRefresh } = useLanguage();
+  const [t, setT] = useState({
+    title: "",
+    subtitle: "",
+    button: "",
+  });
 
   const fallbackTranslations = {
     title: {
@@ -36,28 +40,37 @@ const GalleryCTA = () => {
       button: "Moje tvorba krok za krokem",
     };
 
-    if (language === "cz") {
-      setT(original);
-      return;
-    }
+    const loadTranslations = async () => {
+      if (language === "cz") {
+        setT(original);
+        return;
+      }
 
-    const keys = Object.keys(original);
+      try {
+        const keys = Object.keys(original);
+        const translations = await Promise.all(
+          keys.map((key) => getCachedTranslation(original[key], language))
+        );
 
-    Promise.all(
-      keys.map((key) => getCachedTranslation(original[key], language))
-    ).then((translatedValues) => {
-      const translated = keys.reduce((acc, key, i) => {
-        const fallback = fallbackTranslations[key]?.[language] || original[key];
-        const value = translatedValues[i];
-        acc[key] =
-          !value || value.trim().toLowerCase() === original[key].toLowerCase()
-            ? fallback
-            : value;
-        return acc;
-      }, {});
-      setT(translated);
-    });
-  }, [language]);
+        const translated = keys.reduce((acc, key, i) => {
+          const fallback = fallbackTranslations[key]?.[language] || original[key];
+          const value = translations[i];
+          acc[key] =
+            !value || value.trim().toLowerCase() === original[key].toLowerCase()
+              ? fallback
+              : value.trim();
+          return acc;
+        }, {});
+
+        setT(translated);
+      } catch (err) {
+        console.warn("❌ GalleryCTA translation failed:", err);
+        setT(original);
+      }
+    };
+
+    loadTranslations();
+  }, [language, triggerRefresh]);
 
   return (
     <section className="gallery-cta">

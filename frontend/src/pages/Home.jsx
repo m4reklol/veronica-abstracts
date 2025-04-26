@@ -16,7 +16,7 @@ import { useLanguage } from "../context/LanguageContext";
 const BRAND_NAME = "Veronica Abstracts";
 
 const Home = () => {
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const location = useLocation();
   const [translations, setTranslations] = useState(null);
 
@@ -38,10 +38,10 @@ const Home = () => {
         const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
 
         const [titleRaw, description, ogDescription, twitterDescription] = await Promise.all([
-          getCachedTranslation(clean(original.title), lang),
-          getCachedTranslation(original.description, lang),
-          getCachedTranslation(original.ogDescription, lang),
-          getCachedTranslation(original.twitterDescription, lang)
+          getCachedTranslation(clean(original.title), lang, triggerRefresh),
+          getCachedTranslation(original.description, lang, triggerRefresh),
+          getCachedTranslation(original.ogDescription, lang, triggerRefresh),
+          getCachedTranslation(original.twitterDescription, lang, triggerRefresh)
         ]);
 
         const title = titleRaw.replace("___BRAND___", BRAND_NAME);
@@ -59,7 +59,7 @@ const Home = () => {
     };
 
     fetchTranslations();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   useEffect(() => {
     const hash = location.hash;

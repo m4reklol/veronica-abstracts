@@ -4,7 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getCachedTranslation } from "../utils/translateText";
 
 const PhilosophySection = () => {
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [content, setContent] = useState(null);
 
   const original = {
@@ -33,12 +33,12 @@ const PhilosophySection = () => {
       }
 
       try {
-        const heading = await getCachedTranslation(original.heading, lang);
+        const heading = await getCachedTranslation(original.heading, lang, triggerRefresh);
 
         const blocks = await Promise.all(
           original.blocks.map(async (block) => {
-            const title = await getCachedTranslation(block.title, lang);
-            const text = await getCachedTranslation(block.text, lang);
+            const title = await getCachedTranslation(block.title, lang, triggerRefresh);
+            const text = await getCachedTranslation(block.text, lang, triggerRefresh);
             return {
               title: title?.trim() || block.title,
               text: text?.trim() || block.text,
@@ -54,7 +54,7 @@ const PhilosophySection = () => {
     };
 
     translate();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   if (!content) return null;
 

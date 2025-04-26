@@ -47,16 +47,13 @@ const FAQSection = () => {
   const [faqContent, setFaqContent] = useState(originalFaqs);
   const [t, setT] = useState({
     heading: "Často kladené otázky",
-    subtitle:
-      "Objevte odpovědi na nejčastější dotazy o mé tvorbě a procesu vzniku uměleckých děl",
+    subtitle: "Objevte odpovědi na nejčastější dotazy o mé tvorbě a procesu vzniku uměleckých děl",
     subsection: "Platba a doprava",
-    shippingInfo:
-      "Cena dopravy je vyšší kvůli rozměrům a váze obrazů – jedná se o křehké zboží, které vyžaduje speciální balení. Cena zahrnuje balné a pojištění. Pokud jste z okolí Českých Budějovic, je možné domluvit osobní odběr zdarma.",
+    shippingInfo: "Cena dopravy je vyšší kvůli rozměrům a váze obrazů – jedná se o křehké zboží, které vyžaduje speciální balení. Cena zahrnuje balné a pojištění. Pokud jste z okolí Českých Budějovic, je možné domluvit osobní odběr zdarma.",
     shippingCz: "Česká republika: 500 Kč",
     shippingEu: "Země EU: 1000 Kč",
     shippingNote: "Mimo EU: prosím kontaktujte mě předem",
-    paymentFull:
-      'Platba probíhá bezpečně přes <strong><a href="https://www.comgate.cz/cz/platebni-brana" target="_blank" rel="noopener noreferrer">Comgate</a></strong> – podporujeme moderní metody jako platby kartou i mobilem:',
+    paymentFull: 'Platba probíhá bezpečně přes <strong><a href="https://www.comgate.cz/cz/platebni-brana" target="_blank" rel="noopener noreferrer">Comgate</a></strong> – podporujeme moderní metody jako platby kartou i mobilem:',
     methodsIntro: "Přijímáme tyto platební metody:",
     morePayments: "…a mnoho dalších",
     paymentDocsIntro: "Více info o metodách:",
@@ -96,20 +93,24 @@ const FAQSection = () => {
             };
           })
         );
+
         const keys = Object.keys(t);
         const translatedValues = await Promise.all(
           keys.map((key) => getCachedTranslation(t[key], lang))
         );
+
         const translatedT = keys.reduce((acc, key, i) => {
           acc[key] = translatedValues[i]?.trim() || t[key];
           return acc;
         }, {});
+
         setFaqContent(translatedFaqs);
         setT(translatedT);
       } catch (err) {
         console.warn("❌ FAQ translation failed:", err);
       }
     };
+
     translateFaqs();
   }, [lang]);
 
@@ -158,7 +159,9 @@ const FAQSection = () => {
           <li>{t.shippingEu}</li>
           <li>{t.shippingNote}</li>
         </ul>
+
         <p dangerouslySetInnerHTML={{ __html: t.paymentFull }} />
+
         <div className="payment-icons-info">
           <p>{t.methodsIntro}</p>
           <div className="payment-icons">
@@ -172,19 +175,11 @@ const FAQSection = () => {
 
         <p className="payment-docs">
           {t.paymentDocsIntro}{" "}
-          <a
-            href="https://help.comgate.cz/v1/docs/cs/platby-kartou"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://help.comgate.cz/v1/docs/cs/platby-kartou" target="_blank" rel="noopener noreferrer">
             {t.docLinkCard}
           </a>
           ,{" "}
-          <a
-            href="https://help.comgate.cz/docs/bankovni-prevody"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://help.comgate.cz/docs/bankovni-prevody" target="_blank" rel="noopener noreferrer">
             {t.docLinkBank}
           </a>
           .
@@ -199,9 +194,7 @@ const FAQSection = () => {
             <a href={`mailto:${t.contactEmail}`}>{t.contactEmail}</a>
             <br />
             {t.contactPhoneLabel}{" "}
-            <a href={`tel:${t.contactPhone.replace(/\s/g, "")}`}>
-              {t.contactPhone}
-            </a>
+            <a href={`tel:${t.contactPhone.replace(/\s/g, "")}`}>{t.contactPhone}</a>
           </address>
         </div>
       </div>
@@ -209,11 +202,7 @@ const FAQSection = () => {
       <div className="faq-footer-note">
         <p>
           {t.footer}{" "}
-          <a
-            href="/obchodni-podminky.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="/obchodni-podminky.pdf" target="_blank" rel="noopener noreferrer">
             {t.terms}
           </a>{" "}
           {t.or} <a href="/contact">{t.contact}</a>.

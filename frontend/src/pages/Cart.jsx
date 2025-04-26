@@ -13,7 +13,7 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 
 const Cart = () => {
   const { cart, dispatch } = useCart();
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [notification, setNotification] = useState(null);
   const timeoutRef = useRef(null);
   const [t, setT] = useState({});
@@ -61,16 +61,16 @@ const Cart = () => {
     }
 
     const keys = Object.keys(original);
-    Promise.all(keys.map((k) => getCachedTranslation(original[k], language))).then(
-      (translated) => {
-        const result = keys.reduce((acc, key, i) => {
-          acc[key] = translated[i];
-          return acc;
-        }, {});
-        setT(result);
-      }
-    );
-  }, [language]);
+    Promise.all(
+      keys.map((k) => getCachedTranslation(original[k], language, triggerRefresh))
+    ).then((translated) => {
+      const result = keys.reduce((acc, key, i) => {
+        acc[key] = translated[i];
+        return acc;
+      }, {});
+      setT(result);
+    });
+  }, [language, triggerRefresh]);
 
   return (
     <>

@@ -11,7 +11,7 @@ import { useLanguage } from "../context/LanguageContext";
 
 const ThankYou = () => {
   const location = useLocation();
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [status, setStatus] = useState(null);
   const [t, setT] = useState({});
 
@@ -44,7 +44,7 @@ const ThankYou = () => {
 
       const keys = Object.keys(original);
       const translations = await Promise.all(
-        keys.map((key) => getCachedTranslation(original[key], language))
+        keys.map((key) => getCachedTranslation(original[key], language, triggerRefresh))
       );
 
       const translated = keys.reduce((acc, key, i) => {
@@ -56,7 +56,7 @@ const ThankYou = () => {
     };
 
     fetchTranslations();
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   const isSuccess = status === "ok";
 

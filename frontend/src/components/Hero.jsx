@@ -5,7 +5,7 @@ import { getCachedTranslation } from "../utils/translateText";
 import { useLanguage } from "../context/LanguageContext";
 
 const Hero = () => {
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const images = [
     "/images/hero1.webp",
     "/images/hero2.webp",
@@ -54,15 +54,18 @@ const Hero = () => {
 
     const keys = Object.keys(original);
     Promise.all(
-      keys.map((key) => getCachedTranslation(original[key], language))
+      keys.map((key) => getCachedTranslation(original[key], language, triggerRefresh))
     ).then((translatedValues) => {
       const translated = keys.reduce((acc, key, i) => {
-        acc[key] = translatedValues[i];
+        acc[key] = translatedValues[i] || original[key];
         return acc;
       }, {});
       setT(translated);
+    }).catch((error) => {
+      console.warn("❌ Překlad Hero selhal:", error);
+      setT(original);
     });
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   return (
     <section className="hero">

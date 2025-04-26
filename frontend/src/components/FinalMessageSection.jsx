@@ -4,10 +4,9 @@ import { getCachedTranslation } from "../utils/translateText";
 import { useLanguage } from "../context/LanguageContext";
 
 const FinalMessageSection = () => {
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [t, setT] = useState({
-    quote:
-      "Děkuji všem, kteří mě podporují a sledují mou uměleckou cestu. Vaše podpora pro mě znamená víc, než slova dokážou vyjádřit.",
+    quote: "Děkuji všem, kteří mě podporují a sledují mou uměleckou cestu. Vaše podpora pro mě znamená víc, než slova dokážou vyjádřit.",
     love: "S láskou,",
   });
 
@@ -28,12 +27,11 @@ const FinalMessageSection = () => {
 
   useEffect(() => {
     const original = {
-      quote:
-        "Děkuji všem, kteří mě podporují a sledují mou uměleckou cestu. Vaše podpora pro mě znamená víc, než slova dokážou vyjádřit.",
+      quote: "Děkuji všem, kteří mě podporují a sledují mou uměleckou cestu. Vaše podpora pro mě znamená víc, než slova dokážou vyjádřit.",
       love: "S láskou,",
     };
 
-    const fetchTranslations = async () => {
+    const translate = async () => {
       if (language === "cz") {
         setT(original);
         return;
@@ -46,14 +44,8 @@ const FinalMessageSection = () => {
         ]);
 
         setT({
-          quote:
-            !quote || quote.trim().toLowerCase() === original.quote.toLowerCase()
-              ? fallbackTranslations.quote[language] || original.quote
-              : quote,
-          love:
-            !love || love.trim().toLowerCase() === original.love.toLowerCase()
-              ? fallbackTranslations.love[language] || original.love
-              : love,
+          quote: quote?.trim() || fallbackTranslations.quote[language] || original.quote,
+          love: love?.trim() || fallbackTranslations.love[language] || original.love,
         });
       } catch (error) {
         console.warn("Translation failed, using fallback:", error);
@@ -64,8 +56,8 @@ const FinalMessageSection = () => {
       }
     };
 
-    fetchTranslations();
-  }, [language]);
+    translate();
+  }, [language, triggerRefresh]);
 
   return (
     <section className="final-message-section">

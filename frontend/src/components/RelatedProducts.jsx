@@ -15,7 +15,7 @@ const RelatedProducts = ({ currentProductId }) => {
   });
 
   const { dispatch, cart } = useCart();
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
 
   const containerRef = useRef(null);
   const [showLeft, setShowLeft] = useState(false);
@@ -68,8 +68,8 @@ const RelatedProducts = ({ currentProductId }) => {
       (async () => {
         try {
           const [heading, addToCart] = await Promise.all([
-            getCachedTranslation("Mohlo by se Vám líbit", lang),
-            getCachedTranslation("Přidat do košíku", lang),
+            getCachedTranslation("Mohlo by se Vám líbit", lang, triggerRefresh),
+            getCachedTranslation("Přidat do košíku", lang, triggerRefresh),
           ]);
           setTexts({ heading, addToCart });
         } catch (err) {
@@ -77,7 +77,7 @@ const RelatedProducts = ({ currentProductId }) => {
         }
       })();
     }
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   const scroll = (direction) => {
     const container = containerRef.current;

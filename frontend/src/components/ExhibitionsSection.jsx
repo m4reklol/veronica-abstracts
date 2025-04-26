@@ -14,18 +14,14 @@ const ExhibitionsSection = () => {
       badge: "Ukončená",
       veniceDate: "14. - 15. února 2025",
       veniceLocation: "Castello Gallery, Benátky — Itálie",
-      veniceText1:
-        "Whispered Realms: Hidden Spaces and Beings je magická kolektivní výstava, která se konala v srdci Benátek.",
-      veniceText2:
-        "Výstava zkoumala skryté světy, neviditelné dimenze a nevyřčené příběhy prostřednictvím abstraktního a intuitivního umění. Každé dílo nabídlo hlubší ponor do lidské psychiky, spirituální roviny i neviditelných struktur reality.",
+      veniceText1: "Whispered Realms: Hidden Spaces and Beings je magická kolektivní výstava, která se konala v srdci Benátek.",
+      veniceText2: "Výstava zkoumala skryté světy, neviditelné dimenze a nevyřčené příběhy prostřednictvím abstraktního a intuitivního umění. Každé dílo nabídlo hlubší ponor do lidské psychiky, spirituální roviny i neviditelných struktur reality.",
       moreInfo: "Více informací",
       openTitle: "Zaujalo Vás mé umění?",
       openDate: "Termín dle dohody",
       openLocation: "Tvoje galerie, kavárna nebo festival",
-      openText1:
-        "Jsem otevřená novým příležitostem a spolupracím. Pokud byste si přáli vystavit moje obrazy ve svém prostoru, neváhejte mě kontaktovat.",
-      openText2:
-        "Ráda vytvořím jedinečný zážitek pro Vaše návštěvníky.",
+      openText1: "Jsem otevřená novým příležitostem a spolupracím. Pokud byste si přáli vystavit moje obrazy ve svém prostoru, neváhejte mě kontaktovat.",
+      openText2: "Ráda vytvořím jedinečný zážitek pro Vaše návštěvníky.",
       contactMe: "Napište mi pro více informací",
     };
 
@@ -46,7 +42,7 @@ const ExhibitionsSection = () => {
           const fallback = original[key];
           const translated = await getCachedTranslation(fallback, language);
           result[key] = translated?.trim() || fallback;
-          await delay(100); // prevence zahlcení API
+          await delay(100); // malá pauza, aby se nezatížilo API
         } catch (error) {
           console.warn(`Translation failed for key ${key}:`, error);
           result[key] = original[key];

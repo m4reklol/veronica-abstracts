@@ -15,7 +15,7 @@ const BRAND_NAME = "Veronica Abstracts";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [product, setProduct] = useState(null);
   const [translated, setTranslated] = useState(null);
   const [mainImage, setMainImage] = useState(null);
@@ -53,12 +53,12 @@ const ProductDetail = () => {
           });
         } else {
           const [name, description, dimensions, backToGallery, addToCart, sold] = await Promise.all([
-            getCachedTranslation(data.name, lang),
-            getCachedTranslation(data.description, lang),
-            getCachedTranslation(data.dimensions, lang),
-            getCachedTranslation("Zpět do galerie", lang),
-            getCachedTranslation("PŘIDAT DO KOŠÍKU", lang),
-            getCachedTranslation("Prodáno", lang),
+            getCachedTranslation(data.name, lang, triggerRefresh),
+            getCachedTranslation(data.description, lang, triggerRefresh),
+            getCachedTranslation(data.dimensions, lang, triggerRefresh),
+            getCachedTranslation("Zpět do galerie", lang, triggerRefresh),
+            getCachedTranslation("PŘIDAT DO KOŠÍKU", lang, triggerRefresh),
+            getCachedTranslation("Prodáno", lang, triggerRefresh),
           ]);
           setTranslated({ name, description, dimensions, backToGallery, addToCart, sold });
         }
@@ -68,7 +68,7 @@ const ProductDetail = () => {
     };
 
     fetchProduct();
-  }, [id, lang]);
+  }, [id, lang, triggerRefresh]);
 
   if (!product || !translated) return <p>Načítání...</p>;
 

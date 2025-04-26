@@ -10,7 +10,7 @@ import { getCachedTranslation } from "../utils/translateText";
 const BRAND_NAME = "Veronica Abstracts";
 
 const Checkout = ({ cartItems }) => {
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [t, setT] = useState(null);
 
   useEffect(() => {
@@ -29,10 +29,10 @@ const Checkout = ({ cartItems }) => {
 
       try {
         const [checkout, desc, ogDesc, twitterDesc] = await Promise.all([
-          getCachedTranslation(original.checkout, lang),
-          getCachedTranslation(original.desc, lang),
-          getCachedTranslation(original.ogDesc, lang),
-          getCachedTranslation(original.twitterDesc, lang),
+          getCachedTranslation(original.checkout, lang, triggerRefresh),
+          getCachedTranslation(original.desc, lang, triggerRefresh),
+          getCachedTranslation(original.ogDesc, lang, triggerRefresh),
+          getCachedTranslation(original.twitterDesc, lang, triggerRefresh),
         ]);
 
         setT({
@@ -48,7 +48,7 @@ const Checkout = ({ cartItems }) => {
     };
 
     fetchTranslations();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   if (!t) return <p className="loading-text">Načítání překladu…</p>;
 

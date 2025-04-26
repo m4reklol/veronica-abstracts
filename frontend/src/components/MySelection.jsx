@@ -7,7 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 
 const MySelection = () => {
   const [newestProducts, setNewestProducts] = useState([]);
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [t, setT] = useState({ title: "", explore: "" });
 
   const fallbackTranslations = {
@@ -60,8 +60,8 @@ const MySelection = () => {
 
       try {
         const [title, explore] = await Promise.all([
-          getCachedTranslation(original.title, language),
-          getCachedTranslation(original.explore, language),
+          getCachedTranslation(original.title, language, triggerRefresh),
+          getCachedTranslation(original.explore, language, triggerRefresh),
         ]);
 
         setT({
@@ -84,7 +84,7 @@ const MySelection = () => {
     };
 
     loadTranslations();
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   return (
     <section className="selection-section" data-aos="fade-up">

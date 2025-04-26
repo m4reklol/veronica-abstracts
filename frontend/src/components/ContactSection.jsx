@@ -52,7 +52,7 @@ const ContactSection = () => {
           Object.entries(original).map(async ([key, value]) => {
             try {
               const translated = await getCachedTranslation(value, language);
-              await delay(100); // rate limiting
+              await delay(100);
               return [key, translated?.trim() || value];
             } catch (err) {
               console.warn(`❌ Failed to translate "${key}":`, err);
@@ -189,9 +189,11 @@ const ContactSection = () => {
             ></textarea>
 
             <button type="submit" disabled={isSending} className="contact-section-btn">
-              {isSending ? t.sending : <>
-                {t.send} <i className="ri-send-plane-fill"></i>
-              </>}
+              {isSending ? t.sending : (
+                <>
+                  {t.send} <i className="ri-send-plane-fill"></i>
+                </>
+              )}
             </button>
           </form>
         </div>

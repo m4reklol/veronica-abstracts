@@ -4,7 +4,7 @@ import { getCachedTranslation } from "../utils/translateText";
 import { useLanguage } from "../context/LanguageContext";
 
 const TrustSection = () => {
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -52,8 +52,8 @@ const TrustSection = () => {
       for (const { title, desc, icon } of originalItems) {
         try {
           const [tTitle, tDesc] = await Promise.all([
-            getCachedTranslation(title, language),
-            getCachedTranslation(desc, language),
+            getCachedTranslation(title, language, triggerRefresh),
+            getCachedTranslation(desc, language, triggerRefresh),
           ]);
 
           translatedItems.push({
@@ -71,7 +71,7 @@ const TrustSection = () => {
     };
 
     translateItems();
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   return (
     <section className="trust-section" data-aos="fade-up">

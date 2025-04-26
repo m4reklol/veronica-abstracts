@@ -15,7 +15,7 @@ const BRAND_NAME = "Veronica Abstracts";
 
 const Contact = () => {
   const location = useLocation();
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [t, setT] = useState(null);
 
   useEffect(() => {
@@ -60,18 +60,18 @@ const Contact = () => {
           labelPhone,
           labelIco,
         ] = await Promise.all([
-          getCachedTranslation(clean(original.title), lang),
-          getCachedTranslation(original.description, lang),
-          getCachedTranslation(original.ogDescription, lang),
-          getCachedTranslation(original.twitterDescription, lang),
-          getCachedTranslation(original.heroHeading, lang),
-          getCachedTranslation(original.heroSubtitle, lang),
-          getCachedTranslation(original.heroText, lang),
-          getCachedTranslation(original.contactTitle, lang),
-          getCachedTranslation(original.labels.name, lang),
-          getCachedTranslation(original.labels.email, lang),
-          getCachedTranslation(original.labels.phone, lang),
-          getCachedTranslation(original.labels.ico, lang),
+          getCachedTranslation(clean(original.title), lang, triggerRefresh),
+          getCachedTranslation(original.description, lang, triggerRefresh),
+          getCachedTranslation(original.ogDescription, lang, triggerRefresh),
+          getCachedTranslation(original.twitterDescription, lang, triggerRefresh),
+          getCachedTranslation(original.heroHeading, lang, triggerRefresh),
+          getCachedTranslation(original.heroSubtitle, lang, triggerRefresh),
+          getCachedTranslation(original.heroText, lang, triggerRefresh),
+          getCachedTranslation(original.contactTitle, lang, triggerRefresh),
+          getCachedTranslation(original.labels.name, lang, triggerRefresh),
+          getCachedTranslation(original.labels.email, lang, triggerRefresh),
+          getCachedTranslation(original.labels.phone, lang, triggerRefresh),
+          getCachedTranslation(original.labels.ico, lang, triggerRefresh),
         ]);
 
         setT({
@@ -97,7 +97,7 @@ const Contact = () => {
     };
 
     fetchTranslations();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   useEffect(() => {
     const hash = location.hash;

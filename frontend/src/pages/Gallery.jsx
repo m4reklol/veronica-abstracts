@@ -21,7 +21,7 @@ const Gallery = () => {
   const [notification, setNotification] = useState(null);
   const { cart, dispatch } = useCart();
   const timeoutRef = useRef(null);
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
 
   const [t, setT] = useState({});
 
@@ -59,7 +59,7 @@ const Gallery = () => {
         const translatedPairs = await Promise.all(
           keys.map(async (key) => {
             const original = fallback[key];
-            const translated = await getCachedTranslation(clean(original), lang);
+            const translated = await getCachedTranslation(clean(original), lang, triggerRefresh);
             return [key, restore(translated || original)];
           })
         );
@@ -73,7 +73,7 @@ const Gallery = () => {
     };
 
     loadTranslations();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   useEffect(() => {
     fetchProducts();

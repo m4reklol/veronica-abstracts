@@ -4,7 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getCachedTranslation } from "../utils/translateText";
 
 const Footer = () => {
-  const { language } = useLanguage();
+  const { language, triggerRefresh } = useLanguage();
   const currentYear = new Date().getFullYear();
   const [t, setT] = useState(null);
 
@@ -19,7 +19,7 @@ const Footer = () => {
       terms: "Obchodní podmínky",
       about: "O mně",
       shipping: "Platba a doprava",
-      rights: "Všechna práva vyhrazena."
+      rights: "Všechna práva vyhrazena.",
     };
 
     const translate = async () => {
@@ -30,15 +30,14 @@ const Footer = () => {
 
       try {
         const keys = Object.keys(original);
-        const translatedEntries = await Promise.all(
+        const translations = await Promise.all(
           keys.map(async (key) => {
             if (key === "faq") return [key, "FAQ"];
-            const fallback = original[key];
-            const translated = await getCachedTranslation(fallback, language);
-            return [key, translated?.trim() || fallback];
+            const translated = await getCachedTranslation(original[key], language);
+            return [key, translated?.trim() || original[key]];
           })
         );
-        setT(Object.fromEntries(translatedEntries));
+        setT(Object.fromEntries(translations));
       } catch (err) {
         console.warn("❌ Footer translation failed:", err);
         setT(original);
@@ -46,7 +45,7 @@ const Footer = () => {
     };
 
     translate();
-  }, [language]);
+  }, [language, triggerRefresh]);
 
   if (!t) return null;
 

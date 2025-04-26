@@ -15,7 +15,7 @@ import { useLanguage } from "../context/LanguageContext";
 const BRAND_NAME = "Veronica Abstracts";
 
 const Process = () => {
-  const { language: lang } = useLanguage();
+  const { language: lang, triggerRefresh } = useLanguage();
   const [translations, setTranslations] = useState(null);
 
   useEffect(() => {
@@ -45,17 +45,17 @@ const Process = () => {
         const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
 
         const staticTranslations = await Promise.all([
-          getCachedTranslation(clean(original.title), lang),
-          getCachedTranslation(original.description, lang),
-          getCachedTranslation(original.ogDescription, lang),
-          getCachedTranslation(original.twitterDescription, lang),
-          getCachedTranslation(original.heroTitle, lang),
-          getCachedTranslation(original.heroSubtitle, lang),
-          getCachedTranslation(original.heading, lang),
+          getCachedTranslation(clean(original.title), lang, triggerRefresh),
+          getCachedTranslation(original.description, lang, triggerRefresh),
+          getCachedTranslation(original.ogDescription, lang, triggerRefresh),
+          getCachedTranslation(original.twitterDescription, lang, triggerRefresh),
+          getCachedTranslation(original.heroTitle, lang, triggerRefresh),
+          getCachedTranslation(original.heroSubtitle, lang, triggerRefresh),
+          getCachedTranslation(original.heading, lang, triggerRefresh),
         ]);
 
         const stepTranslations = await Promise.all(
-          original.steps.map(async (step, index) => {
+          original.steps.map(async (step) => {
             let translatedTitle = step.title;
             if (step.title === "2. Vize") {
               const fallbackTitles = {
@@ -66,10 +66,10 @@ const Process = () => {
               };
               translatedTitle = fallbackTitles[lang] || step.title;
             } else {
-              translatedTitle = await getCachedTranslation(step.title, lang);
+              translatedTitle = await getCachedTranslation(step.title, lang, triggerRefresh);
             }
 
-            const translatedText = await getCachedTranslation(step.text, lang);
+            const translatedText = await getCachedTranslation(step.text, lang, triggerRefresh);
 
             return {
               title: translatedTitle?.trim() || step.title,
@@ -100,7 +100,7 @@ const Process = () => {
     };
 
     fetchTranslations();
-  }, [lang]);
+  }, [lang, triggerRefresh]);
 
   if (!translations) return <p className="loading-text">Načítání překladu…</p>;
 

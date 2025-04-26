@@ -30,24 +30,36 @@ const AboutSection = () => {
 
     const keys = Object.keys(original);
 
-    if (language === "cz") {
-      const withNames = keys.reduce((acc, key) => {
-        acc[key] = replacePlaceholders(original[key]);
-        return acc;
-      }, {});
-      setT(withNames);
-      return;
-    }
+    const loadTranslations = async () => {
+      if (language === "cz") {
+        const withNames = keys.reduce((acc, key) => {
+          acc[key] = replacePlaceholders(original[key]);
+          return acc;
+        }, {});
+        setT(withNames);
+        return;
+      }
 
-    Promise.all(
-      keys.map((key) => getCachedTranslation(original[key], language))
-    ).then((translatedValues) => {
-      const translated = keys.reduce((acc, key, i) => {
-        acc[key] = replacePlaceholders(translatedValues[i]);
-        return acc;
-      }, {});
-      setT(translated);
-    });
+      try {
+        const translatedValues = await Promise.all(
+          keys.map((key) => getCachedTranslation(original[key], language))
+        );
+        const translated = keys.reduce((acc, key, i) => {
+          acc[key] = replacePlaceholders(translatedValues[i] || original[key]);
+          return acc;
+        }, {});
+        setT(translated);
+      } catch (err) {
+        console.warn("❌ AboutSection translation failed:", err);
+        const withNames = keys.reduce((acc, key) => {
+          acc[key] = replacePlaceholders(original[key]);
+          return acc;
+        }, {});
+        setT(withNames);
+      }
+    };
+
+    loadTranslations();
   }, [language]);
 
   return (

@@ -1,6 +1,4 @@
 // frontend/src/utils/translateText.js
-import { LanguageContext } from "../context/LanguageContext";
-import { useContext } from "react";
 
 const memoryCache = new Map();
 const pendingRequests = new Map();
@@ -23,7 +21,15 @@ export const translateText = async (text, lang) => {
   }
 };
 
-export const getCachedTranslation = async (text, lang) => {
+/**
+ * Překlad s cache a volitelným callbackem.
+ * 
+ * @param {string} text - Text k překladu.
+ * @param {string} lang - Cílový jazyk (např. "en", "de").
+ * @param {function} [onTranslated] - Nepovinný callback, zavolá se po doběhnutí překladu.
+ * @returns {Promise<string>}
+ */
+export const getCachedTranslation = async (text, lang, onTranslated) => {
   if (!text || !lang || lang === "cz") return text;
 
   const key = `original:${text}`;
@@ -63,9 +69,10 @@ export const getCachedTranslation = async (text, lang) => {
         console.warn("⚠️ Could not write to localStorage:", err);
       }
 
-      // ✅ Zavoláme refresh stránky, aby nové překlady byly zobrazeny
-      const { triggerRefresh } = useContext(LanguageContext);
-      triggerRefresh();
+      // ✅ Zavoláme volitelný callback po překladu
+      if (onTranslated) {
+        onTranslated();
+      }
 
       return translated;
     })
