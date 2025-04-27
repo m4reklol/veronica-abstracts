@@ -36,35 +36,28 @@ const ExhibitionsSection = () => {
         return;
       }
 
-      const translatedTexts = {};
-      let allTranslated = true;
+      try {
+        const jsonString = JSON.stringify(originalTexts);
 
-      for (const key in originalTexts) {
-        try {
-          const translated = await getCachedTranslation(originalTexts[key], language);
+        // Pošleme celý JSON jako jeden text
+        const translatedJsonString = await getCachedTranslation(jsonString, language);
 
-          // pokud překlad selže nebo vrátí stejný text (což znamená nezměněno), bereme jako fail
-          if (!translated || translated.trim() === originalTexts[key].trim()) {
-            allTranslated = false;
-            console.warn(`⚠️ Text "${key}" nebyl přeložen.`);
-          }
-          translatedTexts[key] = translated || originalTexts[key];
-        } catch (err) {
-          console.error(`❌ Error translating key "${key}":`, err);
-          allTranslated = false;
-          translatedTexts[key] = originalTexts[key];
-        }
-      }
+        // Pokusíme se bezpečně parsovat zpátky
+        const parsed = JSON.parse(translatedJsonString);
 
-      if (isMounted) {
-        if (allTranslated) {
-          setT(translatedTexts);
+        if (isMounted && parsed && typeof parsed === "object") {
+          setT(parsed);
         } else {
-          // fallback na originál
-          console.warn("⚠️ Překlad nebyl kompletní, zobrazujeme originální texty.");
+          console.warn("⚠️ Překlad JSONu selhal, fallback na originál.");
           setT(originalTexts);
         }
-        setLoading(false);
+      } catch (err) {
+        console.error("❌ Error during bulk translation:", err);
+        setT(originalTexts);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -72,11 +65,11 @@ const ExhibitionsSection = () => {
     translateAll();
 
     return () => {
-      isMounted = false; // cleanup
+      isMounted = false;
     };
   }, [language]);
 
-  if (loading) return null; // nebo loader animaci, pokud chceš
+  if (loading) return null; // nebo loader animaci
 
   return (
     <section className="exhibitions-section">
