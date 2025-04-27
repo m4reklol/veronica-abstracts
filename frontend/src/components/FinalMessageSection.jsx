@@ -42,8 +42,12 @@ const FinalMessageSection = () => {
         const translatedLove = await getCachedTranslation(original.love, language);
 
         setT({
-          quote: translatedQuote?.trim() || fallbackTranslations.quote[language] || original.quote,
-          love: translatedLove?.trim() || fallbackTranslations.love[language] || original.love,
+          quote: translatedQuote?.trim() && translatedQuote.trim() !== original.quote
+            ? translatedQuote.trim()
+            : fallbackTranslations.quote[language] || original.quote,
+          love: translatedLove?.trim() && translatedLove.trim() !== original.love
+            ? translatedLove.trim()
+            : fallbackTranslations.love[language] || original.love,
         });
       } catch (error) {
         console.warn("❌ Translation fetch failed:", error);
