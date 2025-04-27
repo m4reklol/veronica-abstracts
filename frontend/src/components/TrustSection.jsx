@@ -40,6 +40,113 @@ const TrustSection = () => {
     },
   ];
 
+  const fallbackTranslations = {
+    en: [
+      {
+        title: "High Quality",
+        desc: "Hand-painted originals",
+      },
+      {
+        title: "Fast Shipping",
+        desc: "Shipped within 5 business days",
+      },
+      {
+        title: "New Arrivals Weekly",
+        desc: "New paintings every week",
+      },
+      {
+        title: "Secure Payments",
+        desc: "Comgate - card and mobile payments",
+      },
+      {
+        title: "Exclusive Editions",
+        desc: "Limited series of paintings",
+      },
+      {
+        title: "Authenticity Guarantee",
+        desc: "Certificate of authenticity for each piece",
+      },
+    ],
+    es: [
+      {
+        title: "Alta calidad",
+        desc: "Originales pintados a mano",
+      },
+      {
+        title: "Envío rápido",
+        desc: "Envío en 5 días hábiles",
+      },
+      {
+        title: "Novedades cada semana",
+        desc: "Nuevas pinturas cada semana",
+      },
+      {
+        title: "Pagos seguros",
+        desc: "Comgate - pagos con tarjeta y móvil",
+      },
+      {
+        title: "Ediciones exclusivas",
+        desc: "Series limitadas de pinturas",
+      },
+      {
+        title: "Garantía de autenticidad",
+        desc: "Certificado de autenticidad con cada obra",
+      },
+    ],
+    de: [
+      {
+        title: "Hohe Qualität",
+        desc: "Handgemalte Originale",
+      },
+      {
+        title: "Schneller Versand",
+        desc: "Versand innerhalb von 5 Werktagen",
+      },
+      {
+        title: "Jede Woche Neuheiten",
+        desc: "Neue Gemälde jede Woche",
+      },
+      {
+        title: "Sichere Zahlungen",
+        desc: "Comgate - Zahlungen per Karte und Handy",
+      },
+      {
+        title: "Exklusive Editionen",
+        desc: "Limitierte Serien von Gemälden",
+      },
+      {
+        title: "Echtheitsgarantie",
+        desc: "Echtheitszertifikat für jedes Werk",
+      },
+    ],
+    it: [
+      {
+        title: "Alta qualità",
+        desc: "Originali dipinti a mano",
+      },
+      {
+        title: "Spedizione veloce",
+        desc: "Spedizione entro 5 giorni lavorativi",
+      },
+      {
+        title: "Novità ogni settimana",
+        desc: "Nuovi dipinti ogni settimana",
+      },
+      {
+        title: "Pagamenti sicuri",
+        desc: "Comgate - pagamenti con carta e mobile",
+      },
+      {
+        title: "Edizioni esclusive",
+        desc: "Serie limitate di dipinti",
+      },
+      {
+        title: "Garanzia di autenticità",
+        desc: "Certificato di autenticità per ogni opera",
+      },
+    ],
+  };
+
   useEffect(() => {
     const translateItems = async () => {
       if (language === "cz") {
@@ -50,20 +157,27 @@ const TrustSection = () => {
       try {
         const translated = [];
 
-        for (const item of originalItems) {
-          try {
-            const tTitle = await getCachedTranslation(item.title, language, triggerRefresh);
-            const tDesc = await getCachedTranslation(item.desc, language, triggerRefresh);
+        for (let i = 0; i < originalItems.length; i++) {
+          const item = originalItems[i];
+          let tTitle = "";
+          let tDesc = "";
 
-            translated.push({
-              icon: item.icon,
-              title: tTitle?.trim() || item.title,
-              desc: tDesc?.trim() || item.desc,
-            });
+          try {
+            tTitle = await getCachedTranslation(item.title, language, triggerRefresh);
+            tDesc = await getCachedTranslation(item.desc, language, triggerRefresh);
           } catch (err) {
             console.warn(`❌ Překlad selhal pro ${item.title}`, err);
-            translated.push(item);
           }
+
+          translated.push({
+            icon: item.icon,
+            title: tTitle?.trim() && tTitle.trim() !== item.title
+              ? tTitle.trim()
+              : fallbackTranslations[language]?.[i]?.title || item.title,
+            desc: tDesc?.trim() && tDesc.trim() !== item.desc
+              ? tDesc.trim()
+              : fallbackTranslations[language]?.[i]?.desc || item.desc,
+          });
         }
 
         setItems(translated);
