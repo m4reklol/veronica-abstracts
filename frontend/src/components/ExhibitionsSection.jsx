@@ -25,7 +25,7 @@ const ExhibitionsSection = () => {
       contactMe: "Napište mi pro více informací",
     };
 
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
     const fetchTranslations = async () => {
       if (language === "cz") {
@@ -34,24 +34,22 @@ const ExhibitionsSection = () => {
         return;
       }
 
-      try {
-        const keys = Object.keys(original);
-        const result = {};
+      const translated = {};
 
-        for (const key of keys) {
+      try {
+        for (const key of Object.keys(original)) {
           try {
-            const translated = await getCachedTranslation(original[key], language);
-            await delay(100); // malá pauza mezi překlady
-            result[key] = translated?.trim() || original[key];
+            const translation = await getCachedTranslation(original[key], language);
+            translated[key] = translation?.trim() || original[key];
+            await delay(100); // Pauza, aby se nezatížilo API
           } catch (error) {
-            console.warn(`❌ Translation failed for key "${key}":`, error);
-            result[key] = original[key];
+            console.warn(`❌ Chyba překladu pro klíč "${key}":`, error);
+            translated[key] = original[key];
           }
         }
-
-        setT(result);
+        setT(translated);
       } catch (error) {
-        console.error("❌ Error fetching translations:", error);
+        console.error("❌ Celková chyba překladu ExhibitionsSection:", error);
         setT(original);
       } finally {
         setLoading(false);
