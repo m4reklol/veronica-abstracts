@@ -9,7 +9,7 @@ const ContactSection = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [notification, setNotification] = useState(null);
   const [isSending, setIsSending] = useState(false);
-  const [t, setT] = useState({});
+  const [t, setT] = useState(null);
   const notificationRef = useRef(null);
 
   useEffect(() => {
@@ -39,8 +39,6 @@ const ContactSection = () => {
       it: "Domande frequenti",
     };
 
-    const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-
     const fetchTranslations = async () => {
       if (language === "cz") {
         setT(original);
@@ -54,7 +52,6 @@ const ContactSection = () => {
         for (const key of keys) {
           try {
             const translated = await getCachedTranslation(original[key], language);
-            await delay(100); // malá pauza kvůli API limitům
             result[key] = translated?.trim() || original[key];
           } catch (err) {
             console.warn(`❌ Failed to translate key "${key}":`, err);
@@ -116,6 +113,8 @@ const ContactSection = () => {
       setIsSending(false);
     }
   };
+
+  if (!t) return null; // Pokud překlad ještě není načtený, neukazuj nic
 
   return (
     <section className="contact-section">
