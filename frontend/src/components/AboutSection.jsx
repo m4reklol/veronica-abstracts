@@ -14,6 +14,8 @@ const AboutSection = () => {
     text.replace(/{{VERONIKA}}/g, VERONIKA).replace(/{{BRAND}}/g, BRAND);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchTranslations = async () => {
       const original = {
         title: "O mně",
@@ -29,28 +31,41 @@ const AboutSection = () => {
         intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.`,
       };
 
-      const keys = Object.keys(original);
-
       if (language === "cz") {
-        const withNames = {};
-        for (const key of keys) {
-          withNames[key] = replacePlaceholders(original[key]);
+        if (isMounted) {
+          const withNames = {};
+          for (const key in original) {
+            withNames[key] = replacePlaceholders(original[key]);
+          }
+          setT(withNames);
         }
-        setT(withNames);
         return;
       }
 
       try {
-        const translated = {};
-        for (const key of keys) {
-          const translatedText = await getCachedTranslation(original[key], language);
-          translated[key] = replacePlaceholders(translatedText || original[key]);
+        const jsonString = JSON.stringify(original);
+        const translatedJsonString = await getCachedTranslation(jsonString, language);
+
+        const parsed = JSON.parse(translatedJsonString);
+
+        if (isMounted && parsed && typeof parsed === "object") {
+          const withNames = {};
+          for (const key in parsed) {
+            withNames[key] = replacePlaceholders(parsed[key]);
+          }
+          setT(withNames);
+        } else {
+          console.warn("⚠️ AboutSection: Překlad JSONu selhal, fallback na originál.");
+          const withNames = {};
+          for (const key in original) {
+            withNames[key] = replacePlaceholders(original[key]);
+          }
+          setT(withNames);
         }
-        setT(translated);
       } catch (err) {
-        console.warn("❌ AboutSection translation failed:", err);
+        console.error("❌ AboutSection: Error during translation:", err);
         const withNames = {};
-        for (const key of keys) {
+        for (const key in original) {
           withNames[key] = replacePlaceholders(original[key]);
         }
         setT(withNames);
@@ -58,7 +73,13 @@ const AboutSection = () => {
     };
 
     fetchTranslations();
+
+    return () => {
+      isMounted = false;
+    };
   }, [language]);
+
+  if (!t.title) return null; // loading fallback
 
   return (
     <section id="about-section" className="about-section" data-aos="fade-up">
