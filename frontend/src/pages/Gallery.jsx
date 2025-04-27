@@ -22,7 +22,7 @@ const Gallery = () => {
   const { cart, dispatch } = useCart();
   const timeoutRef = useRef(null);
   const { language: lang, triggerRefresh } = useLanguage();
-  const [t, setT] = useState({});
+  const [t, setT] = useState(null);
 
   useEffect(() => {
     const fallback = {
@@ -31,7 +31,8 @@ const Gallery = () => {
       ogDescription: "Prohlédněte si ručně malované abstraktní obrazy.",
       twitterDescription: "Galerie originálních abstraktních obrazů.",
       galleryHeading: "ABSTRAKTNÍ OBRAZY",
-      galleryIntro: "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele. Nechte se inspirovat unikátními díly, která přinášejí barvu a energii do každého prostoru.",
+      galleryIntro:
+        "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele.",
       sortLabel: "Řadit podle: ",
       sortDefault: "Výchozí",
       sortAsc: "Cena: od nejnižší",
@@ -53,10 +54,9 @@ const Gallery = () => {
       }
 
       try {
-        const keys = Object.keys(fallback);
         const translated = {};
 
-        for (const key of keys) {
+        for (const key of Object.keys(fallback)) {
           try {
             const cleaned = clean(fallback[key]);
             const translatedText = await getCachedTranslation(cleaned, lang, triggerRefresh);
@@ -124,6 +124,8 @@ const Gallery = () => {
     }, 1500);
   };
 
+  if (!t) return null; // Překlady se ještě načítají
+
   return (
     <>
       <Helmet>
@@ -179,7 +181,11 @@ const Gallery = () => {
         <div className="gallery-grid">
           {products.length > 0 ? (
             products.map((product) => (
-              <Link to={`/product/${product._id}`} key={product._id} className="gallery-item-link">
+              <Link
+                to={`/product/${product._id}`}
+                key={product._id}
+                className="gallery-item-link"
+              >
                 <div className="gallery-item">
                   <div className="image-container">
                     <img src={product.image} alt={product.name} className="gallery-img" />
@@ -224,7 +230,11 @@ const Gallery = () => {
                 <div key={product._id} className="gallery-item sold">
                   <Link to={`/product/${product._id}`}>
                     <div className="image-container">
-                      <img src={product.image} alt={product.name} className="gallery-img" />
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="gallery-img"
+                      />
                       {product.additionalImages.length > 0 && (
                         <img
                           src={product.additionalImages[2]}
