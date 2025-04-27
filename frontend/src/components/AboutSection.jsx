@@ -13,24 +13,24 @@ const AboutSection = () => {
   const replacePlaceholders = (text) =>
     text.replace(/{{VERONIKA}}/g, VERONIKA).replace(/{{BRAND}}/g, BRAND);
 
+  const original = {
+    title: "O mně",
+    p1: `Jmenuji se {{VERONIKA}}, ale ve světě umění tvořím pod jménem {{BRAND}}.
+Pocházím z Českých Budějovic a celý život mě provází kreativita, touha tvořit a hledání vnitřního klidu.
+Po letech práce v korporátu jsem se rozhodla vydat cestou svobody – a díky podpoře svého bratra jsem se stala OSVČ.`,
+    p2: `Zásadním momentem v mém životě bylo narození mé dcery Lucie, která je pro mě největším darem a připomínkou toho,
+co je skutečně důležité – láska, čas a vzájemná podpora. Právě s ní vznikl i můj první obraz – spontánně, doma, jen s plátnem a barvami.
+Netušila jsem, že tím začne nová kapitola mého života.`,
+    p3: `Malování mi pomohlo projít i těžkými chvílemi, jako byla ztráta mého tatínka. Plátno se stalo místem, kde mohu
+svobodně vyjádřit emoce, které se slovy vyjádřit nedají. Barvy mi přinášejí klid, svobodu a radost.`,
+    p4: `Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
+intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.`,
+  };
+
   useEffect(() => {
     let isMounted = true;
 
     const fetchTranslations = async () => {
-      const original = {
-        title: "O mně",
-        p1: `Jmenuji se {{VERONIKA}}, ale ve světě umění tvořím pod jménem {{BRAND}}.
-        Pocházím z Českých Budějovic a celý život mě provází kreativita, touha tvořit a hledání vnitřního klidu.
-        Po letech práce v korporátu jsem se rozhodla vydat cestou svobody – a díky podpoře svého bratra jsem se stala OSVČ.`,
-        p2: `Zásadním momentem v mém životě bylo narození mé dcery Lucie, která je pro mě největším darem a připomínkou toho,
-        co je skutečně důležité – láska, čas a vzájemná podpora. Právě s ní vznikl i můj první obraz – spontánně, doma, jen s plátnem a barvami.
-        Netušila jsem, že tím začne nová kapitola mého života.`,
-        p3: `Malování mi pomohlo projít i těžkými chvílemi, jako byla ztráta mého tatínka. Plátno se stalo místem, kde mohu
-        svobodně vyjádřit emoce, které se slovy vyjádřit nedají. Barvy mi přinášejí klid, svobodu a radost.`,
-        p4: `Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
-        intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.`,
-      };
-
       if (language === "cz") {
         if (isMounted) {
           const withNames = {};
@@ -43,32 +43,27 @@ const AboutSection = () => {
       }
 
       try {
-        const jsonString = JSON.stringify(original);
-        const translatedJsonString = await getCachedTranslation(jsonString, language);
+        const translated = {};
 
-        const parsed = JSON.parse(translatedJsonString);
+        for (const key in original) {
+          const textToTranslate = original[key];
+          const translatedText = await getCachedTranslation(textToTranslate, language);
 
-        if (isMounted && parsed && typeof parsed === "object") {
-          const withNames = {};
-          for (const key in parsed) {
-            withNames[key] = replacePlaceholders(parsed[key]);
-          }
-          setT(withNames);
-        } else {
-          console.warn("⚠️ AboutSection: Překlad JSONu selhal, fallback na originál.");
+          translated[key] = replacePlaceholders(translatedText || textToTranslate);
+        }
+
+        if (isMounted) {
+          setT(translated);
+        }
+      } catch (err) {
+        console.error("❌ AboutSection: Error during translation:", err);
+        if (isMounted) {
           const withNames = {};
           for (const key in original) {
             withNames[key] = replacePlaceholders(original[key]);
           }
           setT(withNames);
         }
-      } catch (err) {
-        console.error("❌ AboutSection: Error during translation:", err);
-        const withNames = {};
-        for (const key in original) {
-          withNames[key] = replacePlaceholders(original[key]);
-        }
-        setT(withNames);
       }
     };
 
