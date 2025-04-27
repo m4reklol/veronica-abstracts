@@ -40,6 +40,8 @@ const Gallery = () => {
       sold: "Prodáno",
       successMessage: "Položka byla přidána do košíku!",
       errorMessage: "Tato položka je již v košíku.",
+      currency: "Kč",
+      locale: "cs-CZ",
     };
 
     const fixedTranslations = {
@@ -59,6 +61,8 @@ const Gallery = () => {
         sold: "Sold",
         successMessage: "Item has been added to cart!",
         errorMessage: "This item is already in the cart.",
+        currency: "CZK",
+        locale: "en-US",
       },
     };
 
@@ -186,10 +190,10 @@ const Gallery = () => {
                   <h3>{product.name}</h3>
                   <p id="product-dimensions">{product.dimensions}</p>
                   <p id="product-price">
-                    {new Intl.NumberFormat("cs-CZ", {
+                    {new Intl.NumberFormat(t.locale, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    }).format(product.price)} Kč
+                    }).format(product.price)} {t.currency}
                   </p>
                   <button
                     className="add-to-cart"
