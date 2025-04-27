@@ -108,32 +108,39 @@ router.post("/create-payment", async (req, res) => {
 });
 
 // ✅ Callback z Comgate
-router.post("/callback", async (req, res) => {
-  try {
-    const { transId, status, refId } = req.body;
-    console.log("📩 Comgate callback:", req.body);
+  router.post("/callback", async (req, res) => {
+    try {
+      const { transId, status, refId } = req.body;
+      console.log("📩 Callback přijat:", { refId, status });
 
-    if (!refId || !transId) return res.status(400).send("Missing refId or transId");
+      // Ignoruj testovací callbacky
+      if (!refId || refId.startsWith("test")) {
+        console.warn("⚠️ Ignorován testovací nebo neplatný callback:", req.body);
+        return res.send("OK");
+      }
 
-    const order = await Order.findOne({ orderNumber: refId });
-    if (!order) return res.status(404).send("Order not found");
+      const order = await Order.findOne({ orderNumber: refId });
+      if (!order) {
+        console.warn("⚠️ Objednávka nenalezena pro refId:", refId);
+        return res.send("OK");
+      }
 
-    if (status === "PAID") {
-      order.status = "paid";
-      await order.save();
+      if (status === "PAID" && order.status !== "paid") {
+        order.status = "paid";
+        await order.save();
 
-      const productIds = order.cartItems.map((item) => item._id);
-      await Product.updateMany({ _id: { $in: productIds } }, { $set: { sold: true } });
+        const productIds = order.cartItems.map((item) => item._id);
+        await Product.updateMany({ _id: { $in: productIds } }, { $set: { sold: true } });
 
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT),
-        secure: process.env.SMTP_SECURE === "true",
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_PASS,
-        },
-      });
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT),
+          secure: process.env.SMTP_SECURE === "true",
+          auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS,
+          },
+        });
 
       await transporter.sendMail({
         from: `"${process.env.SMTP_FROM}" <${process.env.GMAIL_USER}>`,
@@ -251,7 +258,7 @@ router.post("/callback", async (req, res) => {
     return res.send("OK");
   } catch (err) {
     console.error("❌ Chyba v Comgate callbacku:", err.message || err);
-    return res.status(500).send("ERROR");
+    return res.send("OK");
   }
 });
 
