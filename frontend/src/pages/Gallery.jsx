@@ -44,6 +44,33 @@ const Gallery = () => {
       errorMessage: "Tato položka je již v košíku.",
     };
 
+    const fixedTranslations = {
+      sold: {
+        en: "Sold",
+        es: "Vendido",
+        de: "Verkauft",
+        it: "Venduto",
+      },
+      sortDefault: {
+        en: "Default",
+        es: "Predeterminado",
+        de: "Standard",
+        it: "Predefinito",
+      },
+      sortAsc: {
+        en: "Price: Low to High",
+        es: "Precio: menor a mayor",
+        de: "Preis: aufsteigend",
+        it: "Prezzo: dal più basso",
+      },
+      sortDesc: {
+        en: "Price: High to Low",
+        es: "Precio: mayor a menor",
+        de: "Preis: absteigend",
+        it: "Prezzo: dal più alto",
+      },
+    };
+
     const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
     const restore = (str) => str.replace("___BRAND___", BRAND_NAME);
 
@@ -57,6 +84,11 @@ const Gallery = () => {
         const translated = {};
 
         for (const key of Object.keys(fallback)) {
+          if (["sold", "sortDefault", "sortAsc", "sortDesc"].includes(key)) {
+            translated[key] = fixedTranslations[key][lang] || fallback[key];
+            continue;
+          }
+
           try {
             const cleaned = clean(fallback[key]);
             const translatedText = await getCachedTranslation(cleaned, lang, triggerRefresh);
@@ -124,7 +156,7 @@ const Gallery = () => {
     }, 1500);
   };
 
-  if (!t) return null; // Překlady se ještě načítají
+  if (!t) return null;
 
   return (
     <>
@@ -181,20 +213,12 @@ const Gallery = () => {
         <div className="gallery-grid">
           {products.length > 0 ? (
             products.map((product) => (
-              <Link
-                to={`/product/${product._id}`}
-                key={product._id}
-                className="gallery-item-link"
-              >
+              <Link to={`/product/${product._id}`} key={product._id} className="gallery-item-link">
                 <div className="gallery-item">
                   <div className="image-container">
                     <img src={product.image} alt={product.name} className="gallery-img" />
                     {product.additionalImages.length > 0 && (
-                      <img
-                        src={product.additionalImages[2]}
-                        alt="alt-preview"
-                        className="hover-img"
-                      />
+                      <img src={product.additionalImages[2]} alt="alt-preview" className="hover-img" />
                     )}
                   </div>
                   <h3>{product.name}</h3>
@@ -230,17 +254,9 @@ const Gallery = () => {
                 <div key={product._id} className="gallery-item sold">
                   <Link to={`/product/${product._id}`}>
                     <div className="image-container">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="gallery-img"
-                      />
+                      <img src={product.image} alt={product.name} className="gallery-img" />
                       {product.additionalImages.length > 0 && (
-                        <img
-                          src={product.additionalImages[2]}
-                          alt="alt-preview"
-                          className="hover-img"
-                        />
+                        <img src={product.additionalImages[2]} alt="alt-preview" className="hover-img" />
                       )}
                       <div className="sold-overlay"></div>
                     </div>
