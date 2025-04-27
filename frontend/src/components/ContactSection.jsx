@@ -22,26 +22,42 @@ const ContactSection = () => {
       placeholderName: "Vaše jméno",
       placeholderEmail: "vas@email.cz",
       placeholderMessage: "Vaše zpráva...",
-      send: "Odeslat zprávu",
-      sending: "Odesílám...",
-      faq: "Podívejte se na",
-      faqHighlight: "nejčastější dotazy",
       success: "Zpráva byla úspěšně odeslána!",
       error: "Něco se pokazilo při odesílání zprávy.",
       fillAll: "Vyplňte prosím všechna pole.",
       errorLater: "Chyba při odesílání. Zkuste to prosím později.",
     };
 
-    const fallbackFaqHighlight = {
-      en: "FAQ",
-      es: "Preguntas frecuentes",
-      de: "Häufige Fragen",
-      it: "Domande frequenti",
+    const fixedTranslations = {
+      send: {
+        en: "Send Message",
+        es: "Enviar mensaje",
+        de: "Nachricht senden",
+        it: "Invia messaggio",
+      },
+      sending: {
+        en: "Sending...",
+        es: "Enviando...",
+        de: "Wird gesendet...",
+        it: "Invio in corso...",
+      },
+      faqHighlight: {
+        en: "FAQ",
+        es: "Preguntas frecuentes",
+        de: "Häufige Fragen",
+        it: "Domande frequenti",
+      },
     };
 
     const fetchTranslations = async () => {
       if (language === "cz") {
-        setT(original);
+        setT({
+          ...original,
+          send: "Odeslat zprávu",
+          sending: "Odesílám...",
+          faq: "Podívejte se na",
+          faqHighlight: "nejčastější dotazy",
+        });
         return;
       }
 
@@ -59,11 +75,21 @@ const ContactSection = () => {
           }
         }
 
-        result.faqHighlight = fallbackFaqHighlight[language] || "FAQ";
+        result.send = fixedTranslations.send[language] || "Send";
+        result.sending = fixedTranslations.sending[language] || "Sending...";
+        result.faq = "See"; // FAQ link text like "See FAQ" – můžeš přizpůsobit
+        result.faqHighlight = fixedTranslations.faqHighlight[language] || "FAQ";
+
         setT(result);
       } catch (err) {
         console.error("❌ Translation fetch failed:", err);
-        setT(original);
+        setT({
+          ...original,
+          send: fixedTranslations.send[language] || "Send",
+          sending: fixedTranslations.sending[language] || "Sending...",
+          faq: "See",
+          faqHighlight: fixedTranslations.faqHighlight[language] || "FAQ",
+        });
       }
     };
 
@@ -114,7 +140,7 @@ const ContactSection = () => {
     }
   };
 
-  if (!t) return null; // Pokud překlad ještě není načtený, neukazuj nic
+  if (!t) return null; // Nezobrazit než se načte
 
   return (
     <section className="contact-section">
