@@ -9,7 +9,6 @@ import ContactSection from "../components/ContactSection.jsx";
 import TrustSection from "../components/TrustSection.jsx";
 import InstagramSection from "../components/InstagramSection.jsx";
 import { Helmet } from "react-helmet-async";
-import { getCachedTranslation } from "../utils/translateText";
 import { useLanguage } from "../context/LanguageContext";
 
 const BRAND_NAME = "Veronica Abstracts";
@@ -21,7 +20,7 @@ const Gallery = () => {
   const [notification, setNotification] = useState(null);
   const { cart, dispatch } = useCart();
   const timeoutRef = useRef(null);
-  const { language: lang, triggerRefresh } = useLanguage();
+  const { language: lang } = useLanguage();
   const [t, setT] = useState(null);
 
   useEffect(() => {
@@ -44,69 +43,33 @@ const Gallery = () => {
     };
 
     const fixedTranslations = {
-      sold: {
-        en: "Sold",
-        es: "Vendido",
-        de: "Verkauft",
-        it: "Venduto",
-      },
-      sortDefault: {
-        en: "Default",
-        es: "Predeterminado",
-        de: "Standard",
-        it: "Predefinito",
-      },
-      sortAsc: {
-        en: "Price: Low to High",
-        es: "Precio: menor a mayor",
-        de: "Preis: aufsteigend",
-        it: "Prezzo: dal più basso",
-      },
-      sortDesc: {
-        en: "Price: High to Low",
-        es: "Precio: mayor a menor",
-        de: "Preis: absteigend",
-        it: "Prezzo: dal più alto",
+      en: {
+        title: `Gallery | ${BRAND_NAME}`,
+        description: "Explore the gallery of abstract art. Each painting is an original with its own story.",
+        ogDescription: "Explore hand-painted abstract artworks.",
+        twitterDescription: "Gallery of original abstract paintings.",
+        galleryHeading: "ABSTRACT PAINTINGS",
+        galleryIntro: "Abstract art is a visual form that conveys emotions and moods without the need for concrete expression. Each brushstroke is part of a story waiting to be discovered.",
+        sortLabel: "Sort by: ",
+        sortDefault: "Default",
+        sortAsc: "Price: Low to High",
+        sortDesc: "Price: High to Low",
+        addToCart: "Add to Cart",
+        noProducts: "No products available.",
+        sold: "Sold",
+        successMessage: "Item has been added to cart!",
+        errorMessage: "This item is already in the cart.",
       },
     };
 
-    const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
-    const restore = (str) => str.replace("___BRAND___", BRAND_NAME);
-
-    const loadTranslations = async () => {
-      if (lang === "cz") {
-        setT(fallback);
-        return;
-      }
-
-      try {
-        const translated = {};
-
-        for (const key of Object.keys(fallback)) {
-          if (fixedTranslations[key]) {
-            translated[key] = fixedTranslations[key][lang] || fallback[key];
-            continue;
-          }
-
-          try {
-            const cleaned = clean(fallback[key]);
-            const translatedText = await getCachedTranslation(cleaned, lang, triggerRefresh);
-            translated[key] = restore(translatedText?.trim() || fallback[key]);
-          } catch (err) {
-            console.warn(`❌ Error translating key ${key}:`, err);
-            translated[key] = fallback[key];
-          }
-        }
-
-        setT(translated);
-      } catch (err) {
-        console.warn("❌ Gallery translation error:", err);
-        setT(fallback);
-      }
-    };
-
-    loadTranslations();
-  }, [lang, triggerRefresh]);
+    if (lang === "cz") {
+      setT(fallback);
+    } else if (fixedTranslations[lang]) {
+      setT(fixedTranslations[lang]);
+    } else {
+      setT(fallback);
+    }
+  }, [lang]);
 
   useEffect(() => {
     fetchProducts();
