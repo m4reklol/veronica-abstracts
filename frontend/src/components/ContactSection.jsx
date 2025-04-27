@@ -47,6 +47,42 @@ const ContactSection = () => {
         de: "Häufige Fragen",
         it: "Domande frequenti",
       },
+      heading: {
+        en: "Have a question? Write me",
+        es: "¿Tienes una pregunta? Escríbeme",
+        de: "Hast du eine Frage? Schreib mir",
+        it: "Hai una domanda? Scrivimi",
+      },
+      desc: {
+        en: "Whether you are interested in a specific artwork or have a question about my art, feel free to write me. I would love to hear your feedback.",
+        es: "Ya sea que estés interesado en una obra específica o tengas una pregunta sobre mi arte, no dudes en escribirme. Me encantaría escuchar tus comentarios.",
+        de: "Ob du an einem bestimmten Kunstwerk interessiert bist oder eine Frage zu meiner Kunst hast, schreibe mir gerne. Ich freue mich auf dein Feedback.",
+        it: "Se sei interessato a un'opera specifica o hai domande sulla mia arte, scrivimi pure. Mi piacerebbe ricevere il tuo feedback.",
+      },
+      placeholderName: {
+        en: "Your Name",
+        es: "Tu nombre",
+        de: "Dein Name",
+        it: "Il tuo nome",
+      },
+      placeholderEmail: {
+        en: "your@email.com",
+        es: "tu@email.com",
+        de: "dein@email.de",
+        it: "tuo@email.com",
+      },
+      placeholderMessage: {
+        en: "Your Message...",
+        es: "Tu mensaje...",
+        de: "Deine Nachricht...",
+        it: "Il tuo messaggio...",
+      },
+      faq: {
+        en: "See",
+        es: "Ver",
+        de: "Ansehen",
+        it: "Vedi",
+      },
     };
 
     const fetchTranslations = async () => {
@@ -77,8 +113,14 @@ const ContactSection = () => {
 
         result.send = fixedTranslations.send[language] || "Send";
         result.sending = fixedTranslations.sending[language] || "Sending...";
-        result.faq = "See"; // FAQ link text like "See FAQ" – můžeš přizpůsobit
+        result.faq = fixedTranslations.faq[language] || "See";
         result.faqHighlight = fixedTranslations.faqHighlight[language] || "FAQ";
+
+        result.heading = fixedTranslations.heading[language] || original.heading;
+        result.desc = fixedTranslations.desc[language] || original.desc;
+        result.placeholderName = fixedTranslations.placeholderName[language] || original.placeholderName;
+        result.placeholderEmail = fixedTranslations.placeholderEmail[language] || original.placeholderEmail;
+        result.placeholderMessage = fixedTranslations.placeholderMessage[language] || original.placeholderMessage;
 
         setT(result);
       } catch (err) {
@@ -87,7 +129,7 @@ const ContactSection = () => {
           ...original,
           send: fixedTranslations.send[language] || "Send",
           sending: fixedTranslations.sending[language] || "Sending...",
-          faq: "See",
+          faq: fixedTranslations.faq[language] || "See",
           faqHighlight: fixedTranslations.faqHighlight[language] || "FAQ",
         });
       }
