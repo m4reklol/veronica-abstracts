@@ -22,6 +22,39 @@ const Footer = () => {
       rights: "Všechna práva vyhrazena.",
     };
 
+    const fixedTranslations = {
+      faq: {
+        en: "FAQ",
+        es: "Preguntas frecuentes",
+        de: "Häufige Fragen",
+        it: "Domande frequenti",
+      },
+      terms: {
+        en: "Terms and Conditions",
+        es: "Términos y condiciones",
+        de: "Allgemeine Geschäftsbedingungen",
+        it: "Termini e condizioni",
+      },
+      about: {
+        en: "About me",
+        es: "Sobre mí",
+        de: "Über mich",
+        it: "Su di me",
+      },
+      shipping: {
+        en: "Payment and Shipping",
+        es: "Pago y envío",
+        de: "Zahlung und Versand",
+        it: "Pagamento e spedizione",
+      },
+      rights: {
+        en: "All rights reserved.",
+        es: "Todos los derechos reservados.",
+        de: "Alle Rechte vorbehalten.",
+        it: "Tutti i diritti riservati.",
+      },
+    };
+
     const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
     const translate = async () => {
@@ -36,16 +69,17 @@ const Footer = () => {
 
         for (const key of keys) {
           try {
-            if (key === "faq") {
-              translated[key] = "FAQ";
+            if (fixedTranslations[key]?.[language]) {
+              translated[key] = fixedTranslations[key][language];
               continue;
             }
+
             const res = await getCachedTranslation(original[key], language);
             await delay(100);
             translated[key] = res?.trim() || original[key];
           } catch (err) {
             console.warn(`❌ Failed to translate "${key}":`, err);
-            translated[key] = original[key];
+            translated[key] = fixedTranslations[key]?.[language] || original[key];
           }
         }
 
