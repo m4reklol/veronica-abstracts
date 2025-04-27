@@ -7,8 +7,8 @@ import ContactSection from "../components/ContactSection.jsx";
 import TrustSection from "../components/TrustSection.jsx";
 import QuoteSection from "../components/QuoteSection.jsx";
 import MySelection from "../components/MySelection.jsx";
-import { Helmet } from "react-helmet-async";
 import ExhibitionsSection from "../components/ExhibitionsSection.jsx";
+import { Helmet } from "react-helmet-async";
 import { getCachedTranslation } from "../utils/translateText";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -54,32 +54,29 @@ const Process = () => {
           getCachedTranslation(original.heading, lang, triggerRefresh),
         ]);
 
-        const stepTranslations = await Promise.all(
-          original.steps.map(async (step) => {
-            let translatedTitle = step.title;
-            if (step.title === "2. Vize") {
-              const fallbackTitles = {
-                en: "2. Vision",
-                de: "2. Vision",
-                es: "2. Visión",
-                it: "2. Visione",
-              };
-              translatedTitle = fallbackTitles[lang] || step.title;
-            } else {
-              translatedTitle = await getCachedTranslation(step.title, lang, triggerRefresh);
-            }
-
-            const translatedText = await getCachedTranslation(step.text, lang, triggerRefresh);
-
-            return {
-              title: translatedTitle?.trim() || step.title,
-              text: translatedText?.trim() || step.text,
+        const stepTranslations = [];
+        for (const step of original.steps) {
+          let translatedTitle = step.title;
+          if (step.title === "2. Vize") {
+            const fallbackTitles = {
+              en: "2. Vision",
+              de: "2. Vision",
+              es: "2. Visión",
+              it: "2. Visione",
             };
-          })
-        );
+            translatedTitle = fallbackTitles[lang] || step.title;
+          } else {
+            translatedTitle = await getCachedTranslation(step.title, lang, triggerRefresh);
+          }
+          const translatedText = await getCachedTranslation(step.text, lang, triggerRefresh);
+          stepTranslations.push({
+            title: translatedTitle?.trim() || step.title,
+            text: translatedText?.trim() || step.text,
+          });
+          await new Promise((resolve) => setTimeout(resolve, 100)); // zpomalení kvůli Renderu
+        }
 
-        const [titleRaw, description, ogDescription, twitterDescription, heroTitle, heroSubtitle, heading] =
-          staticTranslations;
+        const [titleRaw, description, ogDescription, twitterDescription, heroTitle, heroSubtitle, heading] = staticTranslations;
 
         const title = titleRaw.replace("___BRAND___", BRAND_NAME);
 

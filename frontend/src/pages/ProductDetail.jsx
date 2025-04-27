@@ -52,15 +52,28 @@ const ProductDetail = () => {
             sold: "Prodáno",
           });
         } else {
-          const [name, description, dimensions, backToGallery, addToCart, sold] = await Promise.all([
-            getCachedTranslation(data.name, lang, triggerRefresh),
-            getCachedTranslation(data.description, lang, triggerRefresh),
-            getCachedTranslation(data.dimensions, lang, triggerRefresh),
-            getCachedTranslation("Zpět do galerie", lang, triggerRefresh),
-            getCachedTranslation("PŘIDAT DO KOŠÍKU", lang, triggerRefresh),
-            getCachedTranslation("Prodáno", lang, triggerRefresh),
-          ]);
-          setTranslated({ name, description, dimensions, backToGallery, addToCart, sold });
+          const original = {
+            name: data.name,
+            description: data.description,
+            dimensions: data.dimensions,
+            backToGallery: "Zpět do galerie",
+            addToCart: "PŘIDAT DO KOŠÍKU",
+            sold: "Prodáno",
+          };
+          const result = {};
+
+          for (const key of Object.keys(original)) {
+            try {
+              const translated = await getCachedTranslation(original[key], lang, triggerRefresh);
+              result[key] = translated?.trim() || original[key];
+              await new Promise((resolve) => setTimeout(resolve, 100)); // zpomalení pro Render
+            } catch (err) {
+              console.warn(`❌ Překlad selhal pro klíč ${key}:`, err);
+              result[key] = original[key];
+            }
+          }
+
+          setTranslated(result);
         }
       } catch (error) {
         console.error("Error fetching product details:", error);
@@ -239,10 +252,7 @@ const ProductDetail = () => {
           {!product.sold ? (
             <>
               <p className="product-price">
-                {new Intl.NumberFormat("cs-CZ", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(product.price)} Kč
+                {new Intl.NumberFormat("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)} Kč
               </p>
               <button className="add-to-cart-button" onClick={handleAddToCart}>
                 <i className="ri-shopping-cart-line"></i> {translated.addToCart}

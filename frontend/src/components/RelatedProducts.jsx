@@ -8,34 +8,40 @@ import { getCachedTranslation } from "../utils/translateText";
 import "../index.css";
 
 const RelatedProducts = ({ currentProductId }) => {
+  const { dispatch, cart } = useCart();
+  const { language: lang, triggerRefresh } = useLanguage();
+
   const [products, setProducts] = useState([]);
   const [texts, setTexts] = useState({
     heading: "Mohlo by se Vám líbit",
     addToCart: "Přidat do košíku",
   });
-
-  const { dispatch, cart } = useCart();
-  const { language: lang, triggerRefresh } = useLanguage();
+  const [notification, setNotification] = useState(null);
 
   const containerRef = useRef(null);
+  const timeoutRef = useRef(null);
+
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const timeoutRef = useRef(null);
+
   const isMobile = window.innerWidth <= 768;
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await axios.get(`/api/products`);
-      const filtered = data
-        .filter((p) => p._id !== currentProductId && !p.sold)
-        .map((p) => ({
-          ...p,
-          image: p.image || "/images/placeholder.jpg",
-        }));
+      try {
+        const { data } = await axios.get(`/api/products`);
+        const filtered = data
+          .filter((p) => p._id !== currentProductId && !p.sold)
+          .map((p) => ({
+            ...p,
+            image: p.image || "/images/placeholder.jpg",
+          }));
 
-      const shuffled = filtered.sort(() => 0.5 - Math.random()).slice(0, 10);
-      setProducts(shuffled);
+        const shuffled = filtered.sort(() => 0.5 - Math.random()).slice(0, 10);
+        setProducts(shuffled);
+      } catch (err) {
+        console.error("❌ Chyba při načítání produktů:", err);
+      }
     };
 
     fetchProducts();
@@ -59,24 +65,38 @@ const RelatedProducts = ({ currentProductId }) => {
   }, [products]);
 
   useEffect(() => {
-    if (lang === "cz") {
-      setTexts({
-        heading: "Mohlo by se Vám líbit",
-        addToCart: "Přidat do košíku",
-      });
-    } else {
-      (async () => {
-        try {
-          const [heading, addToCart] = await Promise.all([
-            getCachedTranslation("Mohlo by se Vám líbit", lang, triggerRefresh),
-            getCachedTranslation("Přidat do košíku", lang, triggerRefresh),
-          ]);
-          setTexts({ heading, addToCart });
-        } catch (err) {
-          console.error("❌ Chyba překladu RelatedProducts:", err);
+    const original = {
+      heading: "Mohlo by se Vám líbit",
+      addToCart: "Přidat do košíku",
+    };
+
+    const fetchTranslations = async () => {
+      if (lang === "cz") {
+        setTexts(original);
+        return;
+      }
+
+      try {
+        const result = {};
+
+        for (const key of Object.keys(original)) {
+          try {
+            const translated = await getCachedTranslation(original[key], lang, triggerRefresh);
+            result[key] = translated?.trim() || original[key];
+          } catch (err) {
+            console.warn(`❌ Překlad selhal pro klíč: ${key}`, err);
+            result[key] = original[key];
+          }
         }
-      })();
-    }
+
+        setTexts(result);
+      } catch (err) {
+        console.warn("❌ Překlad RelatedProducts selhal:", err);
+        setTexts(original);
+      }
+    };
+
+    fetchTranslations();
   }, [lang, triggerRefresh]);
 
   const scroll = (direction) => {
@@ -125,10 +145,7 @@ const RelatedProducts = ({ currentProductId }) => {
           {products.map((product) => (
             <div className="related-product" key={product._id}>
               <Link to={`/product/${product._id}`}>
-                <img
-                  src={product.image || "/images/placeholder.jpg"}
-                  alt={product.name}
-                />
+                <img src={product.image} alt={product.name} />
               </Link>
               <h4>{product.name}</h4>
               <p>{product.price.toLocaleString("cs-CZ")} Kč</p>

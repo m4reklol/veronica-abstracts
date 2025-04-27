@@ -22,7 +22,6 @@ const Gallery = () => {
   const { cart, dispatch } = useCart();
   const timeoutRef = useRef(null);
   const { language: lang, triggerRefresh } = useLanguage();
-
   const [t, setT] = useState({});
 
   useEffect(() => {
@@ -56,15 +55,19 @@ const Gallery = () => {
 
       try {
         const keys = Object.keys(fallback);
-        const translatedPairs = await Promise.all(
-          keys.map(async (key) => {
-            const original = fallback[key];
-            const translated = await getCachedTranslation(clean(original), lang, triggerRefresh);
-            return [key, restore(translated || original)];
-          })
-        );
+        const translated = {};
 
-        const translated = Object.fromEntries(translatedPairs);
+        for (const key of keys) {
+          try {
+            const cleaned = clean(fallback[key]);
+            const translatedText = await getCachedTranslation(cleaned, lang, triggerRefresh);
+            translated[key] = restore(translatedText?.trim() || fallback[key]);
+          } catch (err) {
+            console.warn(`❌ Error translating key ${key}:`, err);
+            translated[key] = fallback[key];
+          }
+        }
+
         setT(translated);
       } catch (err) {
         console.warn("❌ Gallery translation error:", err);
@@ -199,8 +202,7 @@ const Gallery = () => {
                     {new Intl.NumberFormat("cs-CZ", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    }).format(product.price)}{" "}
-                    Kč
+                    }).format(product.price)} Kč
                   </p>
                   <button
                     className="add-to-cart"

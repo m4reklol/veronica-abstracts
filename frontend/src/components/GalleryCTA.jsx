@@ -40,6 +40,8 @@ const GalleryCTA = () => {
       button: "Moje tvorba krok za krokem",
     };
 
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     const loadTranslations = async () => {
       if (language === "cz") {
         setT(original);
@@ -48,19 +50,22 @@ const GalleryCTA = () => {
 
       try {
         const keys = Object.keys(original);
-        const translations = await Promise.all(
-          keys.map((key) => getCachedTranslation(original[key], language))
-        );
+        const translated = {};
 
-        const translated = keys.reduce((acc, key, i) => {
-          const fallback = fallbackTranslations[key]?.[language] || original[key];
-          const value = translations[i];
-          acc[key] =
-            !value || value.trim().toLowerCase() === original[key].toLowerCase()
-              ? fallback
-              : value.trim();
-          return acc;
-        }, {});
+        for (const key of keys) {
+          try {
+            const fallback = fallbackTranslations[key]?.[language] || original[key];
+            const result = await getCachedTranslation(original[key], language);
+            await delay(100);
+            translated[key] =
+              !result || result.trim().toLowerCase() === original[key].toLowerCase()
+                ? fallback
+                : result.trim();
+          } catch (err) {
+            console.warn(`❌ Failed to translate "${key}":`, err);
+            translated[key] = fallbackTranslations[key]?.[language] || original[key];
+          }
+        }
 
         setT(translated);
       } catch (err) {

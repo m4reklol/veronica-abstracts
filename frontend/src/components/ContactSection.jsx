@@ -48,22 +48,22 @@ const ContactSection = () => {
       }
 
       try {
-        const translatedPairs = await Promise.all(
-          Object.entries(original).map(async ([key, value]) => {
-            try {
-              const translated = await getCachedTranslation(value, language);
-              await delay(100);
-              return [key, translated?.trim() || value];
-            } catch (err) {
-              console.warn(`❌ Failed to translate "${key}":`, err);
-              return [key, value];
-            }
-          })
-        );
+        const keys = Object.keys(original);
+        const result = {};
 
-        const translations = Object.fromEntries(translatedPairs);
-        translations.faqHighlight = fallbackFaqHighlight[language] || "FAQ";
-        setT(translations);
+        for (const key of keys) {
+          try {
+            const translated = await getCachedTranslation(original[key], language);
+            await delay(100); // malá pauza kvůli API limitům
+            result[key] = translated?.trim() || original[key];
+          } catch (err) {
+            console.warn(`❌ Failed to translate key "${key}":`, err);
+            result[key] = original[key];
+          }
+        }
+
+        result.faqHighlight = fallbackFaqHighlight[language] || "FAQ";
+        setT(result);
       } catch (err) {
         console.error("❌ Translation fetch failed:", err);
         setT(original);

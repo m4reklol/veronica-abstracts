@@ -45,50 +45,36 @@ const Contact = () => {
 
       try {
         const clean = (str) => str.replace(BRAND_NAME, "___BRAND___");
+        const restore = (str) => str.replace("___BRAND___", BRAND_NAME);
 
-        const [
-          titleRaw,
-          description,
-          ogDescription,
-          twitterDescription,
-          heroHeading,
-          heroSubtitle,
-          heroText,
-          contactTitle,
-          labelName,
-          labelEmail,
-          labelPhone,
-          labelIco,
-        ] = await Promise.all([
-          getCachedTranslation(clean(original.title), lang, triggerRefresh),
-          getCachedTranslation(original.description, lang, triggerRefresh),
-          getCachedTranslation(original.ogDescription, lang, triggerRefresh),
-          getCachedTranslation(original.twitterDescription, lang, triggerRefresh),
-          getCachedTranslation(original.heroHeading, lang, triggerRefresh),
-          getCachedTranslation(original.heroSubtitle, lang, triggerRefresh),
-          getCachedTranslation(original.heroText, lang, triggerRefresh),
-          getCachedTranslation(original.contactTitle, lang, triggerRefresh),
-          getCachedTranslation(original.labels.name, lang, triggerRefresh),
-          getCachedTranslation(original.labels.email, lang, triggerRefresh),
-          getCachedTranslation(original.labels.phone, lang, triggerRefresh),
-          getCachedTranslation(original.labels.ico, lang, triggerRefresh),
-        ]);
+        const staticKeys = [
+          "title",
+          "description",
+          "ogDescription",
+          "twitterDescription",
+          "heroHeading",
+          "heroSubtitle",
+          "heroText",
+          "contactTitle",
+        ];
+        const labelKeys = ["name", "email", "phone", "ico"];
+
+        const translatedStatic = {};
+        for (const key of staticKeys) {
+          const cleaned = clean(original[key]);
+          const translated = await getCachedTranslation(cleaned, lang, triggerRefresh);
+          translatedStatic[key] = restore(translated?.trim() || original[key]);
+        }
+
+        const translatedLabels = {};
+        for (const key of labelKeys) {
+          const translated = await getCachedTranslation(original.labels[key], lang, triggerRefresh);
+          translatedLabels[key] = translated?.trim() || original.labels[key];
+        }
 
         setT({
-          title: titleRaw.replace("___BRAND___", BRAND_NAME),
-          description,
-          ogDescription,
-          twitterDescription,
-          heroHeading,
-          heroSubtitle,
-          heroText,
-          contactTitle,
-          labels: {
-            name: labelName,
-            email: labelEmail,
-            phone: labelPhone,
-            ico: labelIco,
-          },
+          ...translatedStatic,
+          labels: translatedLabels,
         });
       } catch (err) {
         console.error("Translation error:", err);

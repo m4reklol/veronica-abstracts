@@ -41,73 +41,66 @@ const Cart = () => {
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
   useEffect(() => {
-    const original = {
-      title: "Můj košík",
-      empty1: "Váš košík je prázdný",
-      empty2: "Prozkoumejte moji galerii",
-      empty3: "a najděte svůj ideální obraz!",
-      summary: "Souhrn objednávky",
-      items: "Počet položek:",
-      subtotal: "Mezisoučet:",
-      checkout: "Pokračovat v objednávce",
-      or: "nebo",
-      continue: "Pokračovat v nakupování",
-      removed: "byl odstraněn z košíku."
+    const fetchTranslations = async () => {
+      const original = {
+        title: "Můj košík",
+        empty1: "Váš košík je prázdný",
+        empty2: "Prozkoumejte moji galerii",
+        empty3: "a najděte svůj ideální obraz!",
+        summary: "Souhrn objednávky",
+        items: "Počet položek:",
+        subtotal: "Mezisoučet:",
+        checkout: "Pokračovat v objednávce",
+        or: "nebo",
+        continue: "Pokračovat v nakupování",
+        removed: "byl odstraněn z košíku.",
+      };
+
+      if (language === "cz") {
+        setT(original);
+        return;
+      }
+
+      try {
+        const keys = Object.keys(original);
+        const translated = {};
+
+        for (const key of keys) {
+          const translatedText = await getCachedTranslation(original[key], language, triggerRefresh);
+          translated[key] = translatedText?.trim() || original[key];
+        }
+
+        setT(translated);
+      } catch (err) {
+        console.warn("❌ Cart translation error:", err);
+        setT(original);
+      }
     };
 
-    if (language === "cz") {
-      setT(original);
-      return;
-    }
-
-    const keys = Object.keys(original);
-    Promise.all(
-      keys.map((k) => getCachedTranslation(original[k], language, triggerRefresh))
-    ).then((translated) => {
-      const result = keys.reduce((acc, key, i) => {
-        acc[key] = translated[i];
-        return acc;
-      }, {});
-      setT(result);
-    });
+    fetchTranslations();
   }, [language, triggerRefresh]);
 
   return (
     <>
       <Helmet>
         <title>{`${t.title || "Košík"} | Veronica Abstracts`}</title>
-        <meta
-          name="description"
-          content="Zkontrolujte obsah vašeho košíku před odesláním objednávky."
-        />
+        <meta name="description" content="Zkontrolujte obsah vašeho košíku před odesláním objednávky." />
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://veronicaabstracts.com/cart" />
         <meta property="og:title" content={`${t.title || "Košík"} | Veronica Abstracts`} />
         <meta property="og:description" content="Vaše položky k objednání." />
-        <meta
-          property="og:image"
-          content="https://veronicaabstracts.com/images/Vlogofinal2.png"
-        />
+        <meta property="og:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta property="og:url" content="https://veronicaabstracts.com/cart" />
         <meta property="og:type" content="website" />
         <meta name="twitter:title" content={`${t.title || "Košík"} | Veronica Abstracts`} />
-        <meta
-          name="twitter:description"
-          content="Zkontrolujte si svůj nákupní košík."
-        />
-        <meta
-          name="twitter:image"
-          content="https://veronicaabstracts.com/images/Vlogofinal2.png"
-        />
+        <meta name="twitter:description" content="Zkontrolujte si svůj nákupní košík." />
+        <meta name="twitter:image" content="https://veronicaabstracts.com/images/Vlogofinal2.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       <div className="cart-container">
         {notification && (
-          <Notification
-            {...notification}
-            onClose={() => setNotification(null)}
-          />
+          <Notification {...notification} onClose={() => setNotification(null)} />
         )}
 
         <h2 className="cart-title">
@@ -129,10 +122,7 @@ const Cart = () => {
             <div className="cart-items">
               {cart.map((item) => (
                 <div key={item._id} className="cart-item">
-                  <Link
-                    to={`/product/${item._id}`}
-                    className="cart-product-link"
-                  >
+                  <Link to={`/product/${item._id}`} className="cart-product-link">
                     <img
                       src={normalizeImagePath(item.image)}
                       alt={item.name}
@@ -140,10 +130,7 @@ const Cart = () => {
                     />
                   </Link>
                   <div className="cart-info">
-                    <Link
-                      to={`/product/${item._id}`}
-                      className="cart-product-link"
-                    >
+                    <Link to={`/product/${item._id}`} className="cart-product-link">
                       <h3>{item.name}</h3>
                     </Link>
                     <p>{item.dimensions}</p>

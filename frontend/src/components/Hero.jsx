@@ -28,7 +28,7 @@ const Hero = () => {
         }
       };
     });
-  }, [images]);
+  }, []);
 
   useEffect(() => {
     if (!imagesLoaded) return;
@@ -41,30 +41,61 @@ const Hero = () => {
   useEffect(() => {
     const original = {
       subtext: "Kde se abstrakce stává realitou",
-      description:
-        "Objevte krásu emocí, kreativity a nekonečné inspirace prostřednictvím jedinečného a fascinujícího abstraktního umění.",
+      description: "Objevte krásu emocí, kreativity a nekonečné inspirace prostřednictvím jedinečného a fascinujícího abstraktního umění.",
       gallery: "Moje galerie",
       about: "Kdo jsem?",
     };
 
-    if (language === "cz") {
-      setT(original);
-      return;
-    }
+    const fallback = {
+      en: {
+        subtext: "Where abstraction becomes reality",
+        description: "Discover the beauty of emotions, creativity, and endless inspiration through unique and captivating abstract art.",
+        gallery: "My Gallery",
+        about: "Who am I?",
+      },
+      es: {
+        subtext: "Donde la abstracción se convierte en realidad",
+        description: "Descubre la belleza de las emociones, la creatividad y la inspiración infinita a través de un arte abstracto único y cautivador.",
+        gallery: "Mi Galería",
+        about: "¿Quién soy?",
+      },
+      de: {
+        subtext: "Wo Abstraktion zur Realität wird",
+        description: "Entdecken Sie die Schönheit von Emotionen, Kreativität und endloser Inspiration durch einzigartige und fesselnde abstrakte Kunst.",
+        gallery: "Meine Galerie",
+        about: "Wer bin ich?",
+      },
+      it: {
+        subtext: "Dove l'astrazione diventa realtà",
+        description: "Scopri la bellezza delle emozioni, della creatività e dell'ispirazione infinita attraverso un'arte astratta unica e coinvolgente.",
+        gallery: "La mia Galleria",
+        about: "Chi sono?",
+      },
+    };
 
-    const keys = Object.keys(original);
-    Promise.all(
-      keys.map((key) => getCachedTranslation(original[key], language, triggerRefresh))
-    ).then((translatedValues) => {
-      const translated = keys.reduce((acc, key, i) => {
-        acc[key] = translatedValues[i] || original[key];
-        return acc;
-      }, {});
+    const loadTranslations = async () => {
+      if (language === "cz") {
+        setT(original);
+        return;
+      }
+
+      const translated = {};
+      for (const [key, value] of Object.entries(original)) {
+        try {
+          const result = await getCachedTranslation(value, language, triggerRefresh);
+          translated[key] = result?.trim() && result.trim().toLowerCase() !== value.toLowerCase()
+            ? result.trim()
+            : (fallback[language]?.[key] || value);
+        } catch (err) {
+          console.warn(`❌ Hero translation failed for "${key}":`, err);
+          translated[key] = fallback[language]?.[key] || value;
+        }
+      }
+
       setT(translated);
-    }).catch((error) => {
-      console.warn("❌ Překlad Hero selhal:", error);
-      setT(original);
-    });
+    };
+
+    loadTranslations();
   }, [language, triggerRefresh]);
 
   return (

@@ -34,23 +34,28 @@ const ExhibitionsSection = () => {
         return;
       }
 
-      const keys = Object.keys(original);
-      const result = {};
+      try {
+        const keys = Object.keys(original);
+        const result = {};
 
-      for (const key of keys) {
-        try {
-          const fallback = original[key];
-          const translated = await getCachedTranslation(fallback, language);
-          result[key] = translated?.trim() || fallback;
-          await delay(100); // malá pauza, aby se nezatížilo API
-        } catch (error) {
-          console.warn(`Translation failed for key ${key}:`, error);
-          result[key] = original[key];
+        for (const key of keys) {
+          try {
+            const translated = await getCachedTranslation(original[key], language);
+            await delay(100); // malá pauza mezi překlady
+            result[key] = translated?.trim() || original[key];
+          } catch (error) {
+            console.warn(`❌ Translation failed for key "${key}":`, error);
+            result[key] = original[key];
+          }
         }
-      }
 
-      setT(result);
-      setLoading(false);
+        setT(result);
+      } catch (error) {
+        console.error("❌ Error fetching translations:", error);
+        setT(original);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchTranslations();

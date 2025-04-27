@@ -24,17 +24,14 @@ const ThankYou = () => {
     const fetchTranslations = async () => {
       const original = {
         sub: "Jsem nadšená, že jste si vybral/a mé umění! 🎨",
-        text1:
-          "Vaše vybrané dílo právě připravuji s maximální péčí a láskou. Každý tah štětce tvořím s důrazem na detail.",
-        text2:
-          "Už se nemůžu dočkat, až Vám přinese radost do Vašeho prostoru! ✨",
+        text1: "Vaše vybrané dílo právě připravuji s maximální péčí a láskou. Každý tah štětce tvořím s důrazem na detail.",
+        text2: "Už se nemůžu dočkat, až Vám přinese radost do Vašeho prostoru! ✨",
         note: "Brzy Vám dorazí potvrzení objednávky a informace o doručení. 📬",
         signature: "S věděčností a nadšením,",
         failTitle: "Platba selhala",
         failSub: "Bohužel se něco pokazilo při zpracování platby. 😔",
-        failText:
-          "Vaše objednávka nebyla dokončena. Zkuste to prosím znovu nebo nás kontaktujte.",
-        back: "Zpět na úvodní stránku"
+        failText: "Vaše objednávka nebyla dokončena. Zkuste to prosím znovu nebo nás kontaktujte.",
+        back: "Zpět na úvodní stránku",
       };
 
       if (language === "cz") {
@@ -42,17 +39,19 @@ const ThankYou = () => {
         return;
       }
 
-      const keys = Object.keys(original);
-      const translations = await Promise.all(
-        keys.map((key) => getCachedTranslation(original[key], language, triggerRefresh))
-      );
+      const result = {};
+      for (const key of Object.keys(original)) {
+        try {
+          const translated = await getCachedTranslation(original[key], language, triggerRefresh);
+          result[key] = translated?.trim() || original[key];
+          await new Promise((resolve) => setTimeout(resolve, 100)); // přidáno malé zpoždění
+        } catch (err) {
+          console.warn(`❌ Překlad selhal pro klíč ${key}:`, err);
+          result[key] = original[key];
+        }
+      }
 
-      const translated = keys.reduce((acc, key, i) => {
-        acc[key] = translations[i];
-        return acc;
-      }, {});
-
-      setT(translated);
+      setT(result);
     };
 
     fetchTranslations();

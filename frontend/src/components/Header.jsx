@@ -4,6 +4,7 @@ import "../index.css";
 import { useCart } from "../context/CartContext.jsx";
 import LanguageDropdown from "./LanguageDropdown.jsx";
 import { useLanguage } from "../context/LanguageContext";
+import { getCachedTranslation } from "../utils/translateText";
 
 const Header = () => {
   const { cart } = useCart();
@@ -11,9 +12,9 @@ const Header = () => {
   const [t, setT] = useState({});
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const timeoutRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
   const normalizeImagePath = (path) => path || "/images/placeholder.jpg";
@@ -49,16 +50,17 @@ const Header = () => {
 
   useEffect(() => {
     const manual = {
-      cz: {
-        home: "Domů",
-        gallery: "Galerie",
-        process: "Proces",
-        contact: "Kontakt",
-        faq: "Nejčastější dotazy",
-        shipping: "Doprava & Platba",
-        terms: "Obchodní podmínky",
-        total: "Celkem",
-      },
+      home: "Domů",
+      gallery: "Galerie",
+      process: "Proces",
+      contact: "Kontakt",
+      faq: "Nejčastější dotazy",
+      shipping: "Doprava & Platba",
+      terms: "Obchodní podmínky",
+      total: "Celkem",
+    };
+
+    const fallback = {
       en: {
         home: "Home",
         gallery: "Gallery",
@@ -101,7 +103,29 @@ const Header = () => {
       },
     };
 
-    setT(manual[language] || manual.cz);
+    const loadTranslations = async () => {
+      if (language === "cz") {
+        setT(manual);
+        return;
+      }
+
+      const translated = {};
+      for (const [key, value] of Object.entries(manual)) {
+        try {
+          const result = await getCachedTranslation(value, language);
+          translated[key] =
+            result?.trim() && result.trim().toLowerCase() !== value.toLowerCase()
+              ? result.trim()
+              : (fallback[language]?.[key] || value);
+        } catch (err) {
+          console.warn(`❌ Failed to translate ${key}:`, err);
+          translated[key] = fallback[language]?.[key] || value;
+        }
+      }
+      setT(translated);
+    };
+
+    loadTranslations();
   }, [language, triggerRefresh]);
 
   return (

@@ -39,7 +39,7 @@ const MySelection = () => {
           }));
         setNewestProducts(sorted);
       } catch (err) {
-        console.error("Chyba při načítání produktů:", err);
+        console.error("❌ Chyba při načítání produktů:", err);
       }
     };
 
@@ -47,35 +47,38 @@ const MySelection = () => {
   }, []);
 
   useEffect(() => {
-    const loadTranslations = async () => {
-      const original = {
-        title: "Můj osobní výběr pro Vás",
-        explore: "Prozkoumat detail",
-      };
+    const original = {
+      title: "Můj osobní výběr pro Vás",
+      explore: "Prozkoumat detail",
+    };
 
+    const loadTranslations = async () => {
       if (language === "cz") {
         setT(original);
         return;
       }
 
       try {
-        const [title, explore] = await Promise.all([
-          getCachedTranslation(original.title, language, triggerRefresh),
-          getCachedTranslation(original.explore, language, triggerRefresh),
-        ]);
+        const keys = Object.keys(original);
+        const translations = {};
 
-        setT({
-          title:
-            !title || title.trim().toLowerCase() === original.title.toLowerCase()
-              ? fallbackTranslations.title[language] || original.title
-              : title,
-          explore:
-            !explore || explore.trim().toLowerCase() === original.explore.toLowerCase()
-              ? fallbackTranslations.explore[language] || original.explore
-              : explore,
-        });
+        for (const key of keys) {
+          try {
+            const translated = await getCachedTranslation(original[key], language, triggerRefresh);
+            translations[key] =
+              translated?.trim() && translated.trim().toLowerCase() !== original[key].toLowerCase()
+                ? translated.trim()
+                : fallbackTranslations[key]?.[language] || original[key];
+          } catch (err) {
+            console.warn(`❌ Překlad selhal pro klíč "${key}":`, err);
+            translations[key] = fallbackTranslations[key]?.[language] || original[key];
+          }
+          await new Promise((res) => setTimeout(res, 100)); // malá pauza
+        }
+
+        setT(translations);
       } catch (error) {
-        console.warn("Translation fallback used due to error:", error);
+        console.warn("❌ Překlad MySelection totálně selhal:", error);
         setT({
           title: fallbackTranslations.title[language] || original.title,
           explore: fallbackTranslations.explore[language] || original.explore,

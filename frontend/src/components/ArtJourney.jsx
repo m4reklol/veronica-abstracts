@@ -60,25 +60,24 @@ const ArtJourney = () => {
         const heading = await getCachedTranslation(original.heading, lang);
         const subheading = await getCachedTranslation(original.subheading, lang);
 
-        const timeline = await Promise.all(
-          original.timeline.map(async (item) => {
-            const [czMonth, czYear] = item.year.split(" ");
-            const translatedMonth = await getCachedTranslation(czMonth, lang);
-            const translatedTitle = await getCachedTranslation(item.title, lang);
-            const translatedText = await getCachedTranslation(item.text, lang);
+        const translatedTimeline = [];
+        for (const item of original.timeline) {
+          const [czMonth, czYear] = item.year.split(" ");
+          const translatedMonth = await getCachedTranslation(czMonth, lang);
+          const translatedTitle = await getCachedTranslation(item.title, lang);
+          const translatedText = await getCachedTranslation(item.text, lang);
 
-            return {
-              year: `${translatedMonth?.trim() || czMonth} ${czYear}`,
-              title: translatedTitle?.trim() || item.title,
-              text: translatedText?.trim() || item.text,
-            };
-          })
-        );
+          translatedTimeline.push({
+            year: `${translatedMonth?.trim() || czMonth} ${czYear}`,
+            title: translatedTitle?.trim() || item.title,
+            text: translatedText?.trim() || item.text,
+          });
+        }
 
         setContent({
           heading: heading?.trim() || original.heading,
           subheading: subheading?.trim() || original.subheading,
-          timeline,
+          timeline: translatedTimeline,
         });
       } catch (err) {
         console.warn("❌ Překlad ArtJourney selhal:", err);

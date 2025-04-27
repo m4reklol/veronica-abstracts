@@ -7,67 +7,70 @@ const TrustSection = () => {
   const { language, triggerRefresh } = useLanguage();
   const [items, setItems] = useState([]);
 
-  useEffect(() => {
-    const originalItems = [
-      {
-        icon: "ri-check-line",
-        title: "Vysoká kvalita",
-        desc: "Ručně malované originály",
-      },
-      {
-        icon: "ri-truck-line",
-        title: "Rychlé dodání",
-        desc: "Odesíláme do 5 pracovních dnů",
-      },
-      {
-        icon: "ri-notification-3-line",
-        title: "Novinky každý týden",
-        desc: "Stále nové obrazy",
-      },
-      {
-        icon: "ri-bank-card-line",
-        title: "Bezpečné platby",
-        desc: "Comgate - platby kartou i mobilem",
-      },
-      {
-        icon: "ri-paint-fill",
-        title: "Exkluzivní edice",
-        desc: "Limitované série obrazů",
-      },
-      {
-        icon: "ri-file-text-line",
-        title: "Garance pravosti",
-        desc: "Certifikát o pravosti ke každému dílu",
-      },
-    ];
+  const originalItems = [
+    {
+      icon: "ri-check-line",
+      title: "Vysoká kvalita",
+      desc: "Ručně malované originály",
+    },
+    {
+      icon: "ri-truck-line",
+      title: "Rychlé dodání",
+      desc: "Odesíláme do 5 pracovních dnů",
+    },
+    {
+      icon: "ri-notification-3-line",
+      title: "Novinky každý týden",
+      desc: "Stále nové obrazy",
+    },
+    {
+      icon: "ri-bank-card-line",
+      title: "Bezpečné platby",
+      desc: "Comgate - platby kartou i mobilem",
+    },
+    {
+      icon: "ri-paint-fill",
+      title: "Exkluzivní edice",
+      desc: "Limitované série obrazů",
+    },
+    {
+      icon: "ri-file-text-line",
+      title: "Garance pravosti",
+      desc: "Certifikát o pravosti ke každému dílu",
+    },
+  ];
 
+  useEffect(() => {
     const translateItems = async () => {
       if (language === "cz") {
         setItems(originalItems);
         return;
       }
 
-      const translatedItems = [];
+      try {
+        const translated = [];
 
-      for (const { title, desc, icon } of originalItems) {
-        try {
-          const [tTitle, tDesc] = await Promise.all([
-            getCachedTranslation(title, language, triggerRefresh),
-            getCachedTranslation(desc, language, triggerRefresh),
-          ]);
+        for (const item of originalItems) {
+          try {
+            const tTitle = await getCachedTranslation(item.title, language, triggerRefresh);
+            const tDesc = await getCachedTranslation(item.desc, language, triggerRefresh);
 
-          translatedItems.push({
-            icon,
-            title: tTitle?.trim() || title,
-            desc: tDesc?.trim() || desc,
-          });
-        } catch (err) {
-          console.warn(`[❌] Translation failed for: ${title} | ${desc}`, err);
-          translatedItems.push({ icon, title, desc });
+            translated.push({
+              icon: item.icon,
+              title: tTitle?.trim() || item.title,
+              desc: tDesc?.trim() || item.desc,
+            });
+          } catch (err) {
+            console.warn(`❌ Překlad selhal pro ${item.title}`, err);
+            translated.push(item);
+          }
         }
-      }
 
-      setItems(translatedItems);
+        setItems(translated);
+      } catch (err) {
+        console.error("❌ Chyba v překladu TrustSection:", err);
+        setItems(originalItems);
+      }
     };
 
     translateItems();

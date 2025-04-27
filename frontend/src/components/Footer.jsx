@@ -22,6 +22,8 @@ const Footer = () => {
       rights: "Všechna práva vyhrazena.",
     };
 
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     const translate = async () => {
       if (language === "cz") {
         setT(original);
@@ -30,14 +32,24 @@ const Footer = () => {
 
       try {
         const keys = Object.keys(original);
-        const translations = await Promise.all(
-          keys.map(async (key) => {
-            if (key === "faq") return [key, "FAQ"];
-            const translated = await getCachedTranslation(original[key], language);
-            return [key, translated?.trim() || original[key]];
-          })
-        );
-        setT(Object.fromEntries(translations));
+        const translated = {};
+
+        for (const key of keys) {
+          try {
+            if (key === "faq") {
+              translated[key] = "FAQ";
+              continue;
+            }
+            const res = await getCachedTranslation(original[key], language);
+            await delay(100);
+            translated[key] = res?.trim() || original[key];
+          } catch (err) {
+            console.warn(`❌ Failed to translate "${key}":`, err);
+            translated[key] = original[key];
+          }
+        }
+
+        setT(translated);
       } catch (err) {
         console.warn("❌ Footer translation failed:", err);
         setT(original);

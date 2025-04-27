@@ -31,6 +31,8 @@ const FinalMessageSection = () => {
       love: "S láskou,",
     };
 
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     const translate = async () => {
       if (language === "cz") {
         setT(original);
@@ -38,17 +40,23 @@ const FinalMessageSection = () => {
       }
 
       try {
-        const [quote, love] = await Promise.all([
-          getCachedTranslation(original.quote, language),
-          getCachedTranslation(original.love, language),
-        ]);
+        const keys = Object.keys(original);
+        const translated = {};
 
-        setT({
-          quote: quote?.trim() || fallbackTranslations.quote[language] || original.quote,
-          love: love?.trim() || fallbackTranslations.love[language] || original.love,
-        });
+        for (const key of keys) {
+          try {
+            const res = await getCachedTranslation(original[key], language);
+            await delay(100);
+            translated[key] = res?.trim() || fallbackTranslations[key][language] || original[key];
+          } catch (err) {
+            console.warn(`❌ Failed to translate key "${key}":`, err);
+            translated[key] = fallbackTranslations[key][language] || original[key];
+          }
+        }
+
+        setT(translated);
       } catch (error) {
-        console.warn("Translation failed, using fallback:", error);
+        console.warn("❌ Translation fetch failed:", error);
         setT({
           quote: fallbackTranslations.quote[language] || original.quote,
           love: fallbackTranslations.love[language] || original.love,

@@ -78,16 +78,15 @@ const CheckoutForm = () => {
       if (lang === "cz") return;
 
       try {
-        const entries = Object.entries(t);
         const newT = {};
 
-        for (const [key, value] of entries) {
+        for (const [key, value] of Object.entries(t)) {
           if (typeof value === "string") {
             newT[key] = await getCachedTranslation(value, lang);
           } else if (typeof value === "object" && value !== null) {
             newT[key] = {};
-            for (const subKey in value) {
-              newT[key][subKey] = await getCachedTranslation(value[subKey], lang);
+            for (const [subKey, subValue] of Object.entries(value)) {
+              newT[key][subKey] = await getCachedTranslation(subValue, lang);
             }
           }
         }

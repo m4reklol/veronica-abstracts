@@ -35,20 +35,26 @@ const PhilosophySection = () => {
       try {
         const heading = await getCachedTranslation(original.heading, lang, triggerRefresh);
 
-        const blocks = await Promise.all(
-          original.blocks.map(async (block) => {
+        const blocks = [];
+        for (const block of original.blocks) {
+          try {
             const title = await getCachedTranslation(block.title, lang, triggerRefresh);
             const text = await getCachedTranslation(block.text, lang, triggerRefresh);
-            return {
+
+            blocks.push({
               title: title?.trim() || block.title,
               text: text?.trim() || block.text,
-            };
-          })
-        );
+            });
+          } catch (err) {
+            console.warn(`❌ Překlad bloku selhal:`, err);
+            blocks.push(block);
+          }
+          await new Promise((res) => setTimeout(res, 100)); // malá pauza
+        }
 
         setContent({ heading: heading?.trim() || original.heading, blocks });
       } catch (err) {
-        console.warn("❌ Překlad filozofie selhal:", err);
+        console.warn("❌ Překlad filozofie úplně selhal:", err);
         setContent(original);
       }
     };

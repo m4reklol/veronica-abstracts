@@ -6,38 +6,31 @@ import { getCachedTranslation } from "../utils/translateText";
 const originalFaqs = [
   {
     question: "Jak dlouho trvá vytvořit jeden obraz?",
-    answer:
-      "Záleží na velikosti a náročnosti díla. Někdy vznikne obraz během jednoho dne, jindy mi trvá i týden – hlavně pokud pracuji s více vrstvami, které musí postupně schnout. Každý obraz má svůj vlastní proces.",
+    answer: "Záleží na velikosti a náročnosti díla. Někdy vznikne obraz během jednoho dne, jindy mi trvá i týden – hlavně pokud pracuji s více vrstvami, které musí postupně schnout. Každý obraz má svůj vlastní proces.",
   },
   {
     question: "Můžu si obraz osobně vyzvednout?",
-    answer:
-      "Ano, osobní vyzvednutí je možné po domluvě v Českých Budějovicích. Pokud preferujete tuto možnost, napište mi prosím při objednávce zprávu a domluvíme se na čase a místě.",
+    answer: "Ano, osobní vyzvednutí je možné po domluvě v Českých Budějovicích. Pokud preferujete tuto možnost, napište mi prosím při objednávce zprávu a domluvíme se na čase a místě.",
   },
   {
     question: "Poskytujete certifikát pravosti?",
-    answer:
-      "Ano, ke každému obrazu obdržíte certifikát pravosti. Obsahuje datum zhotovení, název díla, rozměry a podpis autora. Je tak potvrzeno, že se jedná o originální dílo.",
+    answer: "Ano, ke každému obrazu obdržíte certifikát pravosti. Obsahuje datum zhotovení, název díla, rozměry a podpis autora. Je tak potvrzeno, že se jedná o originální dílo.",
   },
   {
     question: "Dodáváte obraz i s rámem?",
-    answer:
-      "Ne, obrazy jsou malované na kvalitní plátno a dodávám je bez rámu. Většina mých obrazů je napnutá na dřevěném blindrámu a připravená k okamžitému zavěšení – rámování je tedy volitelné a můžete si ho doladit podle svého interiéru.",
+    answer: "Ne, obrazy jsou malované na kvalitní plátno a dodávám je bez rámu. Většina mých obrazů je napnutá na dřevěném blindrámu a připravená k okamžitému zavěšení – rámování je tedy volitelné a můžete si ho doladit podle svého interiéru.",
   },
   {
     question: "Jak zjistím, jak bude obraz vypadat u mě doma?",
-    answer:
-      "Ráda Vám pomohu s představou. Pokud mi pošlete fotografii Vašeho interiéru a rozměry stěny, mohu Vám vytvořit jednoduchou vizualizaci s vybraným obrazem. Tak lépe uvidíte, jak se dílo hodí do Vašeho prostoru.",
+    answer: "Ráda Vám pomohu s představou. Pokud mi pošlete fotografii Vašeho interiéru a rozměry stěny, mohu Vám vytvořit jednoduchou vizualizaci s vybraným obrazem. Tak lépe uvidíte, jak se dílo hodí do Vašeho prostoru.",
   },
   {
     question: "Mohu obraz vrátit, pokud nesplní má očekávání?",
-    answer:
-      "Jelikož se jedná o originální umělecká díla vytvářená na zakázku, není možné je vrátit. Proto doporučuji pečlivě zvážit svůj výběr. Ráda Vám poskytnu další fotografie či informace, abyste měli jistotu, že obraz splní Vaše očekávání.",
+    answer: "Jelikož se jedná o originální umělecká díla vytvářená na zakázku, není možné je vrátit. Proto doporučuji pečlivě zvážit svůj výběr. Ráda Vám poskytnu další fotografie či informace, abyste měli jistotu, že obraz splní Vaše očekávání.",
   },
   {
     question: "Posíláte obrazy i do zahraničí?",
-    answer:
-      "Ano, obrazy zasílám i do zahraničí. Při objednávce prosím uveďte svou adresu a já Vám sdělím konkrétní informace o ceně dopravy a odhadovaném době doručení. Upozorňuji, že při mezinárodních zásilkách mohou být účtována cla nebo daně dle předpisů Vaší země.",
+    answer: "Ano, obrazy zasílám i do zahraničí. Při objednávce prosím uveďte svou adresu a já Vám sdělím konkrétní informace o ceně dopravy a odhadovaném době doručení. Upozorňuji, že při mezinárodních zásilkách mohou být účtována cla nebo daně dle předpisů Vaší země.",
   },
 ];
 
@@ -177,12 +170,10 @@ const FAQSection = () => {
           {t.paymentDocsIntro}{" "}
           <a href="https://help.comgate.cz/v1/docs/cs/platby-kartou" target="_blank" rel="noopener noreferrer">
             {t.docLinkCard}
-          </a>
-          ,{" "}
+          </a>,{" "}
           <a href="https://help.comgate.cz/docs/bankovni-prevody" target="_blank" rel="noopener noreferrer">
             {t.docLinkBank}
-          </a>
-          .
+          </a>.
         </p>
 
         <div className="payment-contact">

@@ -28,19 +28,15 @@ const Checkout = ({ cartItems }) => {
       }
 
       try {
-        const [checkout, desc, ogDesc, twitterDesc] = await Promise.all([
-          getCachedTranslation(original.checkout, lang, triggerRefresh),
-          getCachedTranslation(original.desc, lang, triggerRefresh),
-          getCachedTranslation(original.ogDesc, lang, triggerRefresh),
-          getCachedTranslation(original.twitterDesc, lang, triggerRefresh),
-        ]);
+        const keys = Object.keys(original);
+        const translated = {};
 
-        setT({
-          checkout: checkout?.trim() || original.checkout,
-          desc: desc?.trim() || original.desc,
-          ogDesc: ogDesc?.trim() || original.ogDesc,
-          twitterDesc: twitterDesc?.trim() || original.twitterDesc,
-        });
+        for (const key of keys) {
+          const translatedText = await getCachedTranslation(original[key], lang, triggerRefresh);
+          translated[key] = translatedText?.trim() || original[key];
+        }
+
+        setT(translated);
       } catch (err) {
         console.warn("❌ Překlad se nepodařil:", err);
         setT(original);

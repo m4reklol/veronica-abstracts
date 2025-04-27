@@ -14,52 +14,50 @@ const AboutSection = () => {
     text.replace(/{{VERONIKA}}/g, VERONIKA).replace(/{{BRAND}}/g, BRAND);
 
   useEffect(() => {
-    const original = {
-      title: "O mně",
-      p1: `Jmenuji se {{VERONIKA}}, ale ve světě umění tvořím pod jménem {{BRAND}}.
+    const fetchTranslations = async () => {
+      const original = {
+        title: "O mně",
+        p1: `Jmenuji se {{VERONIKA}}, ale ve světě umění tvořím pod jménem {{BRAND}}.
         Pocházím z Českých Budějovic a celý život mě provází kreativita, touha tvořit a hledání vnitřního klidu.
         Po letech práce v korporátu jsem se rozhodla vydat cestou svobody – a díky podpoře svého bratra jsem se stala OSVČ.`,
-      p2: `Zásadním momentem v mém životě bylo narození mé dcery Lucie, která je pro mě největším darem a připomínkou toho,
+        p2: `Zásadním momentem v mém životě bylo narození mé dcery Lucie, která je pro mě největším darem a připomínkou toho,
         co je skutečně důležité – láska, čas a vzájemná podpora. Právě s ní vznikl i můj první obraz – spontánně, doma, jen s plátnem a barvami.
         Netušila jsem, že tím začne nová kapitola mého života.`,
-      p3: `Malování mi pomohlo projít i těžkými chvílemi, jako byla ztráta mého tatínka. Plátno se stalo místem, kde mohu
+        p3: `Malování mi pomohlo projít i těžkými chvílemi, jako byla ztráta mého tatínka. Plátno se stalo místem, kde mohu
         svobodně vyjádřit emoce, které se slovy vyjádřit nedají. Barvy mi přinášejí klid, svobodu a radost.`,
-      p4: `Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
+        p4: `Dnes je pro mě abstraktní umění nejen vášní, ale i formou sebevyjádření a léčení. Každý tah štětce je upřímný,
         intuitivní a nese kus mého příběhu. Pokud Vás moje tvorba osloví, budu ráda, když se stane součástí i toho Vašeho.`,
-    };
+      };
 
-    const keys = Object.keys(original);
+      const keys = Object.keys(original);
 
-    const loadTranslations = async () => {
       if (language === "cz") {
-        const withNames = keys.reduce((acc, key) => {
-          acc[key] = replacePlaceholders(original[key]);
-          return acc;
-        }, {});
+        const withNames = {};
+        for (const key of keys) {
+          withNames[key] = replacePlaceholders(original[key]);
+        }
         setT(withNames);
         return;
       }
 
       try {
-        const translatedValues = await Promise.all(
-          keys.map((key) => getCachedTranslation(original[key], language))
-        );
-        const translated = keys.reduce((acc, key, i) => {
-          acc[key] = replacePlaceholders(translatedValues[i] || original[key]);
-          return acc;
-        }, {});
+        const translated = {};
+        for (const key of keys) {
+          const translatedText = await getCachedTranslation(original[key], language);
+          translated[key] = replacePlaceholders(translatedText || original[key]);
+        }
         setT(translated);
       } catch (err) {
         console.warn("❌ AboutSection translation failed:", err);
-        const withNames = keys.reduce((acc, key) => {
-          acc[key] = replacePlaceholders(original[key]);
-          return acc;
-        }, {});
+        const withNames = {};
+        for (const key of keys) {
+          withNames[key] = replacePlaceholders(original[key]);
+        }
         setT(withNames);
       }
     };
 
-    loadTranslations();
+    fetchTranslations();
   }, [language]);
 
   return (
