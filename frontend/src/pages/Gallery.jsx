@@ -31,8 +31,7 @@ const Gallery = () => {
       ogDescription: "Prohlédněte si ručně malované abstraktní obrazy.",
       twitterDescription: "Galerie originálních abstraktních obrazů.",
       galleryHeading: "ABSTRAKTNÍ OBRAZY",
-      galleryIntro:
-        "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele. Nechte se inspirovat unikátními díly, která přinášejí barvu a energii do každého prostoru.",
+      galleryIntro: "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele. Nechte se inspirovat unikátními díly, která přinášejí barvu a energii do každého prostoru.",
       sortLabel: "Řadit podle: ",
       sortDefault: "Výchozí",
       sortAsc: "Cena: od nejnižší",
@@ -180,11 +179,7 @@ const Gallery = () => {
         <div className="gallery-grid">
           {products.length > 0 ? (
             products.map((product) => (
-              <Link
-                to={`/product/${product._id}`}
-                key={product._id}
-                className="gallery-item-link"
-              >
+              <Link to={`/product/${product._id}`} key={product._id} className="gallery-item-link">
                 <div className="gallery-item">
                   <div className="image-container">
                     <img src={product.image} alt={product.name} className="gallery-img" />
@@ -229,11 +224,7 @@ const Gallery = () => {
                 <div key={product._id} className="gallery-item sold">
                   <Link to={`/product/${product._id}`}>
                     <div className="image-container">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="gallery-img"
-                      />
+                      <img src={product.image} alt={product.name} className="gallery-img" />
                       {product.additionalImages.length > 0 && (
                         <img
                           src={product.additionalImages[2]}
