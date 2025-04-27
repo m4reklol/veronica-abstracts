@@ -10,7 +10,6 @@ import TrustSection from "../components/TrustSection.jsx";
 import InstagramSection from "../components/InstagramSection.jsx";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "../context/LanguageContext";
-import { getCachedTranslation } from "../utils/translateText";
 
 const BRAND_NAME = "Veronica Abstracts";
 
@@ -24,70 +23,56 @@ const Gallery = () => {
   const { language: lang } = useLanguage();
   const [t, setT] = useState(null);
 
-  const fallback = {
-    title: `Galerie | ${BRAND_NAME}`,
-    description: "Prohlédněte si galerii abstraktního umění. Každý obraz je originál s vlastním příběhem.",
-    ogDescription: "Prohlédněte si ručně malované abstraktní obrazy.",
-    twitterDescription: "Galerie originálních abstraktních obrazů.",
-    galleryHeading: "ABSTRAKTNÍ OBRAZY",
-    galleryIntro: "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele.",
-    sortLabel: "Řadit podle: ",
-    sortDefault: "Výchozí",
-    sortAsc: "Cena: od nejnižší",
-    sortDesc: "Cena: od nejvyšší",
-    addToCart: "Přidat do košíku",
-    noProducts: "Žádné produkty k dispozici.",
-    sold: "Prodáno",
-    successMessage: "Položka byla přidána do košíku!",
-    errorMessage: "Tato položka je již v košíku.",
-    currency: "Kč",
-    locale: "cs-CZ",
-  };
-
-  const batchTranslate = async (entries, lang, batchSize = 3, delayMs = 1000) => {
-    const result = {};
-    for (let i = 0; i < entries.length; i += batchSize) {
-      const batch = entries.slice(i, i + batchSize);
-      const promises = batch.map(async ({ key, value }) => {
-        try {
-          const translation = await getCachedTranslation(value, lang);
-          return { key, value: translation?.trim() || value };
-        } catch (err) {
-          console.warn(`Translation error for key ${key}:`, err);
-          return { key, value };
-        }
-      });
-      const translatedBatch = await Promise.all(promises);
-      translatedBatch.forEach(({ key, value }) => {
-        result[key] = value.replace("___BRAND___", BRAND_NAME);
-      });
-      if (i + batchSize < entries.length) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-      }
-    }
-    return result;
-  };
-
   useEffect(() => {
-    const loadTranslations = async () => {
-      if (lang === "cz") {
-        setT(fallback);
-        return;
-      }
-
-      const entries = Object.keys(fallback).map((key) => ({
-        key,
-        value: fallback[key].replace(BRAND_NAME, "___BRAND___"),
-      }));
-
-      const translated = await batchTranslate(entries, lang);
-      translated.currency = "CZK";
-      translated.locale = "en-US";
-
-      setT(translated);
+    const fallback = {
+      title: `Galerie | ${BRAND_NAME}`,
+      description: "Prohlédněte si galerii abstraktního umění. Každý obraz je originál s vlastním příběhem.",
+      ogDescription: "Prohlédněte si ručně malované abstraktní obrazy.",
+      twitterDescription: "Galerie originálních abstraktních obrazů.",
+      galleryHeading: "ABSTRAKTNÍ OBRAZY",
+      galleryIntro: "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele.",
+      sortLabel: "Řadit podle: ",
+      sortDefault: "Výchozí",
+      sortAsc: "Cena: od nejnižší",
+      sortDesc: "Cena: od nejvyšší",
+      addToCart: "Přidat do košíku",
+      noProducts: "Žádné produkty k dispozici.",
+      sold: "Prodáno",
+      successMessage: "Položka byla přidána do košíku!",
+      errorMessage: "Tato položka je již v košíku.",
+      currency: "Kč",
+      locale: "cs-CZ",
     };
 
-    loadTranslations();
+    const fixedTranslations = {
+      en: {
+        title: `Gallery | ${BRAND_NAME}`,
+        description: "Explore the gallery of abstract art. Each painting is an original with its own story.",
+        ogDescription: "Explore hand-painted abstract artworks.",
+        twitterDescription: "Gallery of original abstract paintings.",
+        galleryHeading: "ABSTRACT PAINTINGS",
+        galleryIntro: "Abstract art is a visual form that conveys emotions and moods without the need for concrete expression. Each brushstroke is part of a story waiting to be discovered.",
+        sortLabel: "Sort by: ",
+        sortDefault: "Default",
+        sortAsc: "Price: Low to High",
+        sortDesc: "Price: High to Low",
+        addToCart: "Add to Cart",
+        noProducts: "No products available.",
+        sold: "Sold",
+        successMessage: "Item has been added to cart!",
+        errorMessage: "This item is already in the cart.",
+        currency: "CZK",
+        locale: "en-US",
+      },
+    };
+
+    if (lang === "cz") {
+      setT(fallback);
+    } else if (fixedTranslations[lang]) {
+      setT(fixedTranslations[lang]);
+    } else {
+      setT(fallback);
+    }
   }, [lang]);
 
   useEffect(() => {
