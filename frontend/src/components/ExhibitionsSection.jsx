@@ -25,33 +25,58 @@ const ExhibitionsSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const translateAll = async () => {
       if (language === "cz") {
-        setT(originalTexts);
-        setLoading(false);
+        if (isMounted) {
+          setT(originalTexts);
+          setLoading(false);
+        }
         return;
       }
 
       const translatedTexts = {};
+      let allTranslated = true;
 
       for (const key in originalTexts) {
         try {
-          translatedTexts[key] = await getCachedTranslation(originalTexts[key], language);
+          const translated = await getCachedTranslation(originalTexts[key], language);
+
+          // pokud překlad selže nebo vrátí stejný text (což znamená nezměněno), bereme jako fail
+          if (!translated || translated.trim() === originalTexts[key].trim()) {
+            allTranslated = false;
+            console.warn(`⚠️ Text "${key}" nebyl přeložen.`);
+          }
+          translatedTexts[key] = translated || originalTexts[key];
         } catch (err) {
-          console.error(`❌ Error translating key ${key}:`, err);
-          translatedTexts[key] = originalTexts[key]; // fallback
+          console.error(`❌ Error translating key "${key}":`, err);
+          allTranslated = false;
+          translatedTexts[key] = originalTexts[key];
         }
       }
 
-      setT(translatedTexts);
-      setLoading(false);
+      if (isMounted) {
+        if (allTranslated) {
+          setT(translatedTexts);
+        } else {
+          // fallback na originál
+          console.warn("⚠️ Překlad nebyl kompletní, zobrazujeme originální texty.");
+          setT(originalTexts);
+        }
+        setLoading(false);
+      }
     };
 
     setLoading(true);
     translateAll();
+
+    return () => {
+      isMounted = false; // cleanup
+    };
   }, [language]);
 
-  if (loading) return null; // nebo loader
+  if (loading) return null; // nebo loader animaci, pokud chceš
 
   return (
     <section className="exhibitions-section">
