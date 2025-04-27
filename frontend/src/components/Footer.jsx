@@ -23,6 +23,36 @@ const Footer = () => {
     };
 
     const fixedTranslations = {
+      quote: {
+        en: "Every painting has a story, discover yours.",
+        es: "Cada pintura tiene su historia, descubre la tuya.",
+        de: "Jedes Gemälde erzählt eine Geschichte, entdecke deine.",
+        it: "Ogni dipinto racconta una storia, scopri la tua.",
+      },
+      subtitle: {
+        en: "Choose the art that inspires you.",
+        es: "Elige el arte que te inspira.",
+        de: "Wähle die Kunst, die dich inspiriert.",
+        it: "Scegli l'arte che ti ispira.",
+      },
+      questions: {
+        en: "Do you have questions? Feel free to",
+        es: "¿Tienes preguntas? No dudes en",
+        de: "Hast du Fragen? Kontaktiere mich gerne",
+        it: "Hai domande? Sentiti libero di",
+      },
+      contact: {
+        en: "contact me",
+        es: "contactarme",
+        de: "kontaktieren",
+        it: "contattarmi",
+      },
+      or: {
+        en: "Or check the",
+        es: "O consulta las",
+        de: "Oder schaue in die",
+        it: "Oppure guarda le",
+      },
       faq: {
         en: "FAQ",
         es: "Preguntas frecuentes",
