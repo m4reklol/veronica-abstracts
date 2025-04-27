@@ -31,8 +31,7 @@ const Gallery = () => {
       ogDescription: "Prohlédněte si ručně malované abstraktní obrazy.",
       twitterDescription: "Galerie originálních abstraktních obrazů.",
       galleryHeading: "ABSTRAKTNÍ OBRAZY",
-      galleryIntro:
-        "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele.",
+      galleryIntro: "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele.",
       sortLabel: "Řadit podle: ",
       sortDefault: "Výchozí",
       sortAsc: "Cena: od nejnižší",
@@ -84,7 +83,7 @@ const Gallery = () => {
         const translated = {};
 
         for (const key of Object.keys(fallback)) {
-          if (["sold", "sortDefault", "sortAsc", "sortDesc"].includes(key)) {
+          if (fixedTranslations[key]) {
             translated[key] = fixedTranslations[key][lang] || fallback[key];
             continue;
           }
