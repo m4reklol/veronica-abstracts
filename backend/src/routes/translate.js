@@ -28,7 +28,6 @@ router.post("/", async (req, res) => {
     const translated = response.data.translations?.[0]?.text || textToTranslate;
     res.json({ translated });
   } catch (err) {
-    console.error("❌ DeepL API error:", err.response?.status, err.response?.data || err.message);
     res.status(500).json({ error: "Translation failed" });
   }
 });
