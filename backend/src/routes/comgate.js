@@ -151,7 +151,10 @@ router.post("/callback", async (req, res) => {
             <div style="text-align: center;">
               <img src="https://veronicaabstracts.com/images/Vlogofinalnotext.png" alt="Veronica Abstracts" style="max-width: 100px; margin-bottom: 20px;" />
               <h2 style="color: #ff6600;">Děkuji za Vaši objednávku!</h2>
-              <p style="font-size: 16px;">Vaše objednávka byla úspěšně přijata a nyní ji připravuji k odeslání.</p>
+              <p style="font-size: 16px;">
+                Vaše objednávka byla úspěšně přijata a nyní ji připravuji k odeslání.<br/>
+                Jakmile bude obraz odeslán, obdržíte od nás potvrzovací e-mail s informacemi o doručení.
+              </p>
             </div>
       
             <hr style="margin: 30px 0;" />
