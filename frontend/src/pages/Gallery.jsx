@@ -32,7 +32,7 @@ const Gallery = () => {
       galleryHeading: "ABSTRAKTNÍ OBRAZY",
       galleryIntro: "Abstraktní umění je vizuální forma, která přináší emoce a nálady bez nutnosti konkrétního vyjádření. Každý tah štětce je součástí příběhu, který čeká na svého objevitele.",
       sortLabel: "Řadit podle: ",
-      sortDefault: "Výchozí",
+      sortDefault: "Nejnovější",
       sortAsc: "Cena: od nejnižší",
       sortDesc: "Cena: od nejvyšší",
       addToCart: "Přidat do košíku",
@@ -53,7 +53,7 @@ const Gallery = () => {
         galleryHeading: "ABSTRACT PAINTINGS",
         galleryIntro: "Abstract art is a visual form that conveys emotions and moods without the need for concrete expression. Each brushstroke is part of a story waiting to be discovered.",
         sortLabel: "Sort by: ",
-        sortDefault: "Default",
+        sortDefault: "Newest",
         sortAsc: "Price: Low to High",
         sortDesc: "Price: High to Low",
         addToCart: "Add to Cart",
@@ -82,8 +82,13 @@ const Gallery = () => {
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get(`/api/products`);
-      setProducts(data.filter((product) => !product.sold));
-      setSoldProducts(data.filter((product) => product.sold));
+      const unsold = data.filter((product) => !product.sold);
+      const sold = data.filter((product) => product.sold);
+      
+      // Default sorting by newest (createdAt descending)
+      const sortByNewest = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
+      setProducts([...unsold].sort(sortByNewest));
+      setSoldProducts([...sold].sort(sortByNewest));
     } catch (error) {
       console.error("Error fetching products:", error);
     }
