@@ -39,7 +39,7 @@ const Gallery = () => {
       addToCart: "Přidat do košíku",
       noProducts: "Žádné produkty k dispozici.",
       sold: "Prodáno",
-      exhibited: "VE VÝSTAVĚ",
+      exhibited: "Rezervováno pro výstavu",
       successMessage: "Položka byla přidána do košíku!",
       errorMessage: "Tato položka je již v košíku.",
       currency: "Kč",
@@ -61,7 +61,7 @@ const Gallery = () => {
         addToCart: "Add to Cart",
         noProducts: "No products available.",
         sold: "Sold",
-        exhibited: "On Exhibition",
+        exhibited: "Reserved for Exhibition",
         successMessage: "Item has been added to cart!",
         errorMessage: "This item is already in the cart.",
         currency: "CZK",
@@ -225,7 +225,7 @@ const Gallery = () => {
           <>
             <h2 className="gallery-title exhibited-title">{t.exhibited}</h2>
             <p className="exhibited-description">
-              Tyto obrazy jsou momentálně vystaveny na veřejných místech a nejsou k dispozici k okamžitému zakoupení online.
+              Tyto obrazy budou v následujících měsících součástí výstav. Proto momentálně nejsou dostupné k prodeji online.
             </p>
             <div className="gallery-grid">
               {exhibitedProducts.map((product) => (
