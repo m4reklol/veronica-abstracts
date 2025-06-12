@@ -10,6 +10,7 @@ const productSchema = new mongoose.Schema(
     sold: { type: Boolean, default: false },
     dimensions: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
+    exhibited: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
