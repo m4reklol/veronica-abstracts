@@ -50,6 +50,7 @@ const ProductDetail = () => {
             backToGallery: "Zpět do galerie",
             addToCart: "PŘIDAT DO KOŠÍKU",
             sold: "Prodáno",
+            unavailable: "Momentálně nedostupné",
           });
         } else {
           const original = {
@@ -59,6 +60,7 @@ const ProductDetail = () => {
             backToGallery: "Zpět do galerie",
             addToCart: "PŘIDAT DO KOŠÍKU",
             sold: "Prodáno",
+            unavailable: "Currently unavailable",
           };
           const result = {};
 
@@ -249,7 +251,11 @@ const ProductDetail = () => {
           <p className="product-description">{translated.description}</p>
           <p className="product-dimensions">{translated.dimensions}</p>
 
-          {!product.sold ? (
+          {product.sold ? (
+            <p className="sold-label">{translated.sold}</p>
+          ) : product.exhibited ? (
+            <p className="unavailable-label">{translated.unavailable}</p>
+          ) : (
             <>
               <p className="product-price">
                 {new Intl.NumberFormat("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)} Kč
@@ -258,8 +264,6 @@ const ProductDetail = () => {
                 <i className="ri-shopping-cart-line"></i> {translated.addToCart}
               </button>
             </>
-          ) : (
-            <p className="sold-label">{translated.sold}</p>
           )}
         </div>
 

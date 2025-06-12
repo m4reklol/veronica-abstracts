@@ -15,6 +15,7 @@ const BRAND_NAME = "Veronica Abstracts";
 
 const Gallery = () => {
   const [products, setProducts] = useState([]);
+  const [exhibitedProducts, setExhibitedProducts] = useState([]);
   const [soldProducts, setSoldProducts] = useState([]);
   const [sortOption, setSortOption] = useState("default");
   const [notification, setNotification] = useState(null);
@@ -38,6 +39,7 @@ const Gallery = () => {
       addToCart: "Přidat do košíku",
       noProducts: "Žádné produkty k dispozici.",
       sold: "Prodáno",
+      exhibited: "VE VÝSTAVĚ",
       successMessage: "Položka byla přidána do košíku!",
       errorMessage: "Tato položka je již v košíku.",
       currency: "Kč",
@@ -59,6 +61,7 @@ const Gallery = () => {
         addToCart: "Add to Cart",
         noProducts: "No products available.",
         sold: "Sold",
+        exhibited: "On Exhibition",
         successMessage: "Item has been added to cart!",
         errorMessage: "This item is already in the cart.",
         currency: "CZK",
@@ -82,12 +85,13 @@ const Gallery = () => {
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get(`/api/products`);
-      const unsold = data.filter((product) => !product.sold);
-      const sold = data.filter((product) => product.sold);
-      
-      // Default sorting by newest (createdAt descending)
+      const available = data.filter((p) => !p.sold && !p.exhibited);
+      const exhibited = data.filter((p) => p.exhibited && !p.sold);
+      const sold = data.filter((p) => p.sold);
+
       const sortByNewest = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
-      setProducts([...unsold].sort(sortByNewest));
+      setProducts([...available].sort(sortByNewest));
+      setExhibitedProducts([...exhibited].sort(sortByNewest));
       setSoldProducts([...sold].sort(sortByNewest));
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -217,9 +221,37 @@ const Gallery = () => {
           )}
         </div>
 
+        {exhibitedProducts.length > 0 && (
+          <>
+            <h2 className="gallery-title exhibited-title">{t.exhibited}</h2>
+            <p className="exhibited-description">
+              Tyto obrazy jsou momentálně vystaveny na veřejných místech a nejsou k dispozici k okamžitému zakoupení online.
+            </p>
+            <div className="gallery-grid">
+              {exhibitedProducts.map((product) => (
+                <div key={product._id} className="gallery-item exhibited">
+                  <Link to={`/product/${product._id}`}>
+                    <div className="image-container">
+                      <img src={product.image} alt={product.name} className="gallery-img" />
+                      {product.additionalImages.length > 0 && (
+                        <img src={product.additionalImages[2]} alt="alt-preview" className="hover-img" />
+                      )}
+                      <div className="exhibited-overlay"></div>
+                    </div>
+                  </Link>
+                  <h3>{product.name}</h3>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
         {soldProducts.length > 0 && (
           <>
             <h2 className="gallery-title sold-title">{t.sold}</h2>
+            <p className="sold-description">
+              Obrazy, které už dělají radost ve svých nových domovech.
+            </p>
             <div className="gallery-grid">
               {soldProducts.map((product) => (
                 <div key={product._id} className="gallery-item sold">
