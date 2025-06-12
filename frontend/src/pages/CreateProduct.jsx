@@ -12,6 +12,7 @@ const CreateProduct = () => {
     price: "",
     dimensions: "",
     sold: false,
+    exhibited: false,
   });
   const [images, setImages] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -139,6 +140,16 @@ const CreateProduct = () => {
               handleTextareaResize(e);
             }}
           ></textarea>
+
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              name="exhibited"
+              checked={formData.exhibited}
+              onChange={handleChange}
+            />
+            Označit obraz jako „Ve výstavě“
+          </label>
 
           <label className="checkbox-label">
             <input

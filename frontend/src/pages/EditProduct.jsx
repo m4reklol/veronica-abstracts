@@ -30,6 +30,7 @@ const EditProduct = () => {
     price: "",
     dimensions: "",
     sold: false,
+    exhibited: false,
   });
   const [images, setImages] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -60,6 +61,7 @@ const EditProduct = () => {
           price: data.price,
           dimensions: data.dimensions,
           sold: data.sold,
+          exhibited: data.exhibited || false,
         });
 
         const allImages = [data.image, ...(data.additionalImages || [])].map(
@@ -124,6 +126,7 @@ const EditProduct = () => {
       formDataToSend.append("price", formData.price);
       formDataToSend.append("dimensions", formData.dimensions);
       formDataToSend.append("sold", formData.sold);
+      formDataToSend.append("exhibited", formData.exhibited);
 
       const existingImages = images
         .filter((img) => !img.file)
@@ -276,6 +279,16 @@ const EditProduct = () => {
               </div>
             </SortableContext>
           </DndContext>
+          
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              name="exhibited"
+              checked={formData.exhibited}
+              onChange={handleChange}
+            />
+            Označit obraz jako „Ve výstavě“
+          </label>
 
           <label className="checkbox-label">
             <input
