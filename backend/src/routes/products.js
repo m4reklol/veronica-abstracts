@@ -77,7 +77,7 @@ router.post("/", protect, admin, upload.array("images", 4), async (req, res) => 
 // ✅ UPDATE product
 router.put("/:id", protect, admin, upload.array("images", 4), async (req, res) => {
   try {
-    const { name, description, price, dimensions, sold } = req.body;
+    const { name, description, price, dimensions, sold, exhibited } = req.body;
     const existingImages = JSON.parse(req.body.existingImages || "[]");
     const uploadedImages = req.files.map((file) => file.path);
     const allImages = [...existingImages, ...uploadedImages];
@@ -92,6 +92,7 @@ router.put("/:id", protect, admin, upload.array("images", 4), async (req, res) =
         price: isNaN(numericPrice) ? 0 : numericPrice,
         dimensions,
         sold: sold === "true" || sold === true,
+        exhibited: exhibited === "true" || exhibited === true,
         image: allImages[0],
         additionalImages: allImages.slice(1),
       },

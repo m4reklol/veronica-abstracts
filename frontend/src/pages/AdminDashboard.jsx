@@ -20,9 +20,14 @@ const AdminDashboard = () => {
       return [...data].sort((a, b) => b.price - a.price);
     }
 
+    // Custom třídění podle stavu: dostupné -> ve výstavě -> prodané
     return [...data].sort((a, b) => {
-      if (a.sold === b.sold) return 0;
-      return a.sold ? 1 : -1;
+      const getStatusWeight = (product) => {
+        if (product.sold) return 2;
+        if (product.exhibited) return 1;
+        return 0;
+      };
+      return getStatusWeight(a) - getStatusWeight(b);
     });
   };
 
@@ -34,14 +39,9 @@ const AdminDashboard = () => {
 
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(
-          `/api/admin/products`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const { data } = await axios.get(`/api/admin/products`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const sorted = sortProducts(data, sortOption);
         setProducts(sorted);
@@ -67,9 +67,7 @@ const AdminDashboard = () => {
       return;
     try {
       await axios.delete(`/api/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
@@ -91,8 +89,8 @@ const AdminDashboard = () => {
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
             >
-              <option value="availability">Seřadit podle dostupnosti </option>
-              <option value="price-asc">Cena: od nejnižší </option>
+              <option value="availability">Seřadit podle dostupnosti</option>
+              <option value="price-asc">Cena: od nejnižší</option>
               <option value="price-desc">Cena: od nejvyšší</option>
             </select>
             <button className="logout-button" onClick={handleLogout}>
@@ -102,7 +100,7 @@ const AdminDashboard = () => {
         </div>
 
         {loading ? (
-          <p>Načítaní produktů...</p>
+          <p>Načítání produktů...</p>
         ) : (
           <table className="admin-product-table">
             <thead>
@@ -145,9 +143,19 @@ const AdminDashboard = () => {
                     }).format(prod.price)}
                   </td>
                   <td
-                    className={prod.sold ? "status-sold" : "status-available"}
+                    className={
+                      prod.sold
+                        ? "status-sold"
+                        : prod.exhibited
+                        ? "status-exhibited"
+                        : "status-available"
+                    }
                   >
-                    {prod.sold ? "Prodaný" : "Dostupný"}
+                    {prod.sold
+                      ? "Prodaný"
+                      : prod.exhibited
+                      ? "Ve výstavě"
+                      : "Dostupný"}
                   </td>
                   <td>
                     <button
@@ -167,9 +175,9 @@ const AdminDashboard = () => {
               ))}
             </tbody>
           </table>
-        )}
+      )}
       </div>
-    </>
+  </>
   );
 };
 
