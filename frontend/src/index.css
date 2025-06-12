@@ -2235,6 +2235,11 @@ a {
     color: green;
     font-weight: bold;
 }
+
+.status-exhibited {
+    color: orange;
+    font-weight: bold;
+}
   
 .status-sold {
     color: red;
