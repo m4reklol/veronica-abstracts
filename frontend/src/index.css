@@ -1384,14 +1384,6 @@ a {
     .sold-description {
         font-size: 0.9rem;
     }
-
-    .exhibited-title {
-        font-size: 1.5rem;
-    }
-
-    .exhibited-description {
-        font-size: 0.9rem;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1421,14 +1413,6 @@ a {
     }
 
     .sold-description {
-        font-size: 0.85rem;
-    }
-
-    .exhibited-title {
-        font-size: 1.3rem;
-    }
-
-    .exhibited-description {
         font-size: 0.85rem;
     }
 }
@@ -5034,4 +5018,24 @@ textarea {
     margin-top: 25px;
     font-family: "Nunito Sans", sans-serif;
     color: #ff2424;
+}
+
+@media (max-width: 768px) {
+        .exhibited-title {
+        font-size: 1.5rem;
+    }
+
+    .exhibited-description {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .exhibited-title {
+        font-size: 1.3rem;
+    }
+
+    .exhibited-description {
+        font-size: 0.85rem;
+    }
 }

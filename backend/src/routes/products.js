@@ -124,7 +124,7 @@ router.delete("/:id", protect, admin, async (req, res) => {
   }
 });
 
-// ✅ CHECK which products are sold
+// ✅ CHECK which products are sold or exhibited
 router.post("/check-sold", async (req, res) => {
   try {
     const { ids } = req.body;
@@ -134,10 +134,17 @@ router.post("/check-sold", async (req, res) => {
 
     const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id));
 
-    const soldProducts = await Product.find({ _id: { $in: objectIds }, sold: true });
-    const soldIds = soldProducts.map((p) => p._id.toString());
+    const products = await Product.find({ _id: { $in: objectIds } });
 
-    res.json({ soldIds });
+    const soldIds = products
+      .filter((p) => p.sold)
+      .map((p) => p._id.toString());
+
+    const exhibitedIds = products
+      .filter((p) => p.exhibited)
+      .map((p) => p._id.toString());
+
+    res.json({ soldIds, exhibitedIds });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

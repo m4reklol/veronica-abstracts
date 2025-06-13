@@ -51,7 +51,7 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  const filterSoldItems = async () => {
+  const filterUnavailableItems = async () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     if (cart.length === 0) return;
 
@@ -66,19 +66,18 @@ export const CartProvider = ({ children }) => {
 
       const data = await response.json();
 
-      if (data?.soldIds) {
-        const filtered = cart.filter(
-          (item) => !data.soldIds.includes(item._id)
-        );
+      if (data?.soldIds || data?.exhibitedIds) {
+        const toRemove = new Set([...(data.soldIds || []), ...(data.exhibitedIds || [])]);
+        const filtered = cart.filter((item) => !toRemove.has(item._id));
         dispatch({ type: "SET_CART", payload: filtered });
       }
     } catch (error) {
-      console.error("Error filtering sold items:", error);
+      console.error("Error filtering unavailable items:", error);
     }
   };
 
   useEffect(() => {
-    filterSoldItems();
+    filterUnavailableItems();
   }, []);
 
   useEffect(() => {
