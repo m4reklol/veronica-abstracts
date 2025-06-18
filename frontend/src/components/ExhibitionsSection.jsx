@@ -13,7 +13,7 @@ const originalTexts = {
   moreInfo: "Více informací",
   openTitle: "Zaujalo Vás mé umění?",
   openDate: "Termín dle dohody",
-  openLocation: "Tvoje galerie, kavárna nebo festival",
+  openLocation: "Vaše galerie, kavárna nebo festival",
   openText1: "Jsem otevřená novým příležitostem a spolupracím. Pokud byste si přáli vystavit moje obrazy ve svém prostoru, neváhejte mě kontaktovat.",
   openText2: "Ráda vytvořím jedinečný zážitek pro Vaše návštěvníky.",
   contactMe: "Napište mi pro více informací",
@@ -69,7 +69,7 @@ const ExhibitionsSection = () => {
     };
   }, [language]);
 
-  if (loading) return null; // nebo loader animaci
+  if (loading) return null;
 
   return (
     <section className="exhibitions-section">
