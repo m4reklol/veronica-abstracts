@@ -54,7 +54,7 @@ const exhibitions = [
     link: "https://kuunagency.com/blogs/news/kuun-art-whispered-realms-hidden-spaces-and-beings-a-mystical-art-experience-in-venice",
   },
   {
-    title: "NR.2 GROUP EXHIBIT",
+    title: "Másen Mánes",
     startDate: "2025-07-23",
     endDate: "2025-09-20",
     dateTextKey: "manesDate",
