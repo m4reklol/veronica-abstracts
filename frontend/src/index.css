@@ -3011,6 +3011,8 @@ a {
     padding: 4rem 1.5rem;
     background-color: #ffffff;
     text-align: center;
+    margin: 0 auto;
+    max-width: 1200px;
 }
   
 .exhibitions-intro {
@@ -3025,8 +3027,8 @@ a {
 .exhibitions-line {
     position: absolute;
     top: 50%;
-    left: 0;
-    width: 100%;
+    left: -50%;
+    width: 150vw;
     height: 2px;
     background-color: #ddd;
     border: none;
