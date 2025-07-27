@@ -113,6 +113,7 @@ const Hero = () => {
       <div className="hero-content">
         <small className="hero-subtext">{t.subtext}</small>
         <h1 className="hero-title">VERONICA ABSTRACT ART</h1>
+        <p className="hero-name">— Veronika Hambergerová</p>
         <p className="hero-description">{t.description}</p>
 
         <div className="hero-buttons">
