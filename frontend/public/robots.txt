@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://veronicaabstracts.com/sitemap.xml
