@@ -83,6 +83,7 @@ const Home = () => {
       <Helmet>
         <title>{translations.title}</title>
         <meta name="description" content={translations.description} />
+        <meta name="keywords" content="abstraktní umění, obrazy, Veronika Hambergerová, Veronica Abstracts, moderní umění" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://veronicaabstracts.com/" />
         <meta property="og:title" content={translations.title} />
