@@ -23,7 +23,7 @@ const Home = () => {
   useEffect(() => {
     const fetchTranslations = async () => {
       const original = {
-        title: `Domů | ${BRAND_NAME}`,
+        title: `${BRAND_NAME} - Veronika Hambergerová`,
         description: "Vítejte ve světě abstraktního umění Veroniky. Prohlédněte si ručně malované originály plné emocí a barev.",
         ogDescription: "Vítejte ve světě abstraktního umění Veroniky. Objevte originální obrazy.",
         twitterDescription: "Vítejte ve světě abstraktního umění Veroniky."
